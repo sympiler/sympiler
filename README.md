@@ -1,4 +1,4 @@
-# sympiler
+# Sympiler
 Sympiler: Transforming Sparse Matrix Codes by Decoupling Symbolic Analysis
 
 This repository is only created for Artifact Evaluation of SC17 conference 
@@ -9,8 +9,17 @@ public after its paperwork finished.
 ### requirements
 CHOLMOD, Eigen and OpenBLAS libraries.
 
-### Instruction
-
+### Building the project
+You should use cmake to build the LLVM:
+```bash
+%cd <where you cloned Sympiler>
+%mkdir build
+%cd build
+% cmake ..
+% make -j8
+```
+This will build all parts of the project including Sympiler, Sympiler tests, 
+library tests, and required utility functions. 
 
 ## Source Tree Description
 ### libTest

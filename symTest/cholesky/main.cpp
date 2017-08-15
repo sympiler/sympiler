@@ -16,15 +16,12 @@
 using namespace std;
 int main(int argc, char *argv[]) {
 
-    //std::string f1 = "/home/kazem/UFDB/SymFull/cbuckle.mtx";
-    //string fName1= "/home/kazem/UFDB/SymSparsity/cbuckle_sparsity_amd.dat";
     if(argc<2){
         printf("Please enter a path for the input matrix");
         return -1;
     }
 
     std::string f1 = argv[1];
-//    string fName1 = argv[2];
     int *col, *row;
     int *colL, *rowL;
     double *valL;
@@ -40,23 +37,9 @@ int main(int argc, char *argv[]) {
     wasteFile.open(waste);
     if(wasteFile.fail())
 
-/*    chrono::time_point<std::chrono::system_clock> start, end;
-    double durationAlltogether = 0, durationPruned=0, durationSym=0,
-            ordering=0, durationBlock=0, durationAllSmall=0;
-    chrono::duration<double> elapsed_seconds;*/
 
     int factorSize=0;
     double timing[4];//for time measurement
-
-
-    //if (!InitRHS("/home/kazem/UFDB/case3375wp_b.mtx"))
-    //    return -1;
-    //if (!InitL("/home/kazem/UFDB/Triangular/appu.mtx"))
-    //    return -1;
-    //lu_left_00(n, col, row, val, colL, rowL, valL, colU, rowU, valU);
-    //lu_left_01(n, col, row, val, colL, rowL, valL, colU, rowU, valU);
-    // choltest(2,"/home/kazem/UFDB/denormal/cbuckle.mtx");
-    //string fName2= "/home/kazem/UFDB/SymSparsity/";
 
     ifstream spFile1;
 //    spFile1.open(fName1);
@@ -127,14 +110,16 @@ int main(int argc, char *argv[]) {
 
     CSC *A1 = ptranspose(Amat,2,L->Perm,NULL,0,status);
     CSC *A2 = ptranspose(A1,2,NULL,NULL,0,status);
-    enableColdCache(1200,wasteFile);
-
+   // enableColdCache(1200,wasteFile);
+    /*double *tempVec = new double[n]();
+    double *finger = new double[n*168]();*/
     start = std::chrono::system_clock::now();
     /*cholesky_left_sn_07(n,A2->p,A2->i,A2->x,colL,L->s,li_ptr,valL,
                         L->super,L->nsuper, timingChol,
                         prunePtr,pruneSet,map, contribs);*/
     Chol(n,A2->p,A2->i,A2->x,NULL,
          n,colL,L->s,valL,li_ptr,
+         map,contribs,
          prunePtr,pruneSet,
          0, L->super,L->nsuper);
 
@@ -316,11 +301,11 @@ int main(int argc, char *argv[]) {
         duration3=elapsed_seconds.count();*/
     }
 
-#if 1
+    int *Lpx = static_cast<int*> (L1->px);
+#ifdef VERIFY
     int *Lpi = static_cast<int*> (L1->pi);
     int *Lsuper = static_cast<int*> (L1->super);
     int *Ls = static_cast<int*> (L1->s);
-    int *Lpx = static_cast<int*> (L1->px);
     double *Lx = static_cast<double*> (L1->x);
     int *LPerm = static_cast<int*> (L1->Perm);
     int cnt=0;
@@ -347,7 +332,6 @@ int main(int argc, char *argv[]) {
    if(cnt>0)
        cout<<"#"<<cnt<<";"<<"\n";
 #endif
-    /* solve with Bset will change L from simplicial to supernodal */
     L_is_super = L->is_super ;
 
     //cholmod_print_factor (L1, "L", cm) ;
@@ -384,7 +368,7 @@ int main(int argc, char *argv[]) {
         }
         std::cout<<"\n";
 #endif
-     delete []col2sup;
+    delete []col2sup;
     delete []prunePtr; delete []pruneSet;
     delete []contribs;
     delete []map;

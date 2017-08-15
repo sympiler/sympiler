@@ -6,6 +6,8 @@
 #define CHOLOPENMP_UTIL_H
 
 #include <fstream>
+#include <cstring>
+#include <sstream>
 
 /*
  * reading a CSC matrix from a coordinate file, stored col-ordered
@@ -18,11 +20,61 @@ bool readMatrix(std::string fName, int &n, int &NNZ, int* &col,
      * ach row of the file shows (col, row, nnz)
      * - The matrices are zero-indexed
      */
+
     std::ifstream inFile;
     inFile.open(fName);
-    inFile >> n;
-    inFile >> n;
-    inFile>>NNZ;
+    std::string line,banner, mtx, crd, arith, sym;
+    /*  File format:
+     *    %%MatrixMarket matrix coordinate real general/symmetric/...
+     *    % ...
+     *    % (optional comments)
+     *    % ...
+     *    #rows    #non-zero
+     *    Triplet in the rest of lines: row    col    value
+     */
+    std::getline(inFile,line);
+    for (int i=0; i<line.length(); line[i]=tolower(line[i]),i++);
+    std::istringstream iss(line);
+    if (!(iss >> banner >> mtx >> crd >> arith >> sym)){
+        std::cout<<"Invalid header (first line does not contain 5 tokens)\n";
+        return false;
+    }
+
+    if(banner.compare("%%matrixmarket")) {
+        std::cout<<"Invalid header (first token is not \"%%%%MatrixMarket\")\n";
+        return false;
+    }
+    if(mtx.compare("matrix")) {
+        std::cout<<"Not a matrix; this driver cannot handle that.\"\n";
+        return false;
+    }
+    if(crd.compare("coordinate")) {
+        std::cout<<"Not in coordinate format; this driver cannot handle that.\"\n";
+        return false;
+    }
+    if(arith.compare("real")) {
+        if(!arith.compare("complex")) {
+            std::cout<<"Complex matrix; use zreadMM instead!\n";
+            return false;
+        }
+        else if(!arith.compare("pattern")) {
+            std::cout<<"Pattern matrix; values are needed!\n";
+            return false;
+        }
+        else {
+            std::cout<<"Unknown arithmetic\n";
+            return false;
+        }
+    }
+    while (!line.compare(0,1,"%"))
+    {
+        std::getline(inFile, line);
+    }
+    std::istringstream issDim(line);
+    if (!(issDim >> n >> n >> NNZ)){
+        std::cout<<"The matrix dimension is missing\n";
+        return false;
+    }
     int factorSize= (n * n) / 2;//Worst case assumption
     if(n <= 0 || NNZ <= 0)
         return false;

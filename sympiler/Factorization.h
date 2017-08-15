@@ -33,7 +33,7 @@ public:
 class Cholesky : public Factorization{
     Matrix *L;
     Stmt uncompressCol, update, factCol;
-    Expr nSupR, supWdts;
+    Expr nSupR, supWdt;
     std::string tmpVec, finger;
     virtual Stmt VSBlockIG(SymbolicObject *sym);
     virtual Stmt VIPruneIG(SymbolicObject *sym);

@@ -28,6 +28,13 @@ Cholesky::Cholesky(Sparse &a):Factorization(a),
     args.insert(args.end(),el.begin(),el.end());
     argType.insert(argType.end(),al.begin(),al.end());
     el.clear();al.clear();
+
+    argType.emplace_back(Argument(tmpVec,Argument::Kind::InputBuffer,
+                         Int(32),0));
+//    Expr fingerExpr = Variable::make(Float(64),finger);
+    argType.emplace_back(Argument(finger,Argument::Kind::InputBuffer,
+                                  Float(64),0));
+
 }
 
 Cholesky::~Cholesky(){
@@ -36,7 +43,7 @@ Cholesky::~Cholesky(){
 
 Stmt Cholesky::baseCode() {
     Stmt s,t;
-    Expr curCol = Variable::make(Int(16),Kernel::name+"f0");
+    Expr curCol = Variable::make(Int(32),Kernel::name+"f0");
     std::string tmpVec = "tempVec", finger = "finger";
     s = Free::make(tmpVec);
     s = Block::make(Free::make(finger),s);
@@ -57,10 +64,10 @@ Stmt Cholesky::baseCode() {
 Stmt Cholesky::UncompressCol(Expr col, Matrix *A, std::string tmp, ForType sched) {
     Stmt uncomp;
     Expr temp = Variable::make(A->getType(),tmp);
-    Expr i0 = Variable::make(Int(16),"uncmpress");//TODO add an static member to make the loop variables unique
+    Expr i0 = Variable::make(Int(32),"uncmpress");//TODO add an static member to make the loop variables unique
     Expr lhs = Pointer::make(A->getType(),tmp,A->accessRowIdx(i0));
     uncomp = Store::make(lhs,"stOp",A->accessNNZ(i0));
-    Expr colp1 = Add::make(A->accessCol(col), make_one(Int(16)));
+    Expr colp1 = Add::make(A->accessCol(col), make_one(Int(32)));
     uncomp = For::make("c0",A->accessCol(col),A->accessCol(colp1),sched,
                        DeviceAPI::Host, uncomp);
     return uncomp;
@@ -85,7 +92,7 @@ Stmt Cholesky::Update(Matrix *A, Expr lbCol, Expr ubCol,
 }
 
 Stmt Cholesky::FactCol(Matrix *A, Expr col, std::string tmp) {
-        Expr i0 = Variable::make(Int(16),"fa0");
+        Expr i0 = Variable::make(Int(32),"fa0");
         Stmt fact;
         std::vector<Expr> sqrtArgs;
         Expr diag = Pointer::make(L->getType(),tmp,col);
@@ -95,9 +102,9 @@ Stmt Cholesky::FactCol(Matrix *A, Expr col, std::string tmp) {
         Expr div = Div::make(curTemp,sq);//div = f[lR[i0]] / tmpSqrt;
         Stmt stFa = Store::make(L->accessNNZ(i0),"stFa",div);//lValues[i0]=div
         fact = Store::make(curTemp,"makeZero",
-                           make_zero(Int(16)));
+                           make_zero(Int(32)));
         fact = Block::make(stFa,fact);
-        Expr colp1 = Add::make(L->accessCol(col), make_one(Int(16)));//i0+1
+        Expr colp1 = Add::make(L->accessCol(col), make_one(Int(32)));//i0+1
         fact = For::make("fa0",L->accessCol(col),L->accessCol(colp1),ForType::Serial,
                          DeviceAPI::Host, fact);
         return fact;
@@ -120,7 +127,7 @@ Stmt Cholesky::blockedUncompressCol(Expr curCol, Expr nxtCol, Matrix *A,
     Expr idx2 = Add::make(L->accessCol(i1),Pointer::make(A->getType(),tmp,A->accessRowIdx(i2)));
     Stmt loopNest2 = Store::make(L->accessNNZ(idx2),"copyToL",A->accessNNZ(i2));
     loopNest2 = For::make("c2",A->accessCol(i1),
-                          A->accessCol(Add::make(i1,make_one(Int(16)))),sched,
+                          A->accessCol(Add::make(i1,make_one(Int(32)))),sched,
                        DeviceAPI::Host, loopNest2);
     loopNest2 = For::make("c1",curCol,nxtCol,sched, DeviceAPI::Host, loopNest2);
 
@@ -139,6 +146,7 @@ Stmt Cholesky::blockedUpdate(SymbolicObject *sym,Matrix *A, Expr curCol, Expr ub
                   std::string tmp, std::string extra){
     Stmt upd;
     //f[lR[l]] -= lValues[l] * lValues[contribs[spCol]];
+    Expr curSNode = Variable::make(Int(32),Kernel::name+"f0");
     Expr i0 = Variable::make(Int(32),"u0");
     Expr i1 = Variable::make(Int(32),"u1");
     Expr lhs = Pointer::make(L->getType(),tmp,L->accessRowIdx(i1));
@@ -157,8 +165,8 @@ Stmt Cholesky::blockedUpdate(SymbolicObject *sym,Matrix *A, Expr curCol, Expr ub
     Expr Li_ptr_cSN = L->accessRowIdxPntr(cSN);
     //int nSNRCur=Li_ptr_cNSN-Li_ptr_cSN;
     Expr nSNRCur = Sub::make(Li_ptr_cNSN,Li_ptr_cSN);
-    //int  supWdts=cNSN-cSN;//The width of current src SN
-    //supWdts = Sub::make(cNSN,cSN);
+    //int  supWdt=cNSN-cSN;//The width of current src SN
+    //supWdt = Sub::make(cNSN,cSN);
     Expr sw = Variable::make(Bool(),"sw");
 
     //cur=&lValues[lC[curCol]];
@@ -166,7 +174,7 @@ Stmt Cholesky::blockedUpdate(SymbolicObject *sym,Matrix *A, Expr curCol, Expr ub
 
 
     Expr cond1 = And::make(GE::make(L->accessRowIdx(i1),curCol) , sw );
-    Expr cond2 = And::make(LT::make(L->accessRowIdx(i1),Add::make(curCol,supWdts)) , Not::make(sw) );
+    Expr cond2 = And::make(LT::make(L->accessRowIdx(i1),Add::make(curCol,supWdt)) , Not::make(sw) );
     Expr bnd = Sub::make(i1,Li_ptr_cSN);
     Expr lb = Variable::make(Int(32),"lb1");
     Expr ub = Variable::make(Int(32),"ub1");
@@ -190,14 +198,18 @@ Stmt Cholesky::blockedUpdate(SymbolicObject *sym,Matrix *A, Expr curCol, Expr ub
     Expr i3 = Variable::make(Int(32),"uc1");
     //int col=map[lR[Li_ptr_cSN+i+lb]];
     Expr idxTmp = Add::make(Li_ptr_cSN,lb);
-    Expr colTmp = Pointer::make( Int(32),tmp,A->accessRowIdx(Add::make(idxTmp,i2)) );
+    Expr colTmp = Pointer::make( Int(32),tmp,L->accessRowIdx(Add::make(idxTmp,i2)) );
     //int cRow= lR[Li_ptr_cSN+j+lb];
-    Expr cRow = A->accessRowIdx(Add::make(idxTmp,i3));
+    Expr cRow = L->accessRowIdx(Add::make(idxTmp,i3));
     //cur[col*nSupR+map[cRow]]
     Expr cpyBack = Add::make( Mul::make(colTmp,nSupR), Pointer::make(Int(32),tmp,cRow) );
-    Expr lhsCpy = Pointer::make(Float(64),"cur",cpyBack);//FIXME: use Expr rather than string
+    //cpyBack = Add::make(cpyBack,L->accessCol(i0));
+    //Expr lhsCpy = Pointer::make(Float(64),"cur",cpyBack);//
+    Expr lhsCpy =  L->accessNNZ(Add::make(cpyBack,L->accessCol(curCol)));//
     //contribs[i*nSupRs+j]
-    Expr rhsCpy = Pointer::make(Float(64),tmp, Add::make( Mul::make(i2,nSupRs), i3) );
+    Expr rhsCpy = Pointer::make(Float(64),extra, Add::make( Mul::make(i2,nSupRs), i3) );
+    Expr supWdts = Sub::make(cNSN,cSN);
+
     //cur[col*nSupR+map[cRow]] -= contribs[i*nSupRs+j];
     upd = Store::make(lhsCpy,"cpBack",Sub::make(lhsCpy,rhsCpy));
     upd = For::make("uc1",i2,nSupRs,ForType::Serial,
@@ -207,7 +219,7 @@ Stmt Cholesky::blockedUpdate(SymbolicObject *sym,Matrix *A, Expr curCol, Expr ub
 
 
     /*if(ndrow3>0){
-        dgemm_("N","C",&ndrow3,&ndrow1,&supWdts,one,srcL,&nSNRCur,
+        dgemm_("N","C",&ndrow3,&ndrow1,&supWdt,one,srcL,&nSNRCur,
                src,&nSNRCur,zero,contribs+ndrow1,&nSupRs );
     }*/
     std::vector<Expr> gemmArgs;
@@ -228,7 +240,7 @@ Stmt Cholesky::blockedUpdate(SymbolicObject *sym,Matrix *A, Expr curCol, Expr ub
     Stmt gemm = CallX::make("gemm",gemmArgs,gemmArgums);
     upd = Block::make(IfThenElse::make( GT::make(ndrow1,make_zero(Int(32))),gemm ), upd);
 
-    //dsyrk_("L","N",&ndrow1,&supWdts,one,src,&nSNRCur,zero,contribs,&nSupRs);
+    //dsyrk_("L","N",&ndrow1,&supWdt,one,src,&nSNRCur,zero,contribs,&nSupRs);
     std::vector<Expr> syrkArgs;
     syrkArgs.push_back(ndrow1); syrkArgs.push_back(supWdts);
     syrkArgs.push_back(one); syrkArgs.push_back(src);
@@ -242,8 +254,9 @@ Stmt Cholesky::blockedUpdate(SymbolicObject *sym,Matrix *A, Expr curCol, Expr ub
     syrkArgums.emplace_back(Argument(false));syrkArgums.emplace_back(Argument(true));
     upd = Block::make( CallX::make("syrk",syrkArgs,syrkArgums), upd );
 
-    Stmt lbStmt=Store::make(lb,"lbSet",bnd),
-            ubStmt=Store::make(ub,"ubSet",bnd);
+    Stmt lbStmt=Block::make(Store::make(lb,"lbSet",bnd),lbStmt);
+    lbStmt = Block::make(Store::make(sw,"swreset",make_zero(Int(32))), lbStmt) ;
+    Stmt ubStmt=Store::make(ub,"ubSet",bnd);
     //Finding the
     Stmt updBodyu1 = IfThenElse::make(cond2,ubStmt);
     updBodyu1 = Block::make( IfThenElse::make(cond1,lbStmt) ,updBodyu1);
@@ -252,9 +265,11 @@ Stmt Cholesky::blockedUpdate(SymbolicObject *sym,Matrix *A, Expr curCol, Expr ub
     upd = Block::make(updBodyu1,upd);
     //upd = Block::make( Store::make(sw,"swInit",make_one(Int(32))), upd );//sw=true
     upd = Block::make( Store::make(sw,"swInit",make_one(Int(32))), upd );//sw=true
+    upd = Block::make( Store::make(lb,"lbInit",make_zero(Int(32))), upd );//sw=true
+    upd = Block::make( Store::make(ub,"ubInit",make_zero(Int(32))), upd );//sw=true
 
-    upd = For::make("u0", curCol, ubCol, ForType::Pruned,
-                    DeviceAPI::Host, upd);
+    upd = For::make("u0", Sub::make(curSNode,make_one(Int(32))),
+                    curSNode, ForType::Pruned, DeviceAPI::Host, upd);
     //upd = Block::make( Store::make(,"cur",cur),upd);
     return upd;
 }
@@ -262,10 +277,11 @@ Stmt Cholesky::blockedUpdate(SymbolicObject *sym,Matrix *A, Expr curCol, Expr ub
 Stmt Cholesky::blockedFactCol(Matrix *A, Expr col, std::string tmp) {
     Stmt s;
     //Cholesky_col(nSupR,supWdt,cur);
-    Expr cur = A->accessNNZ( A->accessCol(col) );
+    Expr cur = L->accessNNZ( L->accessCol(col) );
+    Expr curPWdth = L->accessNNZ(Add::make(L->accessCol(col),supWdt));
     Expr info = Variable::make(Int(32),"info");
     std::vector<Expr> choleskyArgs;
-     choleskyArgs.push_back(supWdts);
+     choleskyArgs.push_back(supWdt);
     choleskyArgs.push_back(cur);choleskyArgs.push_back(nSupR); choleskyArgs.push_back(info);
     //int rowNo=nSupR-supWdt;
     //dtrsm_("R", "L", "C", "N", &rowNo, &supWdt,one,
@@ -274,10 +290,10 @@ Stmt Cholesky::blockedFactCol(Matrix *A, Expr col, std::string tmp) {
     Expr zero = Variable::make(Float(64),"zero");
 
     std::vector<Expr> trsmArgs;
-    Expr rowNo = Sub::make(nSupR,supWdts);
-    trsmArgs.push_back(rowNo); trsmArgs.push_back(supWdts);
+    Expr rowNo = Sub::make(nSupR,supWdt);
+    trsmArgs.push_back(rowNo); trsmArgs.push_back(supWdt);
     trsmArgs.push_back(one); trsmArgs.push_back(cur);
-    trsmArgs.push_back(nSupR); trsmArgs.push_back(Add::make(cur,supWdts));
+    trsmArgs.push_back(nSupR); trsmArgs.push_back(curPWdth);
     trsmArgs.push_back(nSupR);
 
     std::vector<Argument> trsmArgums;
@@ -315,13 +331,13 @@ Stmt Cholesky::VSBlockIG(SymbolicObject *sym){
     Expr retVal = Variable::make(Int(32),"retval");
     Expr zro = make_zero(Int(32));
     Expr one = make_one(Int(32));
-    Expr i0 = Variable::make(Int(16),Kernel::name+"f0");
+    Expr i0 = Variable::make(Int(32),Kernel::name+"f0");
     Expr suptoCol = Pointer::make(Int(32),sym->blk2Col,i0);
     Expr nxtCol = Pointer::make(Int(32),sym->blk2Col,i0);
     Expr curColtmp = Pointer::make(Int(32),sym->blk2Col,
                                    Sub::make(i0,one) );
     Expr curCol = Select::make( NE::make(i0,zro), curColtmp, zro);
-    supWdts = Sub::make(nxtCol,curCol);
+    supWdt = Sub::make(nxtCol,curCol);
     nSupR = Sub::make(L->accessRowIdxPntr(nxtCol), L->accessRowIdxPntr(curCol));
     //curCol = Variable::make(Int(16),Kernel::name+"f0");
     //std::string tmpVec = "tempVec", finger = "finger";
@@ -334,28 +350,28 @@ Stmt Cholesky::VSBlockIG(SymbolicObject *sym){
     uncompressCol = blockedUncompressCol(curCol,nxtCol,Factorization::A,tmpVec,ForType::Serial);
     s = Block::make(uncompressCol,s);
     s = For::make(Kernel::name+"f0",make_one(Int(32)),
-                  A->Order(),ForType::Serial,DeviceAPI::Host, s);
-    s = Allocate::make(tmpVec,Float(64),{A->Order()},const_true(),s);
-    s = Allocate::make(finger,Float(64),{A->Order()},const_true(),s);
+                  Add::make(Variable::make(Int(32),sym->blkNo),make_one(Int(32))),
+                  ForType::Serial,DeviceAPI::Host, s);
+  //  s = Allocate::make(tmpVec,Float(64),{A->Order()},const_true(),s);
+  //  s = Allocate::make(finger,Float(64),{A->Order()},const_true(),s);
     //s = Allocate::make("sw",Bool(),{make_one(Int(16))},const_true(),s);
 
     Kernel::loweredKer=s;
     return Kernel::loweredKer;
-    return loweredKer;
 }
 
 Stmt Cholesky::VIPruneIG(SymbolicObject *sym){
     Expr zro = make_zero(Int(32));
     Expr one = make_one(Int(32));
-    Expr i0 = Variable::make(Int(16),Kernel::name+"f0");
+    Expr i0 = Variable::make(Int(32),Kernel::name+"f0");
     Expr suptoCol = Pointer::make(Int(32),sym->blk2Col,i0);
     Expr nxtCol = Pointer::make(Int(32),sym->blk2Col,i0);
     Expr curColtmp = Pointer::make(Int(32),sym->blk2Col,
                                    Sub::make(i0,one) );
     Expr curCol = Select::make( NE::make(i0,zro), curColtmp, zro);
 
-    VIPrune vi_prune(Pointer::make(Int(32),sym->setPtr,curCol),sym->setVal,
-                     Pointer::make(Int(32),sym->setPtr,Add::make(curCol,make_one(Int(32)))) );
+    VIPrune vi_prune(Pointer::make(Int(32),sym->setPtr,Sub::make(i0,make_one(Int(32))))
+            ,sym->setVal, Pointer::make(Int(32),sym->setPtr,i0) );
     //Adding the arguments for the inspection set
     if(!isSetArgInserted){
         argType.push_back(Argument(sym->setPtr,Argument::Kind::InputBuffer,

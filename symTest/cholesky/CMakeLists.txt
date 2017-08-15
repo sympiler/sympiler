@@ -1,15 +1,10 @@
 cmake_minimum_required(VERSION 3.1)
-project(CholOpenMP)
+project(symChol)
 #TODO use env instead
-set(MKL_INC "/home/kazem/programs/intel/compilers_and_libraries_2017.4.196/linux/mkl/include")
-set(MKL_LIB "/home/kazem/programs/intel/compilers_and_libraries_2017.4.196/linux/mkl/lib/intel64")
-set(MMM "/home/kazem/programs/intel/compilers_and_libraries_2017.4.196/linux/compiler/lib/intel64/")
 
-set(SUITE_INC "/home/kazem/programs/SuiteSparse/include")
-set(SUITE_LIB "/home/kazem/programs/SuiteSparse/lib")
 
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMKL -Wall -std=gnu++11  -m64  ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMKL -DVERIFY -Wall -std=gnu++11  -m64  ")
 
 set(SOURCE_FILES main.cpp PB_Cholesky.h Ordering.h Inspection_Block.h
         Etree.h def.h PostOrder.h DFS.h Reach.h Inspection_Prune.h ColumnCount.h
@@ -18,8 +13,8 @@ set(SOURCE_FILES main.cpp PB_Cholesky.h Ordering.h Inspection_Block.h
 
 include_directories(../../symGen ${MKL_INC} ${SUITE_INC})
 link_directories(${MKL_LIB} ${MMM} ${SUITE_LIB})
-add_executable(CholOpenMP ${SOURCE_FILES})
-target_link_libraries(CholOpenMP
+add_executable(symChol ${SOURCE_FILES})
+target_link_libraries(symChol
         #mkl_blacs_intelmpi_ilp64
         #mkl_blacs_intelmpi_lp64
         #mkl_blacs_openmpi_ilp64
