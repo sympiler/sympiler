@@ -3,7 +3,8 @@ Sympiler: Transforming Sparse Matrix Codes by Decoupling Symbolic Analysis
 
 This repository is only created for Artifact Evaluation of SC17 conference 
 and it is not to share with other people. The repository will be shared for 
-public after its paperwork finished.
+public after its paperwork finished. The updated version of Sympiler is available
+in Sympiler repository: https://github.com/sympiler/sympiler.git
 
 ## Installation
 ### requirements

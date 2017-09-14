@@ -24,23 +24,17 @@ int dfsC		/* return the new value of k */
     /* put the root node on the stack */
     Pstack [0] = p ;
     phead = 0 ;
-
-    /* while the stack is not empty, do: */
     while (phead >= 0)
     {
-        /* grab the node p from top of the stack and get its youngest child j */
         p = Pstack [phead] ;
         j = Head [p] ;
         if (j == EMPTY)
         {
-            /* all children of p ordered.  remove p from stack and order it */
             phead-- ;
             Post [k++] = p ;	/* order node p as the kth node */
         }
         else
         {
-            /* leave p on the stack.  Start a DFS at child node j by putting
-             * j on the stack and removing j from the list of children of p. */
             Head [p] = Next [j] ;
             Pstack [++phead] = j ;
         }

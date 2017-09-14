@@ -24,12 +24,7 @@ bool cholesky_left_sn_07(int n, int* c, int* r, double* values,
     /*
      * For timing using BLAS
      */
-    int top=0;
-    // int *xi = new int[2*supNo]();
-    int super_max = 64; //tunig parameter for the max size of supernodes TODO: find it in analysis
-    int col_max = n;
-    // int *map = new int[n]();
-    // double *contribs = new double[super_max*col_max]();
+
     int info;
     double one [2], zero [2];
     one [0] =  1.0 ;    /* ALPHA for *syrk, *herk, *gemm, and *trsm */
@@ -47,7 +42,6 @@ bool cholesky_left_sn_07(int n, int* c, int* r, double* values,
         }
         //copy the columns from A to L
         for (int i = curCol; i < nxtCol; ++i) {//Copy A to L
-            int pad=i-curCol;
             for (int j = c[i]; j < c[i+1] ; ++j) {
                // if(r[j]>=i)//does not need to save upper part.
                     lValues[lC[i]+map[r[j]]] = values[j];

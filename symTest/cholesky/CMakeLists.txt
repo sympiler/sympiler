@@ -3,13 +3,12 @@ project(symChol)
 #TODO use env instead
 
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMKL -DVERIFY -Wall -std=gnu++11  -m64  ")
 
-set(SOURCE_FILES main.cpp PB_Cholesky.h Ordering.h Inspection_Block.h
+
+set(SOURCE_FILES main.cpp PB_Cholesky.h
         Etree.h def.h PostOrder.h DFS.h Reach.h Inspection_Prune.h ColumnCount.h
-        Transpose.h Util.h LSparsity.h SparseUtils.h colCounts.h
-        Inspection_BlockC.h AMD.h)
+        Transpose.h Util.h LSparsity.h SparseUtils.h
+        Inspection_BlockC.h)
 
 include_directories(../../symGen ${MKL_INC} ${SUITE_INC})
 link_directories(${MKL_LIB} ${MMM} ${SUITE_LIB})

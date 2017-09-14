@@ -33,7 +33,7 @@ bool readMatrix(std::string fName, int &n, int &NNZ, int* &col,
      *    Triplet in the rest of lines: row    col    value
      */
     std::getline(inFile,line);
-    for (int i=0; i<line.length(); line[i]=tolower(line[i]),i++);
+    for (unsigned i=0; i<line.length(); line[i]=tolower(line[i]),i++);
     std::istringstream iss(line);
     if (!(iss >> banner >> mtx >> crd >> arith >> sym)){
         std::cout<<"Invalid header (first line does not contain 5 tokens)\n";
@@ -75,7 +75,6 @@ bool readMatrix(std::string fName, int &n, int &NNZ, int* &col,
         std::cout<<"The matrix dimension is missing\n";
         return false;
     }
-    int factorSize= (n * n) / 2;//Worst case assumption
     if(n <= 0 || NNZ <= 0)
         return false;
     col = new int[n + 1]();

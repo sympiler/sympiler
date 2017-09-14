@@ -19,6 +19,7 @@ bool pruning(int n, int* c, int* r, int *ET, int* &prunePtr, int* &pruneSet){
             pruneSet[prunePtr[colNo]+cnt]=xi[i];
         }
     }
+    return true;
 }
 
 bool getBlockedPruneSet(int n, int *Ap, int *Ai, int *col2sup,
