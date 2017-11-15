@@ -1,10 +1,7 @@
 # Sympiler
-Sympiler: Transforming Sparse Matrix Codes by Decoupling Symbolic Analysis
+Kazem Cheshmi, Shoaib Kamil, Michelle Mills Strout, and Maryam Mehri Dehnavi. 2017. Sympiler: Transforming Sparse Matrix Codes by Decoupling
+Symbolic Analysis. In Proceedings of SC17, Denver, CO, USA, November 12–17, 2017,  13 pages.  DOI: 10.1145/3126908.3126936
 
-This repository is only created for Artifact Evaluation of SC17 conference 
-and it is not to share with other people. The repository will be shared for 
-public after its paperwork finished. The updated version of Sympiler is available
-in Sympiler repository: https://github.com/sympiler/sympiler.git
 
 ## Installation
 ### requirements
