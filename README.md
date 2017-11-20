@@ -3,7 +3,7 @@ Sympiler is a code generator for transforming sparse matrix methods.
 The current code supports the features explained in the following paper:
 
 Kazem Cheshmi, Shoaib Kamil, Michelle Mills Strout, and Maryam Mehri Dehnavi. 2017. [Sympiler: Transforming Sparse Matrix Codes by Decoupling
-Symbolic Analysis].(https://dl.acm.org/citation.cfm?id=3126936&CFID=825768759&CFTOKEN=28284703) In Proceedings of SC17, Denver, CO, USA, November 12–17, 2017,  13 pages.  DOI: 10.1145/3126908.3126936
+Symbolic Analysis](https://dl.acm.org/citation.cfm?id=3126936&CFID=825768759&CFTOKEN=28284703). In Proceedings of SC17, Denver, CO, USA, November 12–17, 2017,  13 pages.  DOI: 10.1145/3126908.3126936
 
 
 ## Installation
