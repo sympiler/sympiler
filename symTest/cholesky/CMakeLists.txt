@@ -28,11 +28,11 @@ target_link_libraries(symChol
 
         #mkl_intel_ilp64
         #gomp
-        iomp5
+        #iomp5
         mkl_sequential
         mkl_intel_lp64
         mkl_core
-        #mkl_gnu_thread
+        mkl_gnu_thread
         mkl_intel_thread
         pthread
         m

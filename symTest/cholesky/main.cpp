@@ -9,7 +9,6 @@
 #include "PB_Cholesky.h"
 #include "LSparsity.h"
 #include "chol_gen.h"
-#define CPUTIME (SuiteSparse_time ( ))
 using namespace std;
 int main(int argc, char *argv[]) {
 #ifdef COLDCACHE
@@ -53,7 +52,7 @@ int main(int argc, char *argv[]) {
     double zrelax[3] = {0.8,0.1,0.05};
     int status=0;
     double *contribs;
-    int super_max = 164; //tunig parameter for the max size of supernodes TODO: find it in analysis
+    int super_max = 164; // TODO: find it in analysis phase
     int col_max = n;
     int *col2sup=new int[n]();
     //int *blockSet;
@@ -106,14 +105,14 @@ int main(int argc, char *argv[]) {
     enableColdCache(1200,wasteFile);
 #endif
     start = std::chrono::system_clock::now();
-    cholesky_left_sn_07(n,A2->p,A2->i,A2->x,colL,L->s,li_ptr,valL,
+/*    cholesky_left_sn_07(n,A2->p,A2->i,A2->x,colL,L->s,li_ptr,valL,
                         L->super,L->nsuper, timingChol,
-                        prunePtr,pruneSet,map, contribs);
-   /* Chol(n,A2->p,A2->i,A2->x,NULL,
+                        prunePtr,pruneSet,map, contribs);*/
+    Chol(n,A2->p,A2->i,A2->x,NULL,
          n,colL,L->s,valL,li_ptr,
          map,contribs,
          prunePtr,pruneSet,
-         0, L->super,L->nsuper);*/
+         0, L->super,L->nsuper);
 
     end = std::chrono::system_clock::now();
     elapsed_seconds = end-start;

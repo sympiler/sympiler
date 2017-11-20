@@ -168,7 +168,6 @@ int rowcolcounts
     w = add_size_t (w, (stype ? 0 : ncol), &ok) ;
     if (!ok)
     {
-        //ERROR (CHOLMOD_TOO_LARGE, "problem too large") ;
         return (FALSE) ;
     }
 

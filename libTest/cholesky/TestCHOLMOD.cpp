@@ -133,25 +133,13 @@ int main(int argc, char *argv[]) {
 	cholmod_free_dense (&X0, cm) ;
     }
 #else
-    if (xtype == MATRIX_REAL)
+    /* real case */
+    for (int i = 0 ; i < n ; i++)
     {
-        /* real case */
-        for (int i = 0 ; i < n ; i++)
-        {
-            double x = n ;
-            Bx [i] = 1 + i / x ;
-        }
+        double x = n ;
+        Bx [i] = 1 + i / x ;
     }
-    else
-    {
-        /* complex case */
-        for (int i = 0 ; i < n ; i++)
-        {
-            double x = n ;
-            Bx [2*i  ] = 1 + i / x ;		/* real part of B(i) */
-            Bx [2*i+1] = (x/2 - i) / (3*x) ;	/* imag part of B(i) */
-        }
-    }
+
 #endif
 
 #ifndef NMATRIXOPS
