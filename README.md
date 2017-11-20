@@ -7,7 +7,7 @@ Symbolic Analysis](https://dl.acm.org/citation.cfm?id=3126936&CFID=825768759&CFT
 
 
 ## Installation
-#### Library requirements
+### Library requirements
 CHOLMOD, Eigen and OpenBLAS libraries need to be installed and their corresponding variables 
 need to be set in the CMakeLists.txt file in the root.
 
@@ -15,7 +15,7 @@ need to be set in the CMakeLists.txt file in the root.
 ### Building the project
 You should use cmake to build the LLVM:
 ```bash
-cd <where you cloned Sympiler>
+cd where/you/cloned/Sympiler
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
@@ -24,16 +24,17 @@ make
 This will build all parts of the project including Sympiler, Sympiler tests, and 
 library tests. 
 
-#### Matrix dataset
+### Matrix dataset
 In order to download and generate the matrices, the following commands need to be ran.
 ```bash
 cd ..
 mkdir matrixDB
 ./scripts/dlMat.sh matrixDB/ build/libTest/cholesky/TriangGen
 ```
-After downloading and generating the required matrices you can evaluate Sympiler and other libraries.
+After downloading and generating the required matrices you can evaluate Sympiler and 
+other libraries.
 
-##Evaluating Sympiler
+###Evaluating Sympiler
 After build is done successfully, the following commands can be used 
 to evaluate Sympiler generated code:
 
@@ -48,7 +49,7 @@ to evaluate Sympiler generated code:
 ./build/symTest/triangular/SymTriang matrixDB/triangular/<MATRIX NAME>_trns.mtx
 ```
 
-##Evaluating the libraries
+###Evaluating the libraries
 The two mentioned libraries i.e., Eigen and CHOLMOD can be evaluated as following:
 for Cholesky in CHOLMOD and Eigen:
 ```bash
