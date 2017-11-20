@@ -4,6 +4,7 @@
 #include <cholmod.h>
 #include <cholmod_function.h>
 #include <algorithm>
+#include <iomanip>
 
 #ifdef COLDCACHE
 #include "../../util/Util.h"
@@ -32,14 +33,12 @@ int main(int argc, char *argv[]) {
 #endif
  std::chrono::time_point<std::chrono::system_clock> start, end;
  std::chrono::duration<double> elapsed_seconds;
- double CHOLMODNumTime = 0 ;
 
  std::string f1 = argv[1];
  std::string f2 = argv[2];
  std::string f1Rev(f1);
  std::reverse(f1Rev.begin(),f1Rev.end());
  std::size_t pos = f1Rev.find("/");
- std::size_t pos2 = f1Rev.find(".");
  std::string inputName=f1Rev.substr(4,pos-4);
  std::reverse(inputName.begin(),inputName.end());
  inputName+="_trns.mtx";
@@ -157,7 +156,6 @@ int main(int argc, char *argv[]) {
 
  L1 = cholmod_analyze (Ac1, cm) ;
  cholmod_factorize (Ac1, L1, cm) ;
- long NNZL = L1->xsize;
 
  // cholmod_free_dense (&X, cm) ;
  ofs<<"%%MatrixMarket matrix coordinate real symmetric\n"
@@ -167,16 +165,13 @@ int main(int argc, char *argv[]) {
    "%-------------------------------------------------------------------------------\n";
 
  int *Lpi = static_cast<int*> (L1->i);
- int *Lsuper = static_cast<int*> (L1->super);
- int *Ls = static_cast<int*> (L1->s);
  int *Lp = static_cast<int*> (L1->p);
  double *Lx = static_cast<double*> (L1->x);
  long NNZ = Lp[L1->n];
  ofs<<L1->n<<" "<<L1->n << " "<<NNZ<<"\n";
- // cout<<"\n";
- for (int j = 0; j < L1->n; ++j) {
+ for (unsigned j = 0; j < L1->n; ++j) {
   for (int i = Lp[j]; i < Lp[j+1]; ++i) {
-   ofs<<j << " "<< Lpi[i] << " " <<Lx[i]<<"\n";
+   ofs<< Lpi[i]+1 << " "<< j+1 << " "<< std::fixed << std::setprecision(12)<<Lx[i]<<"\n";
   }
  }
  cholmod_free_factor (&L1, cm) ;

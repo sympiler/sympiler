@@ -4,7 +4,7 @@
 #include <iostream>
 #include <chrono>
 #include <triang_gen.h>
-#include "Util.h"
+#include "../../util/Util.h"
 
 
 #define CSC
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])  {
     end = std::chrono::system_clock::now();
     elapsed_seconds = end-start;
     duration1=elapsed_seconds.count();
-    std::cout<<duration1<<",";
+    //std::cout<<duration1<<",";
 
     //*****************setting up the RHS
     int *Bp = new int[2]; Bp[0]=0; Bp[1]=rhsPercent+1;
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])  {
 #endif
 
 
-#ifdef BLOCKED//
+#if 0
     //Testing
     int test=0;
     for (int i = 0; i < n; ++i) {

@@ -5,10 +5,11 @@
 #include <cholmod.h>
 #include <cholmod_function.h>
 #include "Inspection_Prune.h"
-#include "Util.h"
 #include "PB_Cholesky.h"
 #include "LSparsity.h"
 #include "chol_gen.h"
+#include "../../util/Util.h"
+
 using namespace std;
 int main(int argc, char *argv[]) {
 #ifdef COLDCACHE

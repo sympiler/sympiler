@@ -159,4 +159,20 @@ bool enableColdCache(int n, std::ifstream &f){
     return true;
 }
 
+/*
+ *
+ */
+
+void rhsInit(int n, int *Ap, int *Ai, double *Ax, double *b){
+    /*generating a rhs that produces a result of all 1 vector*/
+    for (int j = 0; j < n; ++j) {
+        b[j]=0;
+    }
+    for (int c = 0; c < n ; ++c) {
+        for (int cc = Ap[c]; cc < Ap[c + 1]; ++cc) {
+            b[Ai[cc]]+=Ax[cc];
+        }
+    }
+}
+
 #endif //CHOLOPENMP_UTIL_H

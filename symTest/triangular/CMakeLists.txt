@@ -7,7 +7,7 @@ set(CMAKE_CXX_FLAGS "-DMYBLAS -std=gnu++11" )
 
 include_directories(../../symGen)
 
-set(SOURCE_FILES main.cpp Util.h )
+set(SOURCE_FILES main.cpp)
 add_executable(SymTriang ${SOURCE_FILES})
 
 target_link_libraries(SymTriang   )

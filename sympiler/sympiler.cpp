@@ -7,8 +7,8 @@
 #include "Triangular.h"
 #include "Factorization.h"
 
-#undef TRN
-#define CHOL
+//#undef TRN
+//#undef CHOL
 
 using namespace Sympiler::Internal;
 using namespace Sympiler;

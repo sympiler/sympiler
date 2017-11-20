@@ -1,6 +1,7 @@
 #!/bin/sh
 OUTPUT=$1
-#This script downlds the SC17 matrix set and extract it to output folder. 
+binFile=$2
+#This script downlds the SC17 matrix set and extract it to output folder and then generates .
 wget http://www.cise.ufl.edu/research/sparse/MM/Oberwolfach/gyro_k.tar.gz -O ${OUTPUT}gyro_k.tar.gz
 wget http://www.cise.ufl.edu/research/sparse/MM/UTEP/Dubcova2.tar.gz -O ${OUTPUT}Dubcova2.tar.gz
 wget http://www.cise.ufl.edu/research/sparse/MM/Boeing/msc23052.tar.gz -O ${OUTPUT}msc23052.tar.gz
@@ -34,3 +35,11 @@ cp ${OUTPUT}raefsky4/raefsky4.mtx ${OUTPUT}raefsky4.mtx;
 cp ${OUTPUT}tmt_sym/tmt_sym.mtx ${OUTPUT}tmt_sym.mtx;
 mkdir ${OUTPUT}ccache
 cp ${OUTPUT}rajat21/rajat21.mtx ${OUTPUT}ccache/rajat21.mtx;
+
+#Generating triangular matrices
+mkdir ${OUTPUT}triangular
+for f in ${OUTPUT}*.mtx
+do
+    echo "Generating Triangular matrix for $f"
+    ${binFile} $f ${OUTPUT}triangular/
+done

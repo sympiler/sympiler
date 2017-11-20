@@ -7,7 +7,7 @@ project(symChol)
 
 set(SOURCE_FILES main.cpp PB_Cholesky.h
         Etree.h def.h PostOrder.h DFS.h Reach.h Inspection_Prune.h ColumnCount.h
-        Transpose.h Util.h LSparsity.h SparseUtils.h
+        Transpose.h LSparsity.h SparseUtils.h
         Inspection_BlockC.h)
 
 include_directories(../../symGen ${MKL_INC} ${SUITE_INC})
