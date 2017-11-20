@@ -34,22 +34,22 @@ mkdir matrixDB
 After downloading and generating the required matrices you can evaluate Sympiler and 
 other libraries.
 
-###Evaluating Sympiler
+### Evaluating Sympiler
 After build is done successfully, the following commands can be used 
 to evaluate Sympiler generated code:
 
-####Cholesky
+#### Cholesky
 ```bash
 ./build/symTest/cholesky/symChol matrixDB/<MATRIX NAME>.mtx matrixDB/ccache/rajat21.mtx
 
 ```
 
-####Triangular solve
+#### Triangular solve
 ```bash
 ./build/symTest/triangular/SymTriang matrixDB/triangular/<MATRIX NAME>_trns.mtx
 ```
 
-###Evaluating the libraries
+### Evaluating the libraries
 The two mentioned libraries i.e., Eigen and CHOLMOD can be evaluated as following:
 for Cholesky in CHOLMOD and Eigen:
 ```bash
