@@ -49,21 +49,7 @@ to evaluate Sympiler generated code:
 ./build/symTest/triangular/SymTriang matrixDB/triangular/<MATRIX NAME>_trns.mtx
 ```
 
-### Evaluating the libraries
-The two mentioned libraries i.e., Eigen and CHOLMOD can be evaluated as following:
-for Cholesky in CHOLMOD and Eigen:
-```bash
-./build/libTest/cholesky/CholeskyTestCHOLMOD matrixDB/<MATRIX NAME>.mtx matrixDB/ccache/rajat21.mtx
-./build/libTest/cholesky/cholEigen matrixDB/<MATRIX NAME>.mtx matrixDB/ccache/rajat21.mtx
-```
-For Triangular Solve in Eigen:
-```bash
-./build/libTest/triangular/trnsEigen matrixDB/triangular/<MATRIX NAME>_trns.mtx
-```
 ## Source Tree Description
-### libTest
-This folder is inteded to evaluate the two library competitors i.e., CHOLMOD 
-and Eigen. 
 
 ### scripts
 The scripts to download the matrices used in the paper.
