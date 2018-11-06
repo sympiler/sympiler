@@ -1,28 +1,42 @@
 # Sympiler
-Sympiler is a code generator for transforming sparse matrix methods. 
-The current code supports the features explained in the following paper:
+Sympiler is a code generator for transforming sparse matrix methods.
+To access the list of publication and resources please visit: http://www.sympiler.com/
 
-Kazem Cheshmi, Shoaib Kamil, Michelle Mills Strout, and Maryam Mehri Dehnavi. 2017. [Sympiler: Transforming Sparse Matrix Codes by Decoupling
-Symbolic Analysis](https://dl.acm.org/citation.cfm?id=3126936&CFID=825768759&CFTOKEN=28284703). In Proceedings of SC17, Denver, CO, USA, November 12–17, 2017,  13 pages.  DOI: 10.1145/3126908.3126936
+ParSy is parallel version of Sympiler. The evaluation benchmark for ParSy is
+available from ParSy_bench repository: https://github.com/cheshmi/parsy_bench
 
 
 ## Installation
+
 ### Library requirements
-CHOLMOD, Eigen and OpenBLAS libraries need to be installed and their corresponding variables 
-need to be set in the CMakeLists.txt file in the root.
+Sympiler does not need any external library however for testing the
+Sympiler-generated code, Suitesparse and Intel MKL libraries are required.
 
-
-### Building the project
-You should use cmake to build the LLVM:
+### Building Sympiler
 ```bash
 cd where/you/cloned/Sympiler
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
-make 
+make sympiler_proj
 ```
-This will build all parts of the project including Sympiler, Sympiler tests, and 
-library tests. 
+
+
+### Building the Sympiler tests
+The first step is to set the environmental variables corresponding
+to each library. The following shows how the variables are set in bash.
+```bash
+export MKLROOT <path to MKL>
+export SUITEROOT <path to Suitesparse>
+```
+After setting the library paths:
+
+```bash
+cd where/you/cloned/Sympiler/build/
+make
+```
+This will build the two remaining parts of the project including
+Sympiler tests for both Cholesky and Triangular solve.
 
 ### Matrix dataset
 In order to download and generate the matrices, the following commands need to be ran.
@@ -31,8 +45,7 @@ cd ..
 mkdir matrixDB
 ./scripts/dlMat.sh matrixDB/ build/libTest/cholesky/TriangGen
 ```
-After downloading and generating the required matrices you can evaluate Sympiler and 
-other libraries.
+After downloading and generating the required matrices you can evaluate Sympiler.
 
 ### Evaluating Sympiler
 After build is done successfully, the following commands can be used 
