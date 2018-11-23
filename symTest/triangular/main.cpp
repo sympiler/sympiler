@@ -5,6 +5,7 @@
 #include <chrono>
 #include <triang_gen.h>
 #include "../../util/Util.h"
+#include "../../sympiler/NumericalUtils.h"
 
 
 #define CSC
@@ -87,15 +88,21 @@ int main(int argc, char *argv[])  {
     delete []col2sup;
     delete []sup2col;
     delete []newCol;
-#else
+#elif PRUNE
     //***************Sympiler-generated code
 
     int top = reach(n, col, row, Bp, Bi, 0, pruneSet, 0);
     start = std::chrono::system_clock::now();
+
     trns(n,col,row,val,NULL,
          0, Bp,Bi,&x2[n-rhsPercent-1],NULL,
          xOut,
          NULL,pruneSet,top,NULL,NULL);
+#else
+    int top = 0;
+    trns(n,col,row,val,NULL,
+         0, Bp,Bi,&x2[n-rhsPercent-1],NULL,
+         xOut);
     end = std::chrono::system_clock::now();
     elapsed_seconds = end-start;
     duration1=elapsed_seconds.count();

@@ -1,0 +1,22 @@
+%%MatrixMarket matrix coordinate real symmetric
+%-------------------------------------------------------------------------------
+% UF Sparse Matrix Collection, Tim Davis
+% http://www.cise.ufl.edu/research/sparse/matrices/TKK/cbuckle
+% name: TKK/cbuckle
+% [Compressed cylindrical shell buckling; stiffness mtx K and initial stress G]
+% id: 1912
+% date: 2008
+% author: R. Kouhia
+% ed: T. Davis
+% fields: name title A id author ed kind aux notes date
+% aux: G
+% kind: structural problem
+%-------------------------------------------------------------------------------
+% notes:
+% Matrix problems from Reijo Kouhia, Structural Mechanics, Helsinki
+% University of Technology.   http://users.tkk.fi/~kouhia/sparse.html
+%-------------------------------------------------------------------------------
+13681 1 3
+1 1 1
+2 1 1
+10 1 1

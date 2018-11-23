@@ -8,7 +8,8 @@
 #include "Factorization.h"
 
 //#undef TRN
-//#undef CHOL
+#undef CHOL
+#define TRN
 
 using namespace Sympiler::Internal;
 using namespace Sympiler;
@@ -24,7 +25,7 @@ int main(int argc, char *argv[]) {
 #ifdef TRN
     //Sparse l(10000,halide_type_t(halide_type_float,64),100,2,"");
     Sparse l(Float(64),matname);
-    Sparse rhs(Float(64),"/home/kazem/Dropbox/cbuckle_rhs.mtx");
+    Sparse rhs(Float(64),"../../data/cbuckle_rhs.mtx");
     //Dense rhsDense(halide_type_t(halide_type_float,64),100,1,"");
     Triangular trns(l,rhs);
     trns.sympile_to_c("../../symGen/triang");

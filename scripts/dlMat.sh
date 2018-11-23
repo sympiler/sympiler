@@ -37,9 +37,9 @@ mkdir ${OUTPUT}ccache
 cp ${OUTPUT}rajat21/rajat21.mtx ${OUTPUT}ccache/rajat21.mtx;
 
 #Generating triangular matrices
-mkdir ${OUTPUT}triangular
-for f in ${OUTPUT}*.mtx
-do
-    echo "Generating Triangular matrix for $f"
-    ${binFile} $f ${OUTPUT}triangular/
-done
+#mkdir ${OUTPUT}triangular
+#for f in ${OUTPUT}*.mtx
+#do
+#    echo "Generating Triangular matrix for $f"
+#    ${binFile} $f ${OUTPUT}triangular/
+#done

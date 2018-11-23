@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <myBLAS.h>
+#include <cholUtils.h>
 #ifndef HALIDE_ATTRIBUTE_ALIGN
   #ifdef _MSC_VER
     #define HALIDE_ATTRIBUTE_ALIGN(x) __declspec(align(x))
@@ -30,7 +30,6 @@ typedef struct buffer_t {
 } buffer_t;
 #endif
 #define __user_context_ NULL
-#define BLOCKED
 struct halide_filter_metadata_t;
 extern "C" {
 void *sympiler_malloc(void *ctx, size_t s){return(malloc(s));}
@@ -115,60 +114,32 @@ template<typename T> T min(T a, T b) {if (a < b) return a; return b;}
 template<typename A, typename B> A reinterpret(B b) {A a; memcpy(&a, &b, sizeof(a)); return a;}
 
 double one [2]={1.0,0.}, zero [2]={0.,0.};
+int sw = false, lb1 = 0, ub1 = 0; 
+double *cur; int info=0; 
 #ifdef __cplusplus
 extern "C" {
 #endif
-int32_t trns(int32_t n1, int32_t *Mp1, int32_t *Mi1, double *Mx1, int32_t *Mip1, int32_t n2, int32_t *Mp2, int32_t *Mi2, double *Mx2, int32_t *, double *D2, int32_t *setPtr, int32_t *setVal, int32_t ub, int32_t *blk2Col, int32_t blkNo) {
+int32_t trns(int32_t n1, int32_t *Mp1, int32_t *Mi1, double *Mx1, int32_t *Mip1, int32_t n2, int32_t *Mp2, int32_t *Mi2, double *Mx2, int32_t *Mip2, double *D2) {
+ int32_t _0 = Mp2[0] + 1;
+ for (int copy = Mp2[0]; copy < Mp2[_0]; copy++)
  {
-  int16_t _0 = (int16_t)(164);
-  double _1 = n1 * _0;
-  int64_t _2 = _1;
-  if ((_2 > ((int64_t(1) << 31) - 1)) || ((_2 * sizeof(double)) > ((int64_t(1) << 31) - 1)))
+  D2[Mi2[copy]] = Mx2[copy];
+ } // for copy
+ int16_t _1 = (int16_t)(0);
+ for (int trnsf0 = _1; trnsf0 < n1; trnsf0++)
+ {
+  double _2 = D2[trnsf0] / Mx1[Mp1[trnsf0]];
+  D2[trnsf0] = _2;
+  int16_t _3 = (int16_t)(1);
+  int32_t _4 = Mp1[trnsf0] + _3;
+  int16_t _5 = trnsf0 + _3;
+  for (int trnsf1 = _4; trnsf1 < Mp1[_5]; trnsf1++)
   {
-      return -1;
-  } // overflow test tempVec
-  bool _3 = (bool)(1);
-  int64_t _4 = (int64_t)(_3 ? _2 : 0);
-  int64_t _5 = _4;
-  double *tempVec = (double *)sympiler_malloc(NULL, sizeof(double)*_5);
-  int32_t _6 = Mp2[0] + 1;
-  for (int copy = Mp2[0]; copy < Mp2[_6]; copy++)
-  {
-   D2[Mi2[copy]] = Mx2[copy];
-  } // for copy
-  for (int trnsf0P = 0; trnsf0P < ub; trnsf0P++)
-  {
-   int32_t _7 = setVal[trnsf0P] - 1;
-   bool _8 = setVal[trnsf0P] != 0;
-   int32_t _9 = (int32_t)(_8 ? blk2Col[_7] : 0);
-   int32_t _10 = Mip1[blk2Col[setVal[trnsf0P]]] - Mip1[_9];
-   int32_t _11 = blk2Col[setVal[trnsf0P]] - _9;
-   trsm_blas(_10, _11, &Mx1[Mp1[_9]], &D2[_9]);
-   int32_t _12 = _10 - _11;
-   int32_t _13 = Mp1[_9] + _11;
-   matvec(_10, _12, _11, &Mx1[_13], &D2[_9], &tempVec[0]);
-   int32_t _14 = Mip1[_9] + _11;
-   for (int trnsf1 = _14; trnsf1 < Mip1[blk2Col[setVal[trnsf0P]]]; trnsf1++)
-   {
-    int32_t _15 = setVal[trnsf0P] - 1;
-    bool _16 = setVal[trnsf0P] != 0;
-    int32_t _17 = (int32_t)(_16 ? blk2Col[_15] : 0);
-    int32_t _18 = blk2Col[setVal[trnsf0P]] - _17;
-    int32_t _19 = Mip1[_17] + _18;
-    int16_t _20 = trnsf1 - _19;
-    double _21 = D2[Mi1[trnsf1]] - tempVec[_20];
-    D2[Mi1[trnsf1]] = _21;
-    int32_t _22 = setVal[trnsf0P] - 1;
-    bool _23 = setVal[trnsf0P] != 0;
-    int32_t _24 = (int32_t)(_23 ? blk2Col[_22] : 0);
-    int32_t _25 = blk2Col[setVal[trnsf0P]] - _24;
-    int32_t _26 = Mip1[_24] + _25;
-    int16_t _27 = trnsf1 - _26;
-    int16_t _28 = (int16_t)(0);
-    tempVec[_27] = _28;
-   } // for trnsf1
-  } // for trnsf0P
- } // alloc tempVec
+   double _6 = Mx1[trnsf1] * D2[trnsf0];
+   double _7 = D2[Mi1[trnsf1]] - _6;
+   D2[Mi1[trnsf1]] = _7;
+  } // for trnsf1
+ } // for trnsf0
  return 0;
 }
 #ifdef __cplusplus

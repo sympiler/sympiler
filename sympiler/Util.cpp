@@ -4,6 +4,8 @@
 
 #include <atomic>
 #include <fstream>
+#include <iostream>
+#include <sstream>
 #include "Util.h"
 
 namespace Sympiler {
@@ -90,21 +92,69 @@ bool readCSCMatrixPattern(std::string fName, int &n, int& m, int &NNZ, int* &col
      * ach row of the file shows (col, row, nnz)
      * - The matrices are zero-indexed
      */
+
     std::ifstream inFile;
     inFile.open(fName);
-    if(inFile.fail())
+    std::string line,banner, mtx, crd, arith, sym;
+    /*  File format:
+     *    %%MatrixMarket matrix coordinate real general/symmetric/...
+     *    % ...
+     *    % (optional comments)
+     *    % ...
+     *    #rows    #non-zero
+     *    Triplet in the rest of lines: row    col    value
+     */
+    std::getline(inFile,line);
+    for (unsigned i=0; i<line.length(); line[i]=tolower(line[i]),i++);
+    std::istringstream iss(line);
+    if (!(iss >> banner >> mtx >> crd >> arith >> sym)){
+        std::cout<<"Invalid header (first line does not contain 5 tokens)\n";
         return false;
-    inFile >> n;
-    inFile >> m;
-    inFile>>NNZ;
-    int factorSize= (n * n) / 2;//Worst case assumption
+    }
+
+    if(banner.compare("%%matrixmarket")) {
+        std::cout<<"Invalid header (first token is not \"%%%%MatrixMarket\")\n";
+        return false;
+    }
+    if(mtx.compare("matrix")) {
+        std::cout<<"Not a matrix; this driver cannot handle that.\"\n";
+        return false;
+    }
+    if(crd.compare("coordinate")) {
+        std::cout<<"Not in coordinate format; this driver cannot handle that.\"\n";
+        return false;
+    }
+    if(arith.compare("real") and arith.compare("integer")) {
+        if(!arith.compare("complex")) {
+            std::cout<<"Complex matrix; use zreadMM instead!\n";
+            return false;
+        }
+        else if(!arith.compare("pattern")) {
+            std::cout<<"Pattern matrix; values are needed!\n";
+            return false;
+        }
+        else {
+            std::cout<<"Unknown arithmetic\n";
+            return false;
+        }
+    }
+    while (!line.compare(0,1,"%"))
+    {
+        std::getline(inFile, line);
+    }
+    std::istringstream issDim(line);
+    if (!(issDim >> n >> n >> NNZ)){
+        std::cout<<"The matrix dimension is missing\n";
+        return false;
+    }
     if(n <= 0 || NNZ <= 0)
         return false;
     col = new int[n + 1]();
     // colL = new int[n + 1]; colU = new int[n + 1];
     row = new int[NNZ];
     // rowL = new int[factorSize]; rowU = new int[factorSize];
-    if(!col || !row)
+    // valL = new double[factorSize]; valU = new double[factorSize];
+    if( !col || !row)
         return false;
     //Initializing the result vector
     int y, x, colCnt=0, nnzCnt=0;
@@ -128,6 +178,7 @@ bool readCSCMatrixPattern(std::string fName, int &n, int& m, int &NNZ, int* &col
             row[nnzCnt]=x;
             nnzCnt++;
         }
+
     }
     col[n]= col[n - 1] + colCnt;//last col
 
