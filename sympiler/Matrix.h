@@ -99,6 +99,7 @@ public:
     virtual Expr diagonal(Expr e);
     virtual Expr accessNNZ(Expr e);
     virtual void getDecl(std::vector<Expr>& , std::vector<Argument>&);
+    virtual MatrixPattern* readPattern();
 };
 
 
