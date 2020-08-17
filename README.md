@@ -7,7 +7,7 @@ To access the list of publication and resources please visit: http://www.sympile
 **ParSy** is parallel version of Sympiler. The evaluation benchmark for ParSy is
 available from ParSy_bench repository: https://github.com/cheshmi/parsy_bench
 
-**NASOQ and LBL** solvers use Sympiler and ParSy code internally. For more information visit [NASOQ Webpage](nasoq.github.io/).
+**NASOQ and LBL** solvers use Sympiler and ParSy code internally. For more information visit [NASOQ Webpage](https://nasoq.github.io/).
 
 ## Installation
 
