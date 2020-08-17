@@ -2,9 +2,12 @@
 Sympiler is a code generator for transforming sparse matrix methods.
 To access the list of publication and resources please visit: http://www.sympiler.com/
 
-ParSy is parallel version of Sympiler. The evaluation benchmark for ParSy is
+**We are actively working on Sympiler code and a major release will come soon.**
+
+**ParSy** is parallel version of Sympiler. The evaluation benchmark for ParSy is
 available from ParSy_bench repository: https://github.com/cheshmi/parsy_bench
 
+**NASOQ and LBL** solvers use Sympiler and ParSy code internally. For more information visit [NASOQ Webpage](nasoq.github.io/).
 
 ## Installation
 
