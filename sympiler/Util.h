@@ -59,6 +59,7 @@ std::string unique_name(const std::string &prefix);
 
     //Matrix related operations
 bool readCSCMatrixPattern(std::string fName, int &n, int& m, int &NNZ, int* &col, int* &row);
+bool readDenseMatrixPattern(std::string fName, int &n, int& m, int &NNZ, int* &col, int* &row);
 
 }
 }

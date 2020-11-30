@@ -185,5 +185,106 @@ bool readCSCMatrixPattern(std::string fName, int &n, int& m, int &NNZ, int* &col
     return true;
 }
 
+bool readDenseMatrixPattern(std::string fName, int &n, int& m, int &NNZ, int* &col,
+                int* &row){
+    /*This function reads the input matrix from "fName" file and
+     * allocate memory for matrix A, L and U.
+     * - The input file is a coordinate version and e
+     * ach row of the file shows (col, row, nnz)
+     * - The matrices are zero-indexed
+     */
+
+    std::ifstream inFile;
+    inFile.open(fName);
+    std::string line,banner, mtx, crd, arith, sym;
+    /*  File format:
+     *    %%MatrixMarket matrix array real general...
+     *    % ...
+     *    % (optional comments)
+     *    % ...
+     *    #rows    #cols
+     *    Matrix mentioned in row-major format:
+     *    R1C1 R1C2 R1C3...
+     *    R2C1 R2C2 R2C3...
+     */
+    std::getline(inFile,line);
+    for (unsigned i=0; i<line.length(); line[i]=tolower(line[i]),i++);
+    std::istringstream iss(line);
+    if (!(iss >> banner >> mtx >> crd >> arith >> sym)){
+        std::cout<<"Invalid header (first line does not contain 5 tokens)\n";
+        return false;
+    }
+
+    if(banner.compare("%%matrixmarket")) {
+        std::cout<<"Invalid header (first token is not \"%%%%MatrixMarket\")\n";
+        return false;
+    }
+    if(mtx.compare("matrix")) {
+        std::cout<<"Not a matrix; this driver cannot handle that.\"\n";
+        return false;
+    }
+    if(crd.compare("array")) {
+        std::cout<<"Not in coordinate format; this driver cannot handle that.\"\n";
+        return false;
+    }
+    if(arith.compare("real") and arith.compare("integer")) {
+        if(!arith.compare("complex")) {
+            std::cout<<"Complex matrix; use zreadMM instead!\n";
+            return false;
+        }
+        else if(!arith.compare("pattern")) {
+            std::cout<<"Pattern matrix; values are needed!\n";
+            return false;
+        }
+        else {
+            std::cout<<"Unknown arithmetic\n";
+            return false;
+        }
+    }
+    if (sym.compare("general")) {
+       std::cout << "Dense matrices have to be store in general format."
+	         << std::endl;
+       return false;
+    }
+    while (!line.compare(0,1,"%"))
+    {
+        std::getline(inFile, line);
+    }
+    std::istringstream issDim(line);
+    if (!(issDim >> n >> m)){
+        std::cout<<"The matrix dimension is missing\n";
+        return false;
+    }
+    if(n <= 0 || m <= 0)
+        return false;
+    NNZ = n * m;
+    col = new int[m + 1]();
+    row = new int[NNZ];
+    if( !col || !row)
+        return false;
+
+    // Verify if input file has all matrix entries
+    double value;
+    for (int i = 0; i < n ; ++i) {
+      for (int j = 0; j < m; ++j) {
+        if( !(inFile >> value) ) {
+	  std::cout << "Failed to read value @ ["
+		    << i << ',' << j << ']' << std::endl;
+	  return false;
+	}
+      }
+    }
+
+    col[0]=0;
+    for (int j = 0; j < m; ++j) {
+      for (int i = 0; i < n; ++i) {
+        row[col[j]+i] = i;
+      }
+      col[j+1] = col[j] + n;
+    }
+
+    return true;
+}
+
 }
 }

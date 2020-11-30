@@ -221,6 +221,15 @@ Expr Dense::accessNNZ(Expr e) {
     return Pointer::make(halide_type_t(halide_type_float,64),Matrix::name,e);
 }
 
+MatrixPattern* Dense::readPattern() {
+  if( mPattern == nullptr ) {
+    mPattern = new MatrixPattern();
+  }
+  readDenseMatrixPattern(path, mPattern->n, mPattern->m, mPattern->nnz,
+                         mPattern->p,mPattern->i);
+  return mPattern;
+}
+
 void Dense::getDecl(std::vector<Expr>& exprList, std::vector<Argument>& argList){
     argList.push_back(Argument(name,Argument::Kind::InputBuffer,
                                halide_type_t(halide_type_float,64),1));
