@@ -1,0 +1,26 @@
+
+## Coding style points
+wrapping line limit is 79 columns.
+
+Using high-level features of C++ are only allowed in test directory.
+
+I am using following naming convention for all names:
+temp_variable, spmv_csr
+
+For typyes and classes let's use Clang format e.g., ClassName
+
+Functions more than 39 lines are not recommended.
+
+There should NOT be any main function in the code other than demo directory.
+
+Create a separate util file for each demo to keep the demo main file easy to follow.
+
+If you are using any extra dependency make sure the code runs correctly without having that otherwise that is a required library. For example Metis is an optional and the code should run well with no Metis.
+
+Never forget running valgrind and fixing memory leaks.
+
+Writing a test for new modules are recommended.
+
+Two namespaces are used in this repository sym_lib and sympiler. Any new class/function should be within these two namespace.
+
+Create a branch for solving an issue.
