@@ -8,7 +8,6 @@
 
 #include <string>
 
-#define PROFILE 1
 #ifdef PAPI
 #include "PAPIWrapper.h"
 #else

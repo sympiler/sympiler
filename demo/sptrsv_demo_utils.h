@@ -81,6 +81,7 @@ namespace sym_lib {
     cost[i] = L1_csr_->p[i+1] - L1_csr_->p[i];
    }
    get_coarse_levelSet_DAG_CSC_tree(n_, L1_csr_->p, L1_csr_->i,
+     L1_csr_->stype,
      final_level_no,
      fina_level_ptr,part_no,
      final_part_ptr,final_node_ptr,

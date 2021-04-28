@@ -1,0 +1,3 @@
+[submodule "lbc"]
+	path = lbc
+	url = https://github.com/sympiler/lbc.git

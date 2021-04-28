@@ -1,3 +1,5 @@
+![APM](https://badgen.net/github/license/micromatch/micromatch)
+
 # Sympiler
 Sympiler is a code generator for transforming sparse matrix methods.
 To access the list of publication and resources please visit: http://www.sympiler.com/
@@ -39,7 +41,8 @@ PAPI works only on Linux and is optional for profiling only.
 ### Build
 
 ```bash
-cd where/sympiler/is/cloned/
+git clone --recursive https://github.com/sympiler/sympiler.git
+cd sympiler/
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
