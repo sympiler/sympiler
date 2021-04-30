@@ -1,5 +1,5 @@
 cmake_minimum_required( VERSION 2.5)
-project(sparse_blas_library)
+project(sym_sparse_blas)
 
 include_directories(includes
         ${BLAS_INC}
@@ -7,7 +7,7 @@ include_directories(includes
         ${MKL_INC}
         )
 
-add_library (sparse_blas_library STATIC
+add_library (sym_sparse_blas STATIC
         spmv.cpp
         sptrsv.cpp
         add.cpp
@@ -18,6 +18,6 @@ add_library (sparse_blas_library STATIC
         other_operations.cpp
         diagonal_solver.cpp
         )
-target_link_libraries(sparse_blas_library
+target_link_libraries(sym_sparse_blas
         ${ALL_LIBS}
         )
