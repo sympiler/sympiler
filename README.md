@@ -30,13 +30,7 @@ export MKLROOT /path/to/mkl
 ```
 If you don't set these variables, the build will continue without using Intel MKL for benchmark
 
-#### PAPI
-PAPI is an open-source profiler that can be obtained from https://icl.utk.edu/papi/
-After installation, please set `PAPIROOT` to enable profiling 
-```bash
-export PAPIROOT /path/to/papi
-```
-PAPI works only on Linux and is optional for profiling only.
+
 
 ### Build
 
