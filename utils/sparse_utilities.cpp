@@ -7,7 +7,6 @@
 #include <def.h>
 #include <cassert>
 #include <cmath>
-#include "sparse_blas_lib.h"
 #include "sparse_utilities.h"
 
 namespace sym_lib {
@@ -1084,6 +1083,34 @@ namespace sym_lib {
   return (nz) ;
  }
 
+ // TODO: replace the following with a more efficient way of making matrix symmetric
+ // TODO:  it is copied here to remove sparseblas dependency
+ CSC* add_tmp(CSC *A, CSC *B, double alpha, double beta, bool sort=true){
+  if(A->stype != B->stype)
+   return NULLPNTR;
+  int p, j, nz = 0, anz, *Cp, *Ci, *Bp, m, n, bnz, *w ;
+  bool values = A->is_pattern || B->is_pattern; //true if either is pattern
+  double *x, *Bx, *Cx ;
+  m = A->m ; anz = A->p [A->n] ;
+  n = B->n ; Bp = B->p ; Bx = B->x ; bnz = Bp [n] ;
+  w = new int[m]();
+  x = !values ? new double[m]() : NULLPNTR;
+  CSC *C = new CSC(m,n,anz+bnz,values);
+  C->stype = A->stype;
+  C->is_pattern = A->is_pattern;
+  Cp = C->p ; Ci = C->i ; Cx = C->x ;
+  for (j = 0 ; j < n ; j++){
+   Cp [j] = nz ;                   /* column j of C starts here */
+   nz = scatter (A, j, alpha, w, x, j+1, C, nz) ;   /* alpha*A(:,j)*/
+   nz = scatter (B, j, beta, w, x, j+1, C, nz) ;    /* beta*B(:,j) */
+   if(sort) std::sort(&C->i[Cp[j]], &C->i[nz]);
+   if (!values) for (p = Cp [j] ; p < nz ; p++) Cx [p] = x [Ci [p]] ;
+  }
+  Cp [n] = nz ;
+  delete []x;
+  delete []w;
+  return C;
+ }
 
  CSC * make_symmetric(CSC *A, bool lower){
   CSC *ApAt, *At;
@@ -1093,7 +1120,7 @@ namespace sym_lib {
    return transpose_symmetric(A, NULLPNTR);
 
   At = transpose_general(A);
-  ApAt = add(A,At,0.5,0.5);//(A+At)/2
+  ApAt = add_tmp(A,At,0.5,0.5);//(A+At)/2
   CSC* As = make_half(ApAt->n, ApAt->p, ApAt->i, ApAt->x, lower);
   As->stype = lower ? -1 : 1;
   delete At;

@@ -1,0 +1,19 @@
+cmake_minimum_required( VERSION 2.5)
+project(sympiler_utils)
+
+include_directories(includes
+        external/includes/
+        )
+
+add_library (sympiler_utils STATIC
+        BCSCMatrix.cpp
+        etree.cpp
+        lfactor_creation.cpp
+        sparse_inspector.cpp
+        sparse_io.cpp
+        sparse_utilities.cpp
+        test_utils.cpp
+        utils.cpp
+        external/mmio.cpp #TODO: remove this and use SMP
+        )
+#target_link_libraries(sympiler_utils)
