@@ -21,7 +21,6 @@ set(SPTRSVD_SOURCE_FILES
         ${ALL_SOURCE_FILES}
         FusionDemo.cpp
         )
-message("======> ${ALL_LIBS}")
 add_executable(sptrsv_demo ${SPTRSVD_SOURCE_FILES}
         sptrsv_demo.cpp )
 

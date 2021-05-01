@@ -23,6 +23,7 @@ add_library (sym_sparse_blas STATIC
         diagonal_solver.cpp
         ${PARSY_SRC}
         )
+
 target_link_libraries(sym_sparse_blas
         ${ALL_LIBS}
         )
