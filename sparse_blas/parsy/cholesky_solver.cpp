@@ -3,7 +3,7 @@
 //
 
 
-#include "linear_solver_wrapper.h"
+#include "cholesky_solver.h"
 
 #include <algorithm>
 #include <iostream>
@@ -327,7 +327,7 @@ namespace sym_lib {
    SM->i = SMi;
    SM->x = SMx;
    SM->stype = -1;
-   SM->xtype = CHOLMOD_REAL;
+   SM->xtype = SYMPILER_REAL;
    SM->packed = TRUE;
    SM->sorted = TRUE;
    SM->nzmax = SM_nz;

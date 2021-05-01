@@ -63,7 +63,7 @@ namespace sym_lib {
 
 /* xtype defines the kind of numerical values used: */
 #define CHOLMOD_PATTERN 0 /* pattern only, no numerical values */
-#define CHOLMOD_REAL 1  /* a real matrix */
+#define SYMPILER_REAL 1  /* a real matrix */
 #define CHOLMOD_COMPLEX 2 /* a complex matrix (ANSI C99 compatible) */
 #define CHOLMOD_ZOMPLEX 3 /* a complex matrix (MATLAB compatible) */
 #define Int_max INT_MAX

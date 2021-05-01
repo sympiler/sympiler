@@ -379,7 +379,7 @@ namespace sym_lib {
    if (values == 0 || F->xtype == CHOLMOD_PATTERN) {
     //  PRINT2 (("\n:::: p_transpose_sym Perm %p\n", Perm)) ;
     ok = transpose_sym_real(A, Perm, F, Wi, Pinv, status);
-   } else if (F->xtype == CHOLMOD_REAL) {
+   } else if (F->xtype == SYMPILER_REAL) {
     // PRINT2 (("\n:::: r_transpose_sym Perm %p\n", Perm)) ;
     ok = transpose_sym_real(A, Perm, F, Wi, Pinv, status);
    }

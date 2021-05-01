@@ -13,7 +13,7 @@ namespace sym_lib {
     A->nrow = A->ncol = nrow;
     A->nzmax = nnz;
     A->stype = sytpe;
-    A->xtype = CHOLMOD_REAL;//TODO removed later
+    A->xtype = SYMPILER_REAL;//TODO removed later
     A->packed = TRUE; // Always
     A->p = new int[nrow + 1]();
     A->i = new int[nnz]();
@@ -44,7 +44,7 @@ namespace sym_lib {
     //L->sParent = new int[sNo](); //TODO HACK
     // L->x = new double[L->xsize]();
     L->is_ll = TRUE;
-    L->xtype = CHOLMOD_REAL;
+    L->xtype = SYMPILER_REAL;
     L->is_super = TRUE;
 
    } else {

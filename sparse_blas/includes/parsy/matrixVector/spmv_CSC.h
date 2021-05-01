@@ -20,7 +20,7 @@ namespace sym_lib {
 #define ASSIGN(x, z, p, ax, az, q)   x [p]  = ax [q]
 #define ASSIGN_CONJ(x, z, p, ax, az, q)  x [p]  = ax [q]
 #define ASSIGN_REAL(x, p, ax, q)   x [p]  = ax [q]
-#define XTYPE_OK(type)   ((type) == CHOLMOD_REAL)
+#define XTYPE_OK(type)   ((type) == SYMPILER_REAL)
 #define IS_NONZERO(ax, az, q)   IS_NONZERO_R (ax [q])
 #define IS_ZERO(ax, az, q)   IS_ZERO_R (ax [q])
 #define IS_ONE(ax, az, q)   (ax [q] == 1)
