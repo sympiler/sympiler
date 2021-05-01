@@ -50,6 +50,7 @@ if(APPLE)
                 /usr/local/opt/llvm/lib/
         )
         message("Make sure to set the -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++")
+        add_definitions(-DOPENMP)
     else()# otherwise, maybe gcc
         find_package(OpenMP REQUIRED)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -59,6 +60,9 @@ else()
     find_package(OpenMP REQUIRED)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
+if(OpenMP_FOUND)
+    add_definitions(-DOPENMP)
 endif()
 
 #add_definitions( -DPROFILE)
@@ -126,7 +130,8 @@ if(NOT METIS_VERSION_OK)
 endif()
 
 
-#find_package(MKL REQUIRED)
+find_package(MKL REQUIRED)
+add_definitions(-DMKL) # add openblas
 
 ### Find Intel MKL if available
 #if(EXISTS "$ENV{MKLROOT}" OR EXISTS "$ENV{MKL_ROOT}")
@@ -190,6 +195,13 @@ endif()
 #    set(PAPI_LIB_NAME "")
 #endif()
 
+include_directories(
+        ${MKL_INCLUDE_DIR}
+        ${METIS_INCLUDE_DIR}
+        ${METIS_INCLUDES}
+)
+
+
 set(ALL_LIBS
         ${MKL_LIB_NAME}
         ${PAPI_LIB_NAME}
@@ -202,8 +214,6 @@ set(ALL_SOURCE_FILES
         ${SPARSE_LIB_SRC_FILES}
         ${SPARSE_UTIL_SRC_FILES}
         ${SPARSE_EXTN_SRC_FILES}
-        ${CODE_FUSION_SRC_FILES}
-        ${DATA_FUSION_SRC_FILES}
     #    ${APPS_SRC_FILES} # TODO:some of them are mixed with blas, should be cleaned
         ${LBC_SRC_FILES}
         ${BLAS_SRC_FILES}
