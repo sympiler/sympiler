@@ -5,6 +5,9 @@ include_directories(includes
         external/includes/
         )
 
+
+file(GLOB_RECURSE EXT_SRC external/*.cpp external/*.c)
+
 add_library (sympiler_utils STATIC
         BCSCMatrix.cpp
         etree.cpp
@@ -14,9 +17,12 @@ add_library (sympiler_utils STATIC
         sparse_utilities.cpp
         test_utils.cpp
         utils.cpp
-        external/mmio.cpp #TODO: remove this and use SMP
-        external/amd_order.c
-        external/amd_1.c
-        external/amd_2.c
+        ${EXT_SRC}
+
+#        external/mmio.cpp #TODO: remove this and use SMP
+#        external/amd_order.c
+#        external/amd_1.c
+#        external/amd_2.c
+
         )
 #target_link_libraries(sympiler_utils)

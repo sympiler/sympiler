@@ -139,7 +139,7 @@ GLOBAL Int AMD_order
     /* --------------------------------------------------------------------- */
 
     nzaat = AMD_aat (n, Cp, Ci, Len, P, Info) ;
-    AMD_DEBUG1 (("nzaat: %g\n", (c_float) nzaat)) ;
+    AMD_DEBUG1 (("nzaat: %g\n", (double) nzaat)) ;
     ASSERT ((MAX (nz-n, 0) <= nzaat) && (nzaat <= 2 * (size_t) nz)) ;
 
     /* --------------------------------------------------------------------- */
@@ -162,7 +162,7 @@ GLOBAL Int AMD_order
     {
 	S = SuiteSparse_malloc (slen, sizeof (Int)) ;
     }
-    AMD_DEBUG1 (("slen %g\n", (c_float) slen)) ;
+    AMD_DEBUG1 (("slen %g\n", (double) slen)) ;
     if (!S)
     {
 	/* :: out of memory :: (or problem too large) */
