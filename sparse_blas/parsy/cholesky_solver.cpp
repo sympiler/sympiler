@@ -430,10 +430,7 @@ namespace sym_lib {
 //  }
    //print_vec("Extra: ",0,AorSM->ncol,extra_cols);
    //Fill diagonals with perturbed value
-   if (regularization == 1)
-    find_perturbation(reg_diag);
-   else
-    apply_perturbation(reg_diag);
+
    L = symbolic_analysis_lin_solve(1, AorSM, NULL, NULL, n_relax, z_relax,
                                    AorSM->ncol, prune_ptr, prune_set,
                                    n_level, level_ptr, level_set,
@@ -694,6 +691,7 @@ namespace sym_lib {
    double *x_ord = ws;
    double *rhs_ord = ws + A_ord->ncol;
    for (int i = 0; i < A_ord->ncol; ++i) {
+    assert(L->Perm[i] < A_ord->ncol);
     x_ord[i] = rhs[L->Perm[i]];
    }
    //print_csc("\nA reo: \n",A_ord->ncol,A_ord->p,A_ord->i,A_ord->x);

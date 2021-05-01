@@ -176,8 +176,12 @@ namespace sym_lib {
 
 
    }
+  delete []map;
+  delete []contribs;
+  delete []xi;
    return true;
   }
+
  }
 }
 
