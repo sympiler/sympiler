@@ -15,5 +15,8 @@ add_library (sympiler_utils STATIC
         test_utils.cpp
         utils.cpp
         external/mmio.cpp #TODO: remove this and use SMP
+        external/amd_order.c
+        external/amd_1.c
+        external/amd_2.c
         )
 #target_link_libraries(sympiler_utils)

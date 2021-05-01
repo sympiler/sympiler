@@ -173,7 +173,7 @@ namespace sym_lib {
                               int *&parPtr, int *&partition, int &levelNo_s, int *&levelPtr_s, int &parNo_s,
                               int *&parPtr_s, int *&partition_s, int costParam, int levelParam, int finalSeqNodes,
                               int status, int &maxSupWid, int &maxCol, double &orderingTime, int simplicial_en,
-                              int *extra_cols, size_t *inPerm) {
+                              int *extra_cols, size_t *inPerm, SYM_ORDER sym_order) {
    double lnz_best;
    int *First, *Level, *Work4n, *Cmember, *CParent, *ColCount, *Lperm, *Parent,
      *Post, *Perm, *Lcolcount;
@@ -333,19 +333,21 @@ namespace sym_lib {
     320  	Common->method [i].aggressive = TRUE ;	*//* aggressive absorption *//*
     321  	Common->method [i].order_for_lu = FALSE ;*//* order for Cholesky not LU */
    start = std::chrono::system_clock::now();
-#ifdef NATURAL
+//#ifdef NATURAL
+ if(sym_order == SYM_ORDER::S_NATURAL){
+
    L->ordering = CHOLMOD_METIS;
    for (int l = 0; l < A->nrow; ++l) {
     Lperm[l] = l;
    }
-#elif  GIVEN
+ } else if(sym_order == SYM_ORDER::S_GIVEN){
    //pastix_data_t **pastix_data;
    L->ordering = CHOLMOD_METIS;
    for (int l = 0; l < A->nrow; ++l) {
     Lperm[l] = inPerm[l];
    }
-
-#elif SCOTCH
+ } else if(sym_order == SYM_ORDER::S_SCOTCH){
+#ifdef SCOTCH
    L->ordering = CHOLMOD_METIS;
    CSC *ATrans;
    unsigned long nnzFull = A->nzmax*2;//Symmetric case
@@ -426,52 +428,58 @@ namespace sym_lib {
    delete [] AFulli;
    delete [] permtab;
 
-#elif METIS
-   L->ordering = CHOLMOD_METIS;
-   CSC *ATrans;
-   unsigned long nnzFull = A->nzmax * 2;//Symmetric case
-   ATrans = ptranspose(A, 0, NULL, NULL, 0, status);
+#else
+ std::cout<<"SCOTCH is not installed, exited the program \n";
+ exit(-1);
+#endif
+ } else if(sym_order == SYM_ORDER::S_METIS) {
+
+#ifdef METIS
+  L->ordering = CHOLMOD_METIS;
+  CSC *ATrans;
+  unsigned long nnzFull = A->nzmax * 2;//Symmetric case
+  ATrans = ptranspose(A, 0, NULL, NULL, 0, status);
 #if 0
-   for (int i = 0; i < ncol; ++i) {
-    for (int j = A->p[i]; j < A->p[i+1]; ++j) {
-     std::cout<<A->i[j]<<";";
-    }
-    std::cout<<"\n";
+  for (int i = 0; i < ncol; ++i) {
+   for (int j = A->p[i]; j < A->p[i+1]; ++j) {
+    std::cout<<A->i[j]<<";";
    }
-   std::cout<<"---\n";
-   for (int i = 0; i < ncol; ++i) {
-    for (int j = ATrans->p[i]; j < ATrans->p[i+1]; ++j) {
-     std::cout<<ATrans->i[j]<<";";
-    }
-    std::cout<<"\n";
+   std::cout<<"\n";
+  }
+  std::cout<<"---\n";
+  for (int i = 0; i < ncol; ++i) {
+   for (int j = ATrans->p[i]; j < ATrans->p[i+1]; ++j) {
+    std::cout<<ATrans->i[j]<<";";
    }
-   std::cout<<"==\n";
+   std::cout<<"\n";
+  }
+  std::cout<<"==\n";
 #endif
 
-   //Making the graph for passing it to metis, it should have
-   //both upper and lower parts
-   //allocateAC(AFull,ncol,nnzFull,0,TRUE);
-   idx_t options1[METIS_NOPTIONS];
-   METIS_SetDefaultOptions(options1);
+  //Making the graph for passing it to metis, it should have
+  //both upper and lower parts
+  //allocateAC(AFull,ncol,nnzFull,0,TRUE);
+  idx_t options1[METIS_NOPTIONS];
+  METIS_SetDefaultOptions(options1);
 
-   idx_t *AFullp = new idx_t[ncol + 1]();
-   idx_t *AFulli = new idx_t[nnzFull]();
-   idx_t ncolIDXT = ncol;
-   idx_t *weigt = new idx_t[ncol];
-   idx_t *LpermIDX = new idx_t[ncol];
-   idx_t *ILpermIDX = new idx_t[ncol];
-   for (int i = 0; i < ncol; ++i) {
-    LpermIDX[i] = 0;
-    ILpermIDX[i] = 0;
-    weigt[i] = 1;
-   }
-   AFullp[0] = 0;
-   int ind = 1;
-   for (int i = 0; i < ncol; ++i) {
-    int nnzOfCurCol = ATrans->p[i + 1] - ATrans->p[i] - 1;
-    nnzOfCurCol += A->p[i + 1] - A->p[i] - 1;
-    //printf("%d ,\n",A->p[i+1]-A->p[i]-1);
-    //assert(nnzOfCurCol > 0);
+  idx_t *AFullp = new idx_t[ncol + 1]();
+  idx_t *AFulli = new idx_t[nnzFull]();
+  idx_t ncolIDXT = ncol;
+  idx_t *weigt = new idx_t[ncol];
+  idx_t *LpermIDX = new idx_t[ncol];
+  idx_t *ILpermIDX = new idx_t[ncol];
+  for (int i = 0; i < ncol; ++i) {
+   LpermIDX[i] = 0;
+   ILpermIDX[i] = 0;
+   weigt[i] = 1;
+  }
+  AFullp[0] = 0;
+  int ind = 1;
+  for (int i = 0; i < ncol; ++i) {
+   int nnzOfCurCol = ATrans->p[i + 1] - ATrans->p[i] - 1;
+   nnzOfCurCol += A->p[i + 1] - A->p[i] - 1;
+   //printf("%d ,\n",A->p[i+1]-A->p[i]-1);
+   //assert(nnzOfCurCol > 0);
 /*  if (nnzOfCurCol == 0){
    printf("Empty columns in graph, METIS failed");
    return NULL;
@@ -481,72 +489,76 @@ namespace sym_lib {
    ind = 0;
    nnzOfCurCol = 1;
   }*/
-    AFullp[i + 1] = (long int) AFullp[i] + nnzOfCurCol;
-    //copying Upper part, ignoring diagonal
-    int base = AFullp[i];
-    for (int j = ATrans->p[i], k = 0; j < ATrans->p[i + 1] - 1; ++j, ++k) {
-     AFulli[base + k] = (long int) ATrans->i[j];
-    }
-    //copying L part
-    base += ATrans->p[i + 1] - ATrans->p[i] - 1;
-    for (int j = A->p[i] + 1, k = 0; j < A->p[i + 1]; ++j, ++k) {
-     AFulli[base + k] = (long int) A->i[j];
-    }
+   AFullp[i + 1] = (long int) AFullp[i] + nnzOfCurCol;
+   //copying Upper part, ignoring diagonal
+   int base = AFullp[i];
+   for (int j = ATrans->p[i], k = 0; j < ATrans->p[i + 1] - 1; ++j, ++k) {
+    AFulli[base + k] = (long int) ATrans->i[j];
    }
+   //copying L part
+   base += ATrans->p[i + 1] - ATrans->p[i] - 1;
+   for (int j = A->p[i] + 1, k = 0; j < A->p[i + 1]; ++j, ++k) {
+    AFulli[base + k] = (long int) A->i[j];
+   }
+  }
 
 
 #if 0
-   int cnt=0;
-   for (int i = 0; i < ncol; ++i) {
-   if(AFullp[i+1]-AFullp[i] == 0)
-    std::cout<<i<<" empty\n";
-    for (int j = AFullp[i]; j < AFullp[i+1]; ++j) {
-    // std::cout<<AFulli[j]<<";";
-     if(AFulli[j] == i){
-      cnt++;
-     }
-    }
-  //  std::cout<<"\n";
-   }
-   std::cout<<"--> "<<cnt<<"\n";
-   for (int m = 0; m < ncol; ++m) {
-    for (int i = AFullp[m]; i < AFullp[m+1]; ++i) {
-     std::cout<<AFulli[i]+1<<" "<<m+1<<" "<< 0.0<<"\n";
+  int cnt=0;
+  for (int i = 0; i < ncol; ++i) {
+  if(AFullp[i+1]-AFullp[i] == 0)
+   std::cout<<i<<" empty\n";
+   for (int j = AFullp[i]; j < AFullp[i+1]; ++j) {
+   // std::cout<<AFulli[j]<<";";
+    if(AFulli[j] == i){
+     cnt++;
     }
    }
-   std::cout<<"\n";
+ //  std::cout<<"\n";
+  }
+  std::cout<<"--> "<<cnt<<"\n";
+  for (int m = 0; m < ncol; ++m) {
+   for (int i = AFullp[m]; i < AFullp[m+1]; ++i) {
+    std::cout<<AFulli[i]+1<<" "<<m+1<<" "<< 0.0<<"\n";
+   }
+  }
+  std::cout<<"\n";
 #endif
 
-   int retMet = METIS_NodeND(&ncolIDXT, AFullp, AFulli, NULL, options1,
-                             LpermIDX, ILpermIDX);
-   assert(retMet == METIS_OK);
-   if (retMet != METIS_OK) {
-    std::cout << " " << retMet << "\n";
-    exit(10);
-   }
-   for (int i = 0; i < ncol; ++i) {
-    Lperm[i] = LpermIDX[i];
-    //std::cout<<Lperm[i];
-   }
-   allocateAC(ATrans, ATrans->nrow, ATrans->nzmax, ATrans->stype, false);
-   //METIS_Free(AFullp);
-   //METIS_Free(AFulli);
-   //METIS_Free(weigt);
-   //METIS_Free(LpermIDX) ;
-   //METIS_Free(ILpermIDX);
-   delete[]AFullp;
-   delete[]AFulli;
-   delete[]weigt;
-   delete[]LpermIDX;
-   delete[]ILpermIDX;
+  int retMet = METIS_NodeND(&ncolIDXT, AFullp, AFulli, NULL, options1,
+                            LpermIDX, ILpermIDX);
+  assert(retMet == METIS_OK);
+  if (retMet != METIS_OK) {
+   std::cout << " " << retMet << "\n";
+   exit(10);
+  }
+  for (int i = 0; i < ncol; ++i) {
+   Lperm[i] = LpermIDX[i];
+   //std::cout<<Lperm[i];
+  }
+  allocateAC(ATrans, ATrans->nrow, ATrans->nzmax, ATrans->stype, false);
+  //METIS_Free(AFullp);
+  //METIS_Free(AFulli);
+  //METIS_Free(weigt);
+  //METIS_Free(LpermIDX) ;
+  //METIS_Free(ILpermIDX);
+  delete[]AFullp;
+  delete[]AFulli;
+  delete[]weigt;
+  delete[]LpermIDX;
+  delete[]ILpermIDX;
 #else
-   double info[20]={0};
-   double Control[2];
-   Control [0] = 10; //TODO check later //AMD_Dense
-   Control [1] = TRUE; //AMD_AGGRESSIVE
-   L->ordering = CHOLMOD_AMD;
-   amd_order(ncol,A->p,A->i,Lperm,NULL,info);
+  std::cout<<"METIS is not installed or detected, exisitng program \n";
+  exit(-1);
 #endif
+ } else {
+  double info[20] = {0};
+  double Control[2];
+  Control[0] = 10; //TODO check later //AMD_Dense
+  Control[1] = TRUE; //AMD_AGGRESSIVE
+  L->ordering = CHOLMOD_AMD;
+  amd_order(ncol, A->p, A->i, Lperm, NULL, info);
+ }
    end = std::chrono::system_clock::now();
    elapsed_seconds = end - start;
    orderingTime = elapsed_seconds.count();

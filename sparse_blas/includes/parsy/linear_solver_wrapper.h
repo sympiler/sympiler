@@ -51,6 +51,7 @@ namespace sym_lib {
    int col_idx;
   };
 
+
   struct SolverSettings {
    int solver_mode; //0 is normal solve, 1 is row/col addition
    BCSC *L;
@@ -93,6 +94,7 @@ namespace sym_lib {
    int *child_sn_ptr, *child_sn_no, *num_sn_child;
    std::vector<std::vector<int>> children_vec;
    std::vector<int> detached_nodes;
+   SYM_ORDER sym_order;
    int col_del, to_del;
    //Numeric related
    double reg_diag;

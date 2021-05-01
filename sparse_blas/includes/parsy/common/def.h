@@ -18,6 +18,10 @@
 namespace sym_lib {
  namespace parsy {
 
+  enum SYM_ORDER{
+   S_AMD,S_METIS,S_SCOTCH,S_GIVEN,S_NATURAL
+  };
+
 #define MKL 1
 #define METIS 1
 

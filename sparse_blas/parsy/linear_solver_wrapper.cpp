@@ -195,6 +195,7 @@ namespace sym_lib {
   }
 
   void SolverSettings::default_setting() {
+   sym_order = SYM_ORDER::S_AMD;
 #ifdef OPENMP
    ldl_variant = 4;
 #else
@@ -441,7 +442,7 @@ namespace sym_lib {
                                    n_par_s, par_ptr_s, par_set_s,
                                    cost_param, level_param, final_seq_node,
                                    status, max_sup_wid, max_col, psi->ordering_time,
-                                   simplicial_alloc, extra_cols);
+                                   simplicial_alloc, extra_cols, NULL, sym_order);
    psi->end = psi->toc();
    psi->analysis_time = psi->elapsed_time(psi->start, psi->end);
    if (L == NULL)
@@ -702,7 +703,11 @@ namespace sym_lib {
    //print_vec<int >("inverse ordering: ",0,A->ncol,L->IPerm);
 
    if (ldl_variant == 1) {
-    solve_phase_simplicial_ldl(A_ord->ncol, l_pb, l_i, l_x, d_val, x_ord);
+    solve_phase_ll_blocked(A_ord->ncol, x_ord,
+                                    L->col2Sup, L->super,
+                                    L->p, L->s, valL, L->i_ptr,
+                                    L->nsuper, L->nzmax);
+
    }  else if(ldl_variant == 4){
     solve_phase_ll_blocked_parallel(A_ord->ncol, x_ord,
                                               L->col2Sup, L->super,
@@ -725,43 +730,13 @@ namespace sym_lib {
   }
 
 
-  void SolverSettings::reorder_matrix() { //TODO: developing a lightweight version of this.
 
-   int *new_ord = ws_int;
-   allocateAC(AT_ord, 0, 0, 0, FALSE);
-   //print_vec("perm_piv: ",0 ,A_ord->ncol,perm_piv);
-   AT_ord = ptranspose(A_ord, 2, perm_piv, NULL, 0, status);
-   allocateAC(A_ord, 0, 0, 0, FALSE);
-   A_ord = ptranspose(AT_ord, 2, NULL, NULL, 0, status);
-   combine_perms(AT_ord->ncol, L->Perm, perm_piv, new_ord);
-   for (int i = 0; i < A_ord->ncol; ++i) {
-    L->Perm[i] = new_ord[i];
-   }
-   compute_inv_perm(AT_ord->ncol, L->Perm, L->IPerm);
-//  for (int j = 0; j < A_ord->ncol; ++j) {
-//   if(perm_piv[j] != j){
-//    std::cout<<j<<" -> "<<perm_piv[j]<<";"
-//    <<extra_cols[j]<<":"<<extra_cols[perm_piv[j]]<<"\n";
-//   }
-//  }
-//  check_row_idx_l(A_ord->ncol, L->nsuper, L->p, L->s, L->i_ptr,
-//                      L->super);
-//  for (int j = 0; j < A_ord->ncol; ++j) {
-//   ws_int[j] = extra_cols[perm_piv[j]];
-//  }
-//  for (int k = 0; k < A_ord->ncol; ++k) {
-//   extra_cols[k] = ws_int[k];
-//  }
-   //print_csc("\nORdered: ",A_ord->ncol,A_ord->p,A_ord->i,A_ord->x);
-  }
 
   void SolverSettings::compute_norms() {
    double alp[2] = {1.0, 0};
    double bet[2] = {0.0, 0};
    int norm_type = 0;
-   set_diags(0);
    CSC *TMP = ptranspose(A_ord, 2, L->IPerm, NULL, 0, status);
-   set_diags(reg_diag);
    CSC *TMP2 = ptranspose(TMP, 2, NULL, NULL, 0, status);
    double *res = new double[TMP2->ncol];
    x_l1 = norm_dense(1, TMP2->ncol, x, norm_type);

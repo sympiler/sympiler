@@ -12,10 +12,11 @@
 #ifdef SCOTCH
 #include "scotch.h"
 #endif
-#ifdef SUITESPARSE_FOUND
-#include "amd.h"
-#endif
+#include <amd.h>
+
+#ifdef METIS
 #include "metis.h"
+#endif
 #include "InspectionLevel_06.h"
 #include "performanceModel.h"
 
@@ -110,7 +111,8 @@ namespace sym_lib {
       double &orderingTime,
       int simplicial_en,
       int *extra_cols,
-      size_t *inPerm = NULL
+      size_t *inPerm = NULL,
+      SYM_ORDER sym_order=SYM_ORDER::S_AMD
     );
 
  }
