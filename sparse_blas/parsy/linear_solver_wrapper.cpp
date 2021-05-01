@@ -198,7 +198,7 @@ namespace sym_lib {
 #ifdef OPENMP
    ldl_variant = 4;
 #else
-   ldl_variant = 2;
+   ldl_variant = 1;
 #endif
    ldl_update_variant = 2;
 #ifdef OPENBLAS
@@ -626,7 +626,6 @@ namespace sym_lib {
 #endif
                                  max_sup_wid + 1, max_col + 1, num_pivot, perm_piv,
                                  L->sParent);*/
-     reorder_matrix();
      psi->end = psi->toc();
      psi->fact_time += psi->elapsed_time(psi->start, psi->end);
      //MKL_Domain_Set_Num_Threads(1, MKL_DOMAIN_BLAS);
@@ -673,7 +672,6 @@ namespace sym_lib {
 #endif
      psi->end = psi->toc();
      psi->fact_time += psi->elapsed_time(psi->start, psi->end);
-     reorder_matrix();
      //print_vec("simpl-o: ",0,A_ord->ncol,d_val);
      break;
     default:
