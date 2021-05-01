@@ -11,8 +11,6 @@ include_directories(includes
 file(GLOB_RECURSE PARSY_SRC parsy/*.cpp)
 
 
-message("======> ${PARSY_SRC} ")
-
 add_library (sym_sparse_blas STATIC
         spmv.cpp
         sptrsv.cpp

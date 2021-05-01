@@ -203,7 +203,7 @@ include_directories(
 
 
 set(ALL_LIBS
-        ${MKL_LIB_NAME}
+        ${MKL_LIBRARIES}
         ${PAPI_LIB_NAME}
         ${PAPI_LIB_NAME2}
         ${METIS_LIB_NAME}
