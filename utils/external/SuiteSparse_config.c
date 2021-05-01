@@ -55,20 +55,40 @@
 
 struct SuiteSparse_config_struct SuiteSparse_config =
 {
-    // Memory allocation from glob_opts.h in OSQP
-   // c_malloc, c_realloc, c_free,
 
-    #ifdef PRINTING
-    // Printing function from glop_opts.h in OSQP
-    c_print,
+    /* memory management functions */
+    #ifndef NMALLOC
+        #ifdef MATLAB_MEX_FILE
+            /* MATLAB mexFunction: */
+            mxMalloc, mxCalloc, mxRealloc, mxFree,
+        #else
+            /* standard ANSI C: */
+            malloc, calloc, realloc, free,
+        #endif
     #else
-    NULL,
+        /* no memory manager defined; you must define one at run-time: */
+        NULL, NULL, NULL, NULL,
+    #endif
+
+    /* printf function */
+    #ifndef NPRINT
+        #ifdef MATLAB_MEX_FILE
+            /* MATLAB mexFunction: */
+            mexPrintf,
+        #else
+            /* standard ANSI C: */
+            printf,
+        #endif
+    #else
+        /* printf is disabled */
+        NULL,
     #endif
 
     SuiteSparse_hypot,
     SuiteSparse_divcomplex
 
 } ;
+
 
 
 /* -------------------------------------------------------------------------- */
@@ -151,7 +171,7 @@ void *SuiteSparse_realloc   /* pointer to reallocated block of memory, or
         /* change the size of the object from nitems_old to nitems_new */
         void *pnew ;
         // pnew = (void *) (SuiteSparse_config.realloc_func) (p, size) ;
-        pnew = (void *) c_realloc (p, size) ;
+        pnew = (void *) realloc (p, size) ;
         if (pnew == NULL)
         {
             if (nitems_new < nitems_old)
