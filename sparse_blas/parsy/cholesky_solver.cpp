@@ -430,7 +430,8 @@ namespace sym_lib {
 //  }
    //print_vec("Extra: ",0,AorSM->ncol,extra_cols);
    //Fill diagonals with perturbed value
-
+   if(ldl_variant == 1)
+    cost_param = 1;
    L = symbolic_analysis_lin_solve(1, AorSM, NULL, NULL, n_relax, z_relax,
                                    AorSM->ncol, prune_ptr, prune_set,
                                    n_level, level_ptr, level_set,
