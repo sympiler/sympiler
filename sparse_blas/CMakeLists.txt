@@ -4,6 +4,7 @@ project(sym_sparse_blas)
 include_directories(includes
         includes/parsy
         ${BLAS_INC}
+        ${SPARSE_EXTN_INC}
         ${SPARSE_UTIL_INC}
         ${MKL_INC}
         )

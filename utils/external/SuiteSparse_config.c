@@ -53,7 +53,7 @@
     SuiteSparse will not use printf.
  */
 
-struct SuiteSparse_config_struct SuiteSparse_config =
+struct SuiteSparse_config_struct SuiteSparse_config1 =
 {
 
     /* memory management functions */
@@ -84,8 +84,8 @@ struct SuiteSparse_config_struct SuiteSparse_config =
         NULL,
     #endif
 
-    SuiteSparse_hypot,
-    SuiteSparse_divcomplex
+    SuiteSparse_hypot1,
+    SuiteSparse_divcomplex1
 
 } ;
 
@@ -95,7 +95,7 @@ struct SuiteSparse_config_struct SuiteSparse_config =
 /* SuiteSparse_malloc: malloc wrapper */
 /* -------------------------------------------------------------------------- */
 
-void *SuiteSparse_malloc    /* pointer to allocated block of memory */
+void *SuiteSparse_malloc1    /* pointer to allocated block of memory */
 (
     size_t nitems,          /* number of items to malloc */
     size_t size_of_item     /* sizeof each item */
@@ -114,7 +114,7 @@ void *SuiteSparse_malloc    /* pointer to allocated block of memory */
     }
     else
     {
-        p = (void *) (SuiteSparse_config.malloc_func) (size) ;
+        p = (void *) (SuiteSparse_config1.malloc_func) (size) ;
         // p = (void *) c_malloc(size) ;
     }
     return (p) ;
@@ -134,7 +134,7 @@ void *SuiteSparse_malloc    /* pointer to allocated block of memory */
    pointer to the old (unmodified) object is returned.
  */
 
-void *SuiteSparse_realloc   /* pointer to reallocated block of memory, or
+void *SuiteSparse_realloc1   /* pointer to reallocated block of memory, or
                                to original block if the realloc failed. */
 (
     size_t nitems_new,      /* new number of items in the object */
@@ -158,7 +158,7 @@ void *SuiteSparse_realloc   /* pointer to reallocated block of memory, or
     else if (p == NULL)
     {
         /* a fresh object is being allocated */
-        p = SuiteSparse_malloc (nitems_new, size_of_item) ;
+        p = SuiteSparse_malloc1 (nitems_new, size_of_item) ;
         (*ok) = (p != NULL) ;
     }
     else if (nitems_old == nitems_new)
@@ -200,14 +200,14 @@ void *SuiteSparse_realloc   /* pointer to reallocated block of memory, or
 /* SuiteSparse_free: free wrapper */
 /* -------------------------------------------------------------------------- */
 
-void *SuiteSparse_free      /* always returns NULL */
+void *SuiteSparse_free1      /* always returns NULL */
 (
     void *p                 /* block to free */
 )
 {
     if (p)
     {
-        (SuiteSparse_config.free_func) (p) ;
+        (SuiteSparse_config1.free_func) (p) ;
         // c_free(p) ;
     }
     return (NULL) ;
@@ -249,7 +249,7 @@ void *SuiteSparse_free      /* always returns NULL */
 
 #include <time.h>
 
-void SuiteSparse_tic
+void SuiteSparse_tic1
 (
     double tic [2]      /* output, contents undefined on input */
 )
@@ -263,7 +263,7 @@ void SuiteSparse_tic
 
 #else
 
-void SuiteSparse_tic
+void SuiteSparse_tic1
 (
     double tic [2]      /* output, contents undefined on input */
 )
@@ -287,13 +287,13 @@ void SuiteSparse_tic
  * SuiteSparse_tic and do the calculations differently.
  */
 
-double SuiteSparse_toc  /* returns time in seconds since last tic */
+double SuiteSparse_toc1  /* returns time in seconds since last tic */
 (
     double tic [2]  /* input, not modified from last call to SuiteSparse_tic */
 )
 {
     double toc [2] ;
-    SuiteSparse_tic (toc) ;
+    SuiteSparse_tic1 (toc) ;
     return ((toc [0] - tic [0]) + 1e-9 * (toc [1] - tic [1])) ;
 }
 
@@ -304,13 +304,13 @@ double SuiteSparse_toc  /* returns time in seconds since last tic */
 
 /* This function might not be accurate down to the nanosecond. */
 
-double SuiteSparse_time  /* returns current wall clock time in seconds */
+double SuiteSparse_time1  /* returns current wall clock time in seconds */
 (
     void
 )
 {
     double toc [2] ;
-    SuiteSparse_tic (toc) ;
+    SuiteSparse_tic1 (toc) ;
     return (toc [0] + 1e-9 * toc [1]) ;
 }
 
@@ -319,7 +319,7 @@ double SuiteSparse_time  /* returns current wall clock time in seconds */
 /* SuiteSparse_version: return the current version of SuiteSparse */
 /* -------------------------------------------------------------------------- */
 
-int SuiteSparse_version
+int SuiteSparse_version1
 (
     int version [3]
 )
@@ -354,7 +354,7 @@ int SuiteSparse_version
  * P. Friedland, Comm. ACM, vol 10, no 10, October 1967, page 665.
  */
 
-double SuiteSparse_hypot (double x, double y)
+double SuiteSparse_hypot1 (double x, double y)
 {
     double s, r ;
     x = fabs (x) ;
@@ -404,7 +404,7 @@ double SuiteSparse_hypot (double x, double y)
  * SuiteSparse_divcomplex.
  */
 
-int SuiteSparse_divcomplex
+int SuiteSparse_divcomplex1
 (
     double ar, double ai,       /* real and imaginary parts of a */
     double br, double bi,       /* real and imaginary parts of b */

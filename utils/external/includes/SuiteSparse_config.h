@@ -93,25 +93,25 @@ struct SuiteSparse_config_struct
     int (*divcomplex_func) (double, double, double, double, double *, double *);
 } ;
 
-extern struct SuiteSparse_config_struct SuiteSparse_config ;
+extern struct SuiteSparse_config_struct SuiteSparse_config1 ;
 
-void SuiteSparse_start ( void ) ;   /* called to start SuiteSparse */
+void SuiteSparse_start1 ( void ) ;   /* called to start SuiteSparse */
 
 void SuiteSparse_finish ( void ) ;  /* called to finish SuiteSparse */
 
-void *SuiteSparse_malloc    /* pointer to allocated block of memory */
+void *SuiteSparse_malloc1    /* pointer to allocated block of memory */
 (
     size_t nitems,          /* number of items to malloc (>=1 is enforced) */
     size_t size_of_item     /* sizeof each item */
 ) ;
 
-void *SuiteSparse_calloc    /* pointer to allocated block of memory */
+void *SuiteSparse_calloc1    /* pointer to allocated block of memory */
 (
     size_t nitems,          /* number of items to calloc (>=1 is enforced) */
     size_t size_of_item     /* sizeof each item */
 ) ;
 
-void *SuiteSparse_realloc   /* pointer to reallocated block of memory, or
+void *SuiteSparse_realloc1   /* pointer to reallocated block of memory, or
                                to original block if the realloc failed. */
 (
     size_t nitems_new,      /* new number of items in the object */
@@ -121,31 +121,31 @@ void *SuiteSparse_realloc   /* pointer to reallocated block of memory, or
     int *ok                 /* 1 if successful, 0 otherwise */
 ) ;
 
-void *SuiteSparse_free      /* always returns NULL */
+void *SuiteSparse_free1      /* always returns NULL */
 (
     void *p                 /* block to free */
 ) ;
 
-void SuiteSparse_tic    /* start the timer */
+void SuiteSparse_tic1    /* start the timer */
 (
     double tic [2]      /* output, contents undefined on input */
 ) ;
 
-double SuiteSparse_toc  /* return time in seconds since last tic */
+double SuiteSparse_toc1  /* return time in seconds since last tic */
 (
     double tic [2]      /* input: from last call to SuiteSparse_tic */
 ) ;
 
-double SuiteSparse_time  /* returns current wall clock time in seconds */
+double SuiteSparse_time1  /* returns current wall clock time in seconds */
 (
     void
 ) ;
 
 /* returns sqrt (x^2 + y^2), computed reliably */
-double SuiteSparse_hypot (double x, double y) ;
+double SuiteSparse_hypot1 (double x, double y) ;
 
 /* complex division of c = a/b */
-int SuiteSparse_divcomplex
+int SuiteSparse_divcomplex1
 (
     double ar, double ai,	/* real and imaginary parts of a */
     double br, double bi,	/* real and imaginary parts of b */
@@ -164,9 +164,9 @@ int SuiteSparse_divcomplex
 /* SuiteSparse printf macro */
 #define SUITESPARSE_PRINTF(params) \
 { \
-    if (SuiteSparse_config.printf_func != NULL) \
+    if (SuiteSparse_config1.printf_func != NULL) \
     { \
-        (void) (SuiteSparse_config.printf_func) params ; \
+        (void) (SuiteSparse_config1.printf_func) params ; \
     } \
 }
 
