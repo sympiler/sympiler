@@ -100,7 +100,7 @@ endif()
 
 find_package(METIS REQUIRED)
 # set(METIS_LIBRARY "")
-# set(METIS_INCLUDE_DIR "")
+ set(METIS_INCLUDE_DIR "")
 #ELSE()
 #    set(ignoreMe "${METIS_ROOT_PATH}")
 #ENDIF()
