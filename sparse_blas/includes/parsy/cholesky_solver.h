@@ -118,8 +118,8 @@ namespace sym_lib {
    std::vector<int> modified_sns;
    bool *marked, *visible_sn;
    double *ws; // workspace for double computations
-   double *ws_zeroed; //after each process, this is zero
-   int *ws_int; // workspace for integer computations
+   //double *ws_zeroed; //after each process, this is zero
+   //int *ws_int; // workspace for integer computations
    double *extra_rhs;
    //Internal vars
    int remove_trans;

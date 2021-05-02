@@ -133,8 +133,8 @@ namespace sym_lib {
    }
    delete psi;
    delete[]ws;
-   delete[]ws_int;
-   delete[]ws_zeroed;
+ //  delete[]ws_int;
+//   delete[]ws_zeroed;
    //delete []pinv;
    delete[]perm_piv;
    delete[]marked;
@@ -531,8 +531,8 @@ namespace sym_lib {
    std::fill(visible_cnt, visible_cnt + L->nsuper, 0);
 
    std::fill(ws, ws + ws_dbl_size, 0);
-   std::fill(ws_int, ws_int + ws_int_size, 0);
-   std::fill(ws_zeroed, ws_zeroed + (num_thread * AorSM->ncol), 0);
+  // std::fill(ws_int, ws_int + ws_int_size, 0);
+ //  std::fill(ws_zeroed, ws_zeroed + (num_thread * AorSM->ncol), 0);
 
    //TODO reseting other symbolic info
 
@@ -581,8 +581,8 @@ namespace sym_lib {
 
    //allocating
    ws = new double[ws_dbl_size]();
-   ws_int = new int[ws_int_size]();
-   ws_zeroed = new double[num_thread * AorSM->ncol]();
+   //ws_int = new int[ws_int_size]();
+   //ws_zeroed = new double[num_thread * AorSM->ncol]();
 
 
   }
