@@ -614,17 +614,20 @@ namespace sym_lib {
      /* use First and Level as workspace [ */
      int *Wi = First, *InvPost = Level;
      int newchild, oldchild, newparent, oldparent;
-
+#pragma omp parallel for
      for (k = 0; k < n; k++) {
       Wi[k] = Lperm[Post[k]];
      }
+#pragma omp parallel for
      for (k = 0; k < n; k++) {
       Lperm[k] = Wi[k];
      }
 
+#pragma omp parallel for
      for (k = 0; k < n; k++) {
       Wi[k] = Lcolcount[Post[k]];
      }
+#pragma omp parallel for
      for (k = 0; k < n; k++) {
       Lcolcount[k] = Wi[k];
      }
@@ -634,9 +637,11 @@ namespace sym_lib {
      for (k = 0; k < n; k++) {
       L->IPerm[Lperm[k]] = k;
      }
+#pragma omp parallel for
      for (k = 0; k < n; ++k) {
       Wi[k] = extra_cols[Lperm[k]];
      }
+#pragma omp parallel for
      for (k = 0; k < n; ++k) {
       extra_cols[k] = Wi[k];
      }
@@ -648,6 +653,7 @@ namespace sym_lib {
       newparent = (oldparent == EMPTY) ? EMPTY : InvPost[oldparent];
       Wi[newchild] = newparent;
      }
+#pragma omp parallel for
      for (k = 0; k < n; k++) {
       Lparent[k] = Wi[k];
      }
@@ -728,43 +734,41 @@ namespace sym_lib {
     //Computing the node cost
 
     start = std::chrono::system_clock::now();
-    double *nodeCost = new double[L->nsuper];
-    int *xi = new int[2 * F->ncol]();
-    for (int s = 1; s <= L->nsuper; ++s) {
-     int curCol = s != 0 ? L->super[s - 1] : 0;
-     int nxtCol = L->super[s];
-     assert(s - 1 < L->nsuper && s - 1 >= 0);
-     nodeCost[s - 1] = computeCostperBlock(F->ncol, curCol, nxtCol, Lparent,
-                                           F->p, F->i, col2Sup, L->super, L->s, L->i_ptr, xi);
-    }
-    delete[]xi;
-    //PRINT1 (("status %d\n", Common->status)) ;
+
+    if(costParam > 1){ // HLevel set is not needed.
+     double *nodeCost = new double[L->nsuper];
+     int *xi = new int[2 * F->ncol]();
+     for (int s = 1; s <= L->nsuper; ++s) {
+      int curCol = s != 0 ? L->super[s - 1] : 0;
+      int nxtCol = L->super[s];
+      assert(s - 1 < L->nsuper && s - 1 >= 0);
+      nodeCost[s - 1] = computeCostperBlock(F->ncol, curCol, nxtCol, Lparent,
+                                            F->p, F->i, col2Sup, L->super, L->s, L->i_ptr, xi);
+     }
+     delete[]xi;
+     //PRINT1 (("status %d\n", Common->status)) ;
 #ifdef PRUNE
-    getBlockedPruneSet(L->nsuper,S->p,S->i,col2Sup,Sparent,L->super,
+     getBlockedPruneSet(L->nsuper,S->p,S->i,col2Sup,Sparent,L->super,
                        prunePtr,pruneSet);
 #endif
+     //levelNo = getLevelSet(L->nsuper,Sparent,levelPtr,levelSet);
+     getCoarseLevelSet_6(L->nsuper, Sparent, L->super,
+                         levelNo, levelPtr, levelSet,//Partition level set
+                         parNo, parPtr, partition,
+                         costParam, levelParam, finalSeqNodes, nodeCost);
 
-    //levelNo = getLevelSet(L->nsuper,Sparent,levelPtr,levelSet);
+     /*getCoarseLevelSet_DAG_BCSC02(L->nsuper,L->p,L->i_ptr,L->s,
+                                  L->super,col2Sup,
+                         levelNo, levelPtr, levelSet,//Partition level set
+                         parNo, parPtr, partition,
+                         costParam,levelParam,finalSeqNodes,nodeCost);*/
+     assert(levelNo <= L->nsuper);
+     end = std::chrono::system_clock::now();
+     elapsed_seconds = end - start;
+     double duration1 = elapsed_seconds.count();
+     delete[]nodeCost;
+    }
 
-    getCoarseLevelSet_6(L->nsuper, Sparent, L->super,
-                        levelNo, levelPtr, levelSet,//Partition level set
-                        parNo, parPtr, partition,
-                        costParam, levelParam, finalSeqNodes, nodeCost);
-
-    /*getCoarseLevelSet_DAG_BCSC02(L->nsuper,L->p,L->i_ptr,L->s,
-                                 L->super,col2Sup,
-                        levelNo, levelPtr, levelSet,//Partition level set
-                        parNo, parPtr, partition,
-                        costParam,levelParam,finalSeqNodes,nodeCost);*/
-
-    assert(levelNo <= L->nsuper);
-
-    end = std::chrono::system_clock::now();
-    elapsed_seconds = end - start;
-    double duration1 = elapsed_seconds.count();
-
-
-    delete[]nodeCost;
    }
 
 #endif
