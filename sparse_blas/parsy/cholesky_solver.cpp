@@ -87,6 +87,9 @@ namespace sym_lib {
    a_consistent = 1;
    to_del = 0;
    visible_sn = NULL;
+   level_ptr = NULL;
+   par_ptr = NULL;
+   par_set = NULL;
   }
 
   SolverSettings::SolverSettings(CSC *Amat, double *rhs_in, CSC *Bmat) :
