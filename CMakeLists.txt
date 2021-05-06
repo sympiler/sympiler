@@ -42,26 +42,31 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/)
 
 
-if(APPLE)
-    if(EXISTS "/usr/local/opt/llvm/bin/clang++" AND CMAKE_CXX_COMPILER_ID MATCHES "Clang" ) # where LLVM is selected that has OpenMP
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
-        link_directories(
-                /usr/local/opt/llvm/lib/
-        )
-        message("Make sure to set the -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++")
-        add_definitions(-DOPENMP)
-    else()# otherwise, maybe gcc
-        find_package(OpenMP REQUIRED)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    endif()
-else()
-    find_package(OpenMP REQUIRED)
+#if(APPLE)
+#    if(EXISTS "/usr/local/opt/llvm/bin/clang++" AND CMAKE_CXX_COMPILER_ID MATCHES "Clang" ) # where LLVM is selected that has OpenMP
+#        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp")
+#        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+#        link_directories(
+#                /usr/local/opt/llvm/lib/
+#        )
+#        message("Make sure to set the -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++")
+#        add_definitions(-DOPENMP)
+#    else()# otherwise, maybe gcc
+#        find_package(OpenMP REQUIRED)
+#        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+#        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+#    endif()
+#else()
+#    find_package(OpenMP REQUIRED)
+#    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+#endif()
+
+
+find_package(OpenMP REQUIRED)
+if(OpenMP_FOUND)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-endif()
-if(OpenMP_FOUND)
     add_definitions(-DOPENMP)
 endif()
 
@@ -98,7 +103,7 @@ endif()
 #find_package(METIS OPTIONAL_COMPONENTS)
 
 
-find_package(METIS REQUIRED)
+find_package(METIS OPTIONAL_COMPONENTS)
 # set(METIS_LIBRARY "")
  set(METIS_INCLUDE_DIR "")
 #ELSE()
