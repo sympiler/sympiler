@@ -37,6 +37,10 @@ namespace sym_lib {
                               size_t *rowP, size_t nBlocks,
                               int nnz);
 
+  void solve_phase_ll_blocked_nrhs(size_t n, double *x, int n_rhs, int *col2sup,
+    int *sup2col, size_t *newCol, int *newRow, double *newVal,
+    size_t *rowP, size_t nBlocks, int nnz, int max_col);
+
   void solve_phase_ll_blocked_parallel(size_t n, double *x, int *col2sup, int *sup2col, size_t *newCol,
                                        int *newRow, double *newVal, size_t *rowP, size_t nBlocks, int nnz, int levels,
                                        int *levelPtr, int *levelSet, int parts, int *parPtr, int *partition,

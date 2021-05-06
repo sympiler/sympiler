@@ -70,6 +70,28 @@ namespace sym_lib {
    std::cout << "solve time: " << solve_time << ";";
   }
 
+  SolverSettings::SolverSettings(CSC *Amat) {
+   default_setting();
+   A = Amat;
+   rhs = NULL;
+   A_ord = NULL;//new CSC;
+   AT_ord = NULL; //new CSC;
+   SM = new CSC;
+   psi = new profiling_solver_info(num_thread);
+
+   solver_mode = 0;//basic mode
+   remove_trans = 0;
+   x = NULL;
+   B = NULL;
+   C = NULL;
+   a_consistent = 1;
+   to_del = 0;
+   visible_sn = NULL;
+   level_ptr = NULL;
+   par_ptr = NULL;
+   par_set = NULL;
+  }
+
   SolverSettings::SolverSettings(CSC *Amat, double *rhs_in) {
    default_setting();
    A = Amat;
@@ -691,6 +713,8 @@ namespace sym_lib {
    // ws_size for iter_ref = 4*(max_inner_iter+1) +
    // max_inner_iter*(max_inner_iter+1) + n + max_inner_iter*(n-1) +
    //
+   if (!rhs)
+    return NULL;//rhs is not given
    psi->start = psi->toc();
    double *x_ord = ws;
    double *rhs_ord = ws + A_ord->ncol;
@@ -732,6 +756,60 @@ namespace sym_lib {
   }
 
 
+  double *SolverSettings::solve_only(const double *rhs_in, const int n_rhs) {
+   // workspace needed for solve:
+   // ws_size for solve_only= 2*A_ord->ncol
+   // ws_size for triangular solves = num_thread*A_ord->ncol
+   // ws_size for iter_ref = 4*(max_inner_iter+1) +
+   // max_inner_iter*(max_inner_iter+1) + n + max_inner_iter*(n-1) +
+   //
+   const double *rhs = rhs_in;
+   psi->start = psi->toc();
+   double *x_ord = ws;
+   double *rhs_ord = ws + A_ord->ncol;
+   for (int i = 0; i < A_ord->ncol; ++i) {
+    assert(L->Perm[i] < A_ord->ncol);
+    x_ord[i] = rhs[L->Perm[i]];
+   }
+   //print_csc("\nA reo: \n",A_ord->ncol,A_ord->p,A_ord->i,A_ord->x);
+   //print_vec<double >("\n\nrrhhssss\n: ",0,A_ord->ncol,rhs);
+   //print_vec<double >("x reordered: ",0,A->ncol,x_ord);
+   //print_vec<int >("ordering: ",0,A_ord->ncol,L->Perm);
+   //print_vec<int >("inverse ordering: ",0,A->ncol,L->IPerm);
+
+   if (ldl_variant == 1) {
+    if(n_rhs == 1)
+    solve_phase_ll_blocked(A_ord->ncol, x_ord,
+                           L->col2Sup, L->super,
+                           L->p, L->s, valL, L->i_ptr,
+                           L->nsuper, L->nzmax);
+    else
+     solve_phase_ll_blocked_nrhs(A_ord->ncol, x_ord, n_rhs,
+                            L->col2Sup, L->super,
+                            L->p, L->s, valL, L->i_ptr,
+                            L->nsuper, L->nzmax, max_col);
+
+
+   }  else if(ldl_variant == 4){
+    solve_phase_ll_blocked_parallel(A_ord->ncol, x_ord,
+                                    L->col2Sup, L->super,
+                                    L->p, L->s, valL, L->i_ptr,
+                                    L->nsuper, L->nzmax,
+                                    n_level, level_ptr, level_set,
+                                    n_par, par_ptr, par_set, chunk);
+   } else{
+    assert(false); // Wrong input
+   }
+
+   for (int i = 0; i < A_ord->ncol; ++i) {
+    x[i] = x_ord[L->IPerm[i]];
+   }
+   //print_vec<double >("x orig order: ",0,A->ncol,x);
+   //print_vec("dval \n",0,2*AorSM->ncol,d_val);
+   psi->end = psi->toc();
+   psi->solve_time += psi->elapsed_time(psi->start, psi->end);
+   return x;
+  }
 
 
   void SolverSettings::compute_norms() {

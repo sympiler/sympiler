@@ -20,7 +20,8 @@ namespace sym_lib {
 
 // TODO: enabling SYM_BLAS should be faster than MKL here
   int
-  blockedLsolve(int n, size_t *Lp, int *Li, double *Lx, int NNZ, size_t *Li_ptr, int *col2sup, int *sup2col, int supNo,
+  blockedLsolve(int n, size_t *Lp, int *Li, double *Lx, int NNZ, size_t *Li_ptr, int *col2sup,
+    int *sup2col, int supNo,
                 double *x) {
    int p, j;
    double one[2], zero[2];
@@ -56,6 +57,47 @@ namespace sym_lib {
    delete[]tempVec;
    return (1);
   }
+
+  int blockedLsolve_mrhs(int n, const int *Lp, const int *Li, double *Lx, int NNZ,
+    const int *nrows, int *col2sup, const int *supernodes,
+    int num_nodes, double *x, int n_rhs, int max_col) {
+   int i, p, k;
+   double one[2], zero[2];
+   one[0] = 1.0;
+   one[1] = 0.;
+   zero[0] = 0.;
+   zero[1] = 0.;
+   int ione = 1;
+   int off_set = max_col < 0 ? n : max_col;
+   auto *tempvec = new double[n_rhs*off_set]();
+
+   for (i = 0; i < num_nodes; i++) {
+    int super = supernodes[i];
+
+    int width = supernodes[i + 1] - super;
+    int nrow = nrows[i];
+
+    SYM_DTRSM("L", "L", "N", "N", &width,&n_rhs,one,&Lx[Lp[i]],
+          &nrow,&x[super],&n);
+
+    int tmpRow=nrow - width;
+    SYM_DGEMM("N", "N", &tmpRow, &n_rhs, &width, one, &Lx[Lp[i] + width],
+          &nrow,
+          &x[super], &n,
+          one, tempvec, &off_set);
+
+    for (p = Lp[i] + width, k = 0; p < Lp[i] + nrow; p++, k++) {
+     int idx = Li[p];
+     for (int j = 0; j < n_rhs; ++j) {
+      auto tmp = k + j*off_set;
+      x[idx+(j*n)] -= tempvec[tmp];
+      tempvec[tmp] = 0;
+     }
+    }
+   }
+   delete[]tempvec;
+  }
+
 
   int
   blockedLTsolve(int n, size_t *Lp, int *Li, double *Lx, int NNZ, size_t *Li_ptr, int *col2sup, int *sup2col, int supNo,
@@ -103,6 +145,69 @@ namespace sym_lib {
                 Ltrng, nSupR, &x[curCol], n);
 #else
     SYM_DTRSM("L", "L", "T", "N", &supWdt, &ione, one, Ltrng,
+              &nSupR, &x[curCol], &n);
+#endif
+
+#endif
+
+#if 0
+    for (int k = 0; k < 200; ++k) {
+              std::cout<<","<<x[k];
+          }
+          std::cout<<"\n";
+#endif
+   }
+   delete[]tempVec;
+   return (1);
+  }
+
+  int
+  blockedLTsolve_mrhs(int n, size_t *Lp, int *Li, double *Lx, int NNZ, size_t *Li_ptr, int *col2sup, int *sup2col, int supNo,
+                 double *x, int m_rhs, int max_col) {
+   int p, j;
+   double one[2], zero[2];
+   one[0] = 1.0;
+   one[1] = 0.;
+   zero[0] = 0.;
+   zero[1] = 0.;
+   double minus_one = -1;
+   int ione = 1;
+   int off_set = max_col < 0 ? n : max_col;
+   double *tempVec = new double[m_rhs*off_set]();
+   if (!Lp || !Li || !x) return (0);                     /* check inputs */
+   for (int i = supNo; i > 0; --i) {// for each supernode
+    int curCol = i != 0 ? sup2col[i - 1] : 0;
+    int nxtCol = sup2col[i];
+    int supWdt = nxtCol - curCol;
+    int nSupR = Li_ptr[nxtCol] - Li_ptr[curCol];//row size of supernode
+
+    double *Ltrng = &Lx[Lp[curCol] + supWdt];//first nnz of below diagonal
+    for (int l = 0; l < nSupR - supWdt; ++l) {
+     tempVec[l] = x[Li[Li_ptr[curCol] + supWdt + l]];
+    }
+#ifdef SYM_BLAS
+    dmatvec_blas(nSupR,nSupR-supWdt,supWdt,Ltrng,&x[curCol],tempVec);
+#else
+
+    int tmpRow = nSupR - supWdt;
+#ifdef OPENBLAS
+    cblas_dgemv(CblasColMajor,CblasTrans,tmpRow, supWdt, minus_one, Ltrng,
+      nSupR, tempVec, ione, 1.0, &x[curCol], ione);
+#else
+    SYM_DGEMM("T", "N", &supWdt, &m_rhs, &tmpRow, &minus_one, Ltrng, &nSupR, tempVec, &off_set,
+              one, &x[curCol], &n);
+#endif
+
+#endif
+    Ltrng = &Lx[Lp[curCol]];//first nnz of current supernode
+#ifdef SYM_BLAS
+    dlsolve_blas_nonUnit(nSupR,supWdt,Ltrng,&x[curCol]);//FIXME make it for transpose
+#else
+#ifdef OPENBLAS
+    cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasConjTrans, CblasNonUnit, supWdt, ione, 1.0,
+                Ltrng, nSupR, &x[curCol], n);
+#else
+    SYM_DTRSM("L", "L", "T", "N", &supWdt, &m_rhs, one, Ltrng,
               &nSupR, &x[curCol], &n);
 #endif
 

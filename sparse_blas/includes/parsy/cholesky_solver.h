@@ -128,6 +128,8 @@ namespace sym_lib {
    double A_l1, x_l1, rhs_l1, res_l1;
    double bwd_err;
 
+   SolverSettings(CSC *Amat);
+
    SolverSettings(CSC *Amat, double *rhs_in);
 
    SolverSettings(CSC *Amat, double *rhs_in, CSC *Bmat);
@@ -257,6 +259,7 @@ namespace sym_lib {
 
 
    double *solve_only();
+   double *solve_only(const double *rhs_in, const int n_rhs=1);
 
    double *iterative_ref_only();
 
