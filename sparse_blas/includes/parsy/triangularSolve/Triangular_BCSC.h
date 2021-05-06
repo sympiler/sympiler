@@ -17,10 +17,9 @@ namespace sym_lib {
  */
   int blockedLsolve(int n, size_t *Lp, int *Li, double *Lx, int NNZ,
                     size_t *Li_ptr, int *col2sup, int *sup2col, int supNo, double *x);
-  int blockedLsolve_mrhs(int n, const size_t *Lp, const int *Li, double *Lx, int NNZ,
-                           const size_t *nrows, int *col2sup, int *supernodes,
-                          int num_nodes, double *x, int n_rhs, int max_col=-1);
-
+  int blockedLsolve_mrhs(int n, size_t *Lp, int *Li, double *Lx, int NNZ, size_t *Li_ptr,
+    int *col2sup, int *sup2col,
+    int supNo, double *x, int n_rhs, int max_col=-1);
 /*
  * Backward solve blocked, u
  */

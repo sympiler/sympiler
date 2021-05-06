@@ -58,9 +58,8 @@ namespace sym_lib {
    return (1);
   }
 
-  int blockedLsolve_mrhs(int n, const size_t *Lp, const int *Li, double *Lx, int NNZ,
-                         const size_t *nrows, int *col2sup, int *supernodes,
-                         int num_nodes, double *x, int n_rhs, int max_col){
+  int blockedLsolve_mrhs(int n, size_t *Lp, int *Li, double *Lx, int NNZ, size_t *Li_ptr, int *col2sup, int *sup2col,
+                         int supNo, double *x, int n_rhs, int max_col){
    int i, p, k;
    double one[2], zero[2];
    one[0] = 1.0;
@@ -71,23 +70,28 @@ namespace sym_lib {
    int off_set = max_col < 0 ? n : max_col;
    auto *tempvec = new double[n_rhs*off_set]();
 
-   for (i = 0; i < num_nodes; i++) {
-    int super = supernodes[i];
+   for (i = 0; i < supNo; i++) {
+    int curCol = sup2col[i];
+    int nxtCol = sup2col[i + 1];
+    int supWdt = nxtCol - curCol;
+    int nSupR = Li_ptr[nxtCol] - Li_ptr[curCol];//row size of supernode
+    double *Ltrng = &Lx[Lp[curCol]];//first nnz of current supernode
 
-    int width = supernodes[i + 1] - super;
-    int nrow = nrows[i];
 
-    SYM_DTRSM("L", "L", "N", "N", &width,&n_rhs,one,&Lx[Lp[i]],
-          &nrow,&x[super],&n);
 
-    int tmpRow=nrow - width;
-    SYM_DGEMM("N", "N", &tmpRow, &n_rhs, &width, one, &Lx[Lp[i] + width],
-          &nrow,
-          &x[super], &n,
+    SYM_DTRSM("L", "L", "N", "N", &supWdt,&n_rhs,one,Ltrng,
+          &nSupR,&x[curCol],&n);
+
+    Ltrng = &Lx[Lp[curCol] + supWdt];//first nnz of below diagonal
+    int tmpRow = nSupR - supWdt;
+    SYM_DGEMM("N", "N", &tmpRow, &n_rhs, &supWdt, one, Ltrng,
+          &nSupR,
+          &x[curCol], &n,
           one, tempvec, &off_set);
 
-    for (p = Lp[i] + width, k = 0; p < Lp[i] + nrow; p++, k++) {
-     int idx = Li[p];
+
+    for (int l = Li_ptr[curCol] + supWdt, k = 0; l < Li_ptr[nxtCol]; l++, k++) {
+     int idx = Li[l];
      for (int j = 0; j < n_rhs; ++j) {
       auto tmp = k + j*off_set;
       x[idx+(j*n)] -= tempvec[tmp];
@@ -184,7 +188,11 @@ namespace sym_lib {
 
     double *Ltrng = &Lx[Lp[curCol] + supWdt];//first nnz of below diagonal
     for (int l = 0; l < nSupR - supWdt; ++l) {
-     tempVec[l] = x[Li[Li_ptr[curCol] + supWdt + l]];
+     auto base = Li[Li_ptr[curCol] + supWdt + l];
+     for (int k = 0; k < m_rhs; ++k) {
+      auto idx = k * off_set;
+      tempVec[l + idx ] = x[base + (k*n) ];
+     }
     }
 #ifdef SYM_BLAS
     dmatvec_blas(nSupR,nSupR-supWdt,supWdt,Ltrng,&x[curCol],tempVec);

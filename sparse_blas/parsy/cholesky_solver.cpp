@@ -166,7 +166,7 @@ namespace sym_lib {
    delete[]valL;
    delete[]d_val;
    delete[]visible_cnt;
-
+   delete []x;
    if (remove_trans) {
     allocateAC(BT, 0, 0, 0, FALSE);
    }
@@ -415,7 +415,7 @@ namespace sym_lib {
    if (solver_mode == 0) {
     AorSM = A;
     base = 0;
-    x = new double[AorSM->ncol];
+    //x = new double[AorSM->ncol];
     if (ldl_variant == 6 || ldl_variant == 7) {
      is_super = 0;
      simplicial_alloc = 1;
@@ -716,6 +716,7 @@ namespace sym_lib {
    if (!rhs)
     return NULL;//rhs is not given
    psi->start = psi->toc();
+   x = new double[A_ord->ncol]();
    double *x_ord = ws;
    double *rhs_ord = ws + A_ord->ncol;
    for (int i = 0; i < A_ord->ncol; ++i) {
@@ -764,12 +765,18 @@ namespace sym_lib {
    // max_inner_iter*(max_inner_iter+1) + n + max_inner_iter*(n-1) +
    //
    const double *rhs = rhs_in;
+   x = new double[n_rhs*A_ord->ncol]();
    psi->start = psi->toc();
-   double *x_ord = ws;
+   double *x_ord = new double[n_rhs*A_ord->ncol];
    double *rhs_ord = ws + A_ord->ncol;
+#pragma omp parallel for
    for (int i = 0; i < A_ord->ncol; ++i) {
     assert(L->Perm[i] < A_ord->ncol);
-    x_ord[i] = rhs[L->Perm[i]];
+    int tmp = L->IPerm[i];
+    for (int j = 0; j < n_rhs; ++j) {
+     auto idx = j *A_ord->ncol;
+     x_ord[i + idx] = rhs[tmp + idx];
+    }
    }
    //print_csc("\nA reo: \n",A_ord->ncol,A_ord->p,A_ord->i,A_ord->x);
    //print_vec<double >("\n\nrrhhssss\n: ",0,A_ord->ncol,rhs);
@@ -800,19 +807,25 @@ namespace sym_lib {
    } else{
     assert(false); // Wrong input
    }
-
+#pragma omp parallel for
    for (int i = 0; i < A_ord->ncol; ++i) {
-    x[i] = x_ord[L->IPerm[i]];
+    int tmp = L->IPerm[i];
+    for (int j = 0; j < n_rhs; ++j) {
+     auto idx = j *A_ord->ncol;
+     x[i + idx] = x_ord[tmp + idx];
+    }
    }
    //print_vec<double >("x orig order: ",0,A->ncol,x);
    //print_vec("dval \n",0,2*AorSM->ncol,d_val);
    psi->end = psi->toc();
    psi->solve_time += psi->elapsed_time(psi->start, psi->end);
+   delete []x_ord;
    return x;
   }
 
 
-  void SolverSettings::compute_norms() {
+  void SolverSettings::compute_norms(double *rhs_in) {
+   rhs = rhs_in != NULL ? rhs_in : rhs;
    double alp[2] = {1.0, 0};
    double bet[2] = {0.0, 0};
    int norm_type = 0;

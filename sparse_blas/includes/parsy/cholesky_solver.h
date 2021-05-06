@@ -268,7 +268,7 @@ namespace sym_lib {
    /*
     * Computes all required norms
     */
-   void compute_norms();
+   void compute_norms(double *rhs_in = NULL);
 
    double backward_error();
 
