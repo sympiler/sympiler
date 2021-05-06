@@ -58,9 +58,9 @@ namespace sym_lib {
    return (1);
   }
 
-  int blockedLsolve_mrhs(int n, const int *Lp, const int *Li, double *Lx, int NNZ,
-    const int *nrows, int *col2sup, const int *supernodes,
-    int num_nodes, double *x, int n_rhs, int max_col) {
+  int blockedLsolve_mrhs(int n, const size_t *Lp, const int *Li, double *Lx, int NNZ,
+                         const size_t *nrows, int *col2sup, int *supernodes,
+                         int num_nodes, double *x, int n_rhs, int max_col){
    int i, p, k;
    double one[2], zero[2];
    one[0] = 1.0;
@@ -96,6 +96,7 @@ namespace sym_lib {
     }
    }
    delete[]tempvec;
+   return 1;
   }
 
 
