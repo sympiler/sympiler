@@ -40,7 +40,7 @@
 extern "C" {
 #endif
 
-#include "SuiteSparse_config.h"
+#include "SuiteSparse_config_s.h"
 
 /* get the definition of size_t: */
 #include <stddef.h>
