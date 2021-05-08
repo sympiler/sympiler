@@ -772,9 +772,9 @@ namespace sym_lib {
 #pragma omp parallel for
    for (int i = 0; i < A_ord->ncol; ++i) {
     assert(L->Perm[i] < A_ord->ncol);
-    int tmp = L->IPerm[i];
+    int tmp = L->Perm[i];
     for (int j = 0; j < n_rhs; ++j) {
-     auto idx = j *A_ord->ncol;
+     int idx = j *A_ord->ncol;
      x_ord[i + idx] = rhs[tmp + idx];
     }
    }
