@@ -70,7 +70,7 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
  for (int i1 = 0; i1 < nLevels - 1; ++i1) {
 #pragma omp parallel //shared(lValues)//private(map, contribs)
   {
-#pragma omp  for schedule(dynamic) private(map, contribs, xi, startin, endin, duration2)
+#pragma omp  for schedule(static) private(map, contribs, xi, startin, endin, duration2)
    for (int j1 = levelPtr[i1]; j1 < levelPtr[i1 + 1]; ++j1) {
 #ifdef BLASTIMING
     int threadID = omp_get_thread_num();
