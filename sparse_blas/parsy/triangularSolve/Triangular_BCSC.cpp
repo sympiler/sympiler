@@ -6,6 +6,7 @@
 
 #include <cassert>
 #include <common/Sym_BLAS.h>
+#include <iostream>
 
 
 #ifdef  OPENMP
@@ -563,6 +564,65 @@ namespace sym_lib {
    return (1);
   }
 
+
+  int
+  H2LeveledBlockedLsolve_mrhs(int n, size_t *Lp, int *Li, double *Lx, int NNZ, size_t *Li_ptr, int *col2sup, int *sup2col,
+                         int supNo, double *x, int n_rhs, int levels, int *levelPtr, int *levelSet, int parts, int *parPtr,
+                         int *partition, int chunk, int max_col) {
+   //int chunk = 70;
+   double one[2], zero[2];
+   one[0] = 1.0;    /* ALPHA for *syrk, *herk, *gemm, and *trsm */
+   one[1] = 0.;
+   zero[0] = 0.;     /* BETA for *syrk, *herk, and *gemm */
+   zero[1] = 0.;
+   int ione = 1;
+   //double *tempVec = new double[n]();
+   double *tempvec;
+   int off_set = max_col < 0 ? n : max_col;
+
+   if (!Lp || !Li || !x) return (0);                     /* check inputs */
+   for (int i1 = 0; i1 < levels; ++i1) {
+    int j1 = 0;
+#pragma omp parallel //shared(lValues)//private(map, contribs)
+    {
+#pragma omp  for schedule(static) private(j1, tempvec)
+     for (j1 = levelPtr[i1]; j1 < levelPtr[i1 + 1]; ++j1) {
+      //tempVec = new double[n]();
+      tempvec = new double[n_rhs*off_set]();
+      for (int k1 = parPtr[j1]; k1 < parPtr[j1 + 1]; ++k1) {
+       int i = partition[k1];
+       int curCol = sup2col[i];
+       int nxtCol = sup2col[i + 1];
+       int supWdt = nxtCol - curCol;
+       int nSupR = Li_ptr[nxtCol] - Li_ptr[curCol];//row size of supernode
+       double *Ltrng = &Lx[Lp[curCol]];//first nnz of current supernode
+       SYM_DTRSM("L", "L", "N", "N", &supWdt,&n_rhs,one,Ltrng,
+                 &nSupR,&x[curCol],&n);
+
+       Ltrng = &Lx[Lp[curCol] + supWdt];//first nnz of below diagonal
+       int tmpRow = nSupR - supWdt;
+       SYM_DGEMM("N", "N", &tmpRow, &n_rhs, &supWdt, one, Ltrng,
+                 &nSupR,
+                 &x[curCol], &n,
+                 one, tempvec, &off_set);
+
+
+       for (int l = Li_ptr[curCol] + supWdt, k = 0; l < Li_ptr[nxtCol]; l++, k++) {
+        int idx = Li[l];
+        for (int j = 0; j < n_rhs; ++j) {
+         auto tmp = k + j*off_set;
+         x[idx+(j*n)] -= tempvec[tmp];
+         tempvec[tmp] = 0;
+        }
+       }
+      }
+      delete []tempvec;
+     }
+    }
+   }
+   return (1);
+  }
+
   int H2LeveledBlockedLsolve_update(int n, size_t *Lp, int *Li, double *Lx, int NNZ, size_t *Li_ptr, int *col2sup,
                                     int *sup2col, int supNo, double *x, int levels, int *levelPtr, int *levelSet,
                                     int parts, int *parPtr, int *partition, int chunk, bool *mask, double *ws_dbl) {
@@ -716,6 +776,85 @@ namespace sym_lib {
    }
    return (1);
   }
+
+
+  int
+  H2LeveledBlockedLTsolve_mrhs(int n, size_t *Lp, int *Li, double *Lx, int NNZ, size_t *Li_ptr, int *col2sup, int *sup2col,
+                          int supNo, double *x, int m_rhs, int levels, int *levelPtr, int *levelSet, int parts, int *parPtr,
+                          int *partition, int chunk, int max_col) {
+   //int chunk = 70;
+   double one[2], zero[2];
+   one[0] = 1.0;    /* ALPHA for *syrk, *herk, *gemm, and *trsm */
+   one[1] = 0.;
+   zero[0] = 0.;     /* BETA for *syrk, *herk, and *gemm */
+   zero[1] = 0.;
+   int ione = 1;
+   double minus_one = -1;
+   //double *tempVec = new double[n]();
+   int off_set = max_col < 0 ? n : max_col;
+
+   if (!Lp || !Li || !x) return (0);                     /* check inputs */
+   for (int i1 = levels - 1; i1 >= 0; --i1) {
+    int j1 = 0;
+#pragma omp parallel //shared(lValues)//private(map, contribs)
+    {
+#pragma omp  for schedule(static) private(j1)
+     for (j1 = levelPtr[i1]; j1 < levelPtr[i1 + 1]; ++j1) {
+      //tempVec = new double[n]();
+      double *tempVec = new double[m_rhs*off_set]();
+      for (int k1 = parPtr[j1 + 1] - 1; k1 >= parPtr[j1]; --k1) {
+       int i = partition[k1];
+
+       int curCol = i != 0 ? sup2col[i - 1] : 0;
+       int nxtCol = sup2col[i];
+       int supWdt = nxtCol - curCol;
+       int nSupR = Li_ptr[nxtCol] - Li_ptr[curCol];//row size of supernode
+       //std::cout<<" : "<<nSupR <<"\n";
+       double *Ltrng = &Lx[Lp[curCol] + supWdt];//first nnz of below diagonal
+       for (int l = 0; l < nSupR - supWdt; ++l) {
+        auto base = Li[Li_ptr[curCol] + supWdt + l];
+        for (int k = 0; k < m_rhs; ++k) {
+         auto idx = k * off_set;
+         tempVec[l + idx] = 0;
+         tempVec[l + idx ] = x[base + (k*n) ];
+        }
+       }
+
+#ifdef SYM_BLAS
+       dmatvec_blas(nSupR,nSupR-supWdt,supWdt,Ltrng,&x[curCol],tempVec);
+#else
+       //std::cout<<" : "<<nSupR <<" \n";
+       int tmpRow = nSupR - supWdt;
+#ifdef OPENBLAS
+       cblas_dgemv(CblasColMajor,CblasTrans,tmpRow, supWdt, minus_one, Ltrng,
+      nSupR, tempVec, ione, 1.0, &x[curCol], ione);
+#else
+       SYM_DGEMM("T", "N", &supWdt, &m_rhs, &tmpRow, &minus_one, Ltrng, &nSupR, tempVec, &off_set,
+                 one, &x[curCol], &n);
+#endif
+
+#endif
+       Ltrng = &Lx[Lp[curCol]];//first nnz of current supernode
+#ifdef SYM_BLAS
+       dlsolve_blas_nonUnit(nSupR,supWdt,Ltrng,&x[curCol]);//FIXME make it for transpose
+#else
+#ifdef OPENBLAS
+       cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasConjTrans, CblasNonUnit, supWdt, ione, 1.0,
+                Ltrng, nSupR, &x[curCol], n);
+#else
+       SYM_DTRSM("L", "L", "T", "N", &supWdt, &m_rhs, one, Ltrng,
+                 &nSupR, &x[curCol], &n);
+#endif
+
+#endif
+      }
+      delete []tempVec;
+     }
+    }
+   }
+   return (1);
+  }
+
 
   int H2LeveledBlockedLTsolve_update(int n, size_t *Lp, int *Li, double *Lx, int NNZ, size_t *Li_ptr, int *col2sup,
                                      int *sup2col, int supNo, double *x, int levels, int *levelPtr, int *levelSet,

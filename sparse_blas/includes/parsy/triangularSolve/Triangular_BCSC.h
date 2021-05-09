@@ -77,6 +77,10 @@ namespace sym_lib {
                              int *col2sup, int *sup2col, int supNo, double *x,
                              int levels, int *levelPtr, int *levelSet,
                              int parts, int *parPtr, int *partition, int chunk);
+  int
+  H2LeveledBlockedLsolve_mrhs(int n, size_t *Lp, int *Li, double *Lx, int NNZ, size_t *Li_ptr, int *col2sup, int *sup2col,
+                              int supNo, double *x, int n_rhs, int levels, int *levelPtr, int *levelSet, int parts, int *parPtr,
+                              int *partition, int chunk, int max_col=-1);
 
   int H2LeveledBlockedLsolve_update(int n, size_t *Lp, int *Li, double *Lx, int NNZ, size_t
   *Li_ptr,
@@ -92,6 +96,10 @@ namespace sym_lib {
                               int *col2sup, int *sup2col, int supNo, double *x,
                               int levels, int *levelPtr, int *levelSet,
                               int parts, int *parPtr, int *partition, int chunk);
+  int
+  H2LeveledBlockedLTsolve_mrhs(int n, size_t *Lp, int *Li, double *Lx, int NNZ, size_t *Li_ptr, int *col2sup, int *sup2col,
+                               int supNo, double *x, int m_rhs, int levels, int *levelPtr, int *levelSet, int parts, int *parPtr,
+                               int *partition, int chunk, int max_col=-1);
 
   int H2LeveledBlockedLTsolve_update(int n, size_t *Lp, int *Li,
                                      double *Lx, int NNZ, size_t *Li_ptr,

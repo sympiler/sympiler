@@ -798,12 +798,25 @@ namespace sym_lib {
 
 
    }  else if(ldl_variant == 4){
-    solve_phase_ll_blocked_parallel(A_ord->ncol, x_ord,
-                                    L->col2Sup, L->super,
-                                    L->p, L->s, valL, L->i_ptr,
-                                    L->nsuper, L->nzmax,
-                                    n_level, level_ptr, level_set,
-                                    n_par, par_ptr, par_set, chunk);
+    if(n_rhs == 1)
+     solve_phase_ll_blocked_parallel(A_ord->ncol, x_ord,
+                                     L->col2Sup, L->super,
+                                     L->p, L->s, valL, L->i_ptr,
+                                     L->nsuper, L->nzmax,
+                                     n_level, level_ptr, level_set,
+                                     n_par, par_ptr, par_set, chunk);
+    else
+     // TODO: replace the following with the parallel version
+     solve_phase_ll_blocked_nrhs(A_ord->ncol, x_ord, n_rhs,
+                                 L->col2Sup, L->super,
+                                 L->p, L->s, valL, L->i_ptr,
+                                 L->nsuper, L->nzmax, max_col);
+/*     solve_phase_ll_blocked_parallel_nrhs(A_ord->ncol, x_ord, n_rhs,
+                                     L->col2Sup, L->super,
+                                     L->p, L->s, valL, L->i_ptr,
+                                     L->nsuper, L->nzmax,
+                                     n_level, level_ptr, level_set,
+                                     n_par, par_ptr, par_set, chunk, max_col);*/
    } else{
     assert(false); // Wrong input
    }

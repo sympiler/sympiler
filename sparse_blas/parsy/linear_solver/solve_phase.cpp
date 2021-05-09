@@ -73,6 +73,24 @@ namespace sym_lib {
                            parts, parPtr, partition, chunk);
   }
 
+  void solve_phase_ll_blocked_parallel_nrhs(size_t n, double *x, int n_rhs, int *col2sup, int *sup2col, size_t *newCol,
+                                       int *newRow, double *newVal, size_t *rowP, size_t nBlocks, int nnz, int levels,
+                                       int *levelPtr, int *levelSet, int parts, int *parPtr, int *partition,
+                                       int chunk, int max_col) {
+   //*************** Parallel L solve
+   H2LeveledBlockedLsolve_mrhs(n, newCol, newRow, newVal, nnz, rowP, col2sup,
+                          sup2col, nBlocks, x, n_rhs, levels, levelPtr, levelSet,
+                          parts, parPtr, partition, chunk, max_col);
+#if 0
+   for (int i = 0; i < n; ++i) {
+   std::cout<<i<<"->"<<x[i]<<"/"<<d_val[i]<<"= "<<x[i]/d_val[i]<<"\n";
+  }
+#endif
+   //*************** Parallel Blocked BWD solve
+   H2LeveledBlockedLTsolve_mrhs(n, newCol, newRow, newVal, nnz, rowP, col2sup,
+                           sup2col, nBlocks, x, n_rhs, levels, levelPtr, levelSet,
+                           parts, parPtr, partition, chunk, max_col);
+  }
 
   void solve_phase_ldl(size_t n, double *d_val, double *x, int *col2sup, int *sup2col, size_t *newCol, int *newRow,
                        double *newVal, size_t *rowP, size_t nBlocks, int nnz) {//*************** Serial Blocked
