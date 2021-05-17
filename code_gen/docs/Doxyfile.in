@@ -18,3 +18,4 @@ EXCLUDE_PATTERNS       =
 # =============================================================================
 
 EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES

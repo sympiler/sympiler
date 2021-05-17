@@ -18,7 +18,7 @@ add_executable(sympile sympiler.cpp Func.cpp Func.h Var.cpp Var.h Module.cpp Mod
         NumericalUtils.cpp Triangular.cpp Triangular.h
         VIPrune.cpp VIPrune.h
         VIPeel.cpp VIPeel.h
-        VILoopFuse.cpp VILoopFuse.h)
+        VILoopFuse.cpp VILoopFuse.h PeelIters.cpp PeelIters.h)
 
 
 target_link_libraries(sympile
