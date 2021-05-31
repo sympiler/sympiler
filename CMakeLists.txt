@@ -254,3 +254,5 @@ add_subdirectory(Catch_tests)
 add_subdirectory(code_gen)
 add_subdirectory(utils)
 add_subdirectory(dense_blas)
+
+add_subdirectory(SymLang)
