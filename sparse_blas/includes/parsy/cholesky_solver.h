@@ -72,6 +72,7 @@ namespace sym_lib {
    int is_super, simplicial_alloc;
    size_t ws_int_size;
    size_t ws_dbl_size;
+   bool is_factorized, is_solved;
 
    //parallel variables
    int n_level, n_par;
@@ -193,6 +194,11 @@ namespace sym_lib {
     *
     */
    int numerical_factorization();
+
+   /*
+    * Factorize a new matrix with the same pattern as the old one.
+    */
+   int numerical_factorization(CSC *A_in);
 
    /*
    * deleting node k from atree assuming the col is in supernode

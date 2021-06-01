@@ -257,6 +257,8 @@ namespace sym_lib {
    regularization = 1;
    thread_thresh = 25;
    simplicial_alloc = 0;
+   is_solved = is_factorized = false;
+   x = NULL;
   }
 
   int SolverSettings::build_super_matrix() {
@@ -550,12 +552,8 @@ namespace sym_lib {
   }
 
   void SolverSettings::reset_symbolic_factor() {
-   std::fill(sm_rhs, sm_rhs + SM->ncol, 0);
-   std::fill(sm_solution, sm_rhs + SM->ncol, 0);
    std::fill(valL, valL + L->xsize, 0);
    std::fill(d_val, d_val + 2 * AorSM->ncol, 0);
-   std::fill(visible_cnt, visible_cnt + L->nsuper, 0);
-
    std::fill(ws, ws + ws_dbl_size, 0);
   // std::fill(ws_int, ws_int + ws_int_size, 0);
  //  std::fill(ws_zeroed, ws_zeroed + (num_thread * AorSM->ncol), 0);
@@ -613,8 +611,18 @@ namespace sym_lib {
 
   }
 
+  int SolverSettings::numerical_factorization(sym_lib::parsy::CSC *A_in) {
+   A = A_in;
+   is_factorized = false; is_solved = false;
+   reset_symbolic_factor();
+   numerical_factorization();
+
+  }
+
   int SolverSettings::numerical_factorization() {
    int ret_val = 0;
+   if(is_factorized)
+    return 1;
    //print_csc("\nORdered: ",A_ord->ncol,A_ord->p,A_ord->i,A_ord->x);
    switch (ldl_variant) {
     case 1:
@@ -634,6 +642,7 @@ namespace sym_lib {
      psi->fact_time += psi->elapsed_time(psi->start, psi->end);
      //MKL_Domain_Set_Num_Threads(1, MKL_DOMAIN_BLAS);
      SET_BLAS_THREAD(1);
+     is_factorized = true;
      break;
     case 2:
      //MKL_Domain_Set_Num_Threads(num_thread, MKL_DOMAIN_BLAS);
@@ -677,6 +686,7 @@ namespace sym_lib {
 
      psi->end = psi->toc();
      psi->fact_time += psi->elapsed_time(psi->start, psi->end);
+     is_factorized = true;
      break;
     case 4://Parallel SBK
      psi->start = psi->tic();
@@ -697,12 +707,13 @@ namespace sym_lib {
      psi->end = psi->toc();
      psi->fact_time += psi->elapsed_time(psi->start, psi->end);
      //print_vec("simpl-o: ",0,A_ord->ncol,d_val);
+     is_factorized = true;
      break;
     default:
      std::cout << " Wrong algorithm type! \n";
      return -1;
    }
-   return 1;
+   return ret_val;
   }
 
 
@@ -713,6 +724,8 @@ namespace sym_lib {
    // ws_size for iter_ref = 4*(max_inner_iter+1) +
    // max_inner_iter*(max_inner_iter+1) + n + max_inner_iter*(n-1) +
    //
+   if(is_solved)
+    return x;
    if (!rhs)
     return NULL;//rhs is not given
    psi->start = psi->toc();
@@ -753,6 +766,7 @@ namespace sym_lib {
    //print_vec("dval \n",0,2*AorSM->ncol,d_val);
    psi->end = psi->toc();
    psi->solve_time += psi->elapsed_time(psi->start, psi->end);
+   is_solved=true;
    return x;
   }
 
@@ -765,6 +779,7 @@ namespace sym_lib {
    // max_inner_iter*(max_inner_iter+1) + n + max_inner_iter*(n-1) +
    //
    const double *rhs = rhs_in;
+   delete []x;
    x = new double[n_rhs*A_ord->ncol]();
    psi->start = psi->toc();
    double *x_ord = new double[n_rhs*A_ord->ncol];
