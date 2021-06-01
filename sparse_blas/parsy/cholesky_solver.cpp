@@ -613,10 +613,20 @@ namespace sym_lib {
 
   int SolverSettings::numerical_factorization(sym_lib::parsy::CSC *A_in) {
    A = A_in;
+   AorSM = A;
+   base = 0;
+   //x = new double[AorSM->ncol];
    is_factorized = false; is_solved = false;
    reset_symbolic_factor();
+   //delete AT_ord;
+   //delete A_ord;
+   allocateAC(A_ord, 0, 0, 0, FALSE);
+   allocateAC(AT_ord, 0, 0, 0, FALSE);
+   AT_ord = ptranspose(AorSM, 2, L->Perm, NULL, 0, status);
+   A_ord = ptranspose(AT_ord, 2, NULL, NULL, 0, status);
+   etree = L->Parent;
+   atree = L->sParent;
    numerical_factorization();
-
   }
 
   int SolverSettings::numerical_factorization() {
