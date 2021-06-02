@@ -35,7 +35,6 @@ add_subdirectory(src)
 #
 #   Dependencies: doxygen, graphviz.
 # =============================================================================
-#[[
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
     set(DOXYGEN_IN ${CMAKE_CURRENT_LIST_DIR}/docs/Doxyfile.in)
@@ -53,4 +52,3 @@ if (DOXYGEN_FOUND)
 else (DOXYGEN_FOUND)
     message("Doxygen need to be installed to generate the doxygen documentation")
 endif (DOXYGEN_FOUND)
-]]
