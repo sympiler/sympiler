@@ -3,6 +3,11 @@ cmake_minimum_required( VERSION 2.5)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 include(DownloadProject)
 
+set(SYMPILER_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/)
+set(SYMPILER_EXTERNAL ${CMAKE_CURRENT_LIST_DIR}/external)
+
 # Defining paths
 set(SPARSE_LIB_INC "${CMAKE_CURRENT_SOURCE_DIR}/sparse_blas/includes")
 set(SPARSE_LIB_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib")
@@ -120,19 +125,20 @@ find_package(METIS OPTIONAL_COMPONENTS)
 #ELSE()
 #    set(ignoreMe "${METIS_ROOT_PATH}")
 #ENDIF()
+
 if(NOT METIS_VERSION_OK)
     #    find_program(MAKE_EXE NAMES gmake nmake make)
     #    set(metis_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/metis")
     #    set(metis_CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${metis_INSTALL_DIR})
     #set(EXTERNAL_INSTALL_LOCATION ${CMAKE_CURRENT_LIST_DIR}/external)
-    # set(GKLIB_PATH ${NASOQ_EXTERNAL}/metis/metis-src/GKLIB/ CACHE PATH "d")
+    # set(GKLIB_PATH ${SYMPILER_EXTERNAL}/metis/metis-src/GKLIB/ CACHE PATH "d")
     download_project(PROJ metis
             GIT_REPOSITORY https://github.com/cheshmi/METIS.git  # https://github.com/KarypisLab/METIS.git
             # BUILD_IN_SOURCE 1
             #PREFIX  ${metis_BINARY_DIR}
             #     URL http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-5.1.0.tar.gz
-            PREFIX  ${NASOQ_EXTERNAL}/metis/
-            #SOURCE_DIR ${NASOQ_EXTERNAL}/metis/metis-src/
+            PREFIX  ${SYMPILER_EXTERNAL}/metis/
+            #SOURCE_DIR ${SYMPILER_EXTERNAL}/metis/metis-src/
             BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/metis/
             UPDATE_DISCONNECTED 1
             #CMAKE_ARGS  -DGKLIB_PATH=${metis_SOURCE_DIR}/GKlib/
@@ -141,8 +147,8 @@ if(NOT METIS_VERSION_OK)
     add_subdirectory(${metis_SOURCE_DIR})
     set(METIS_INCLUDE_DIR ${metis_SOURCE_DIR}/include)
     set(METIS_INCLUDES ${metis_SOURCE_DIR}/include/)
-    set(METIS_LIBRARY ${NASOQ_ROOT_DIR}/lib/)
-    set(METIS_LIBRARIES ${NASOQ_ROOT_DIR}/lib/)
+    set(METIS_LIBRARY ${SYMPILER_ROOT_DIR}/lib/)
+    set(METIS_LIBRARIES ${SYMPILER_ROOT_DIR}/lib/)
 endif()
 
 
