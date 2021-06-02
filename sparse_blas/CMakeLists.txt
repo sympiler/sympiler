@@ -25,6 +25,7 @@ add_library (sym_sparse_blas STATIC
         ${PARSY_SRC}
         )
 
+add_dependencies(sym_sparse_blas metis)
 target_link_libraries(sym_sparse_blas
         ${ALL_LIBS}
         )

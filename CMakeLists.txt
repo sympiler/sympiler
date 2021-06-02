@@ -35,6 +35,7 @@ AUX_SOURCE_DIRECTORY(${SPARSE_EXTN_SRC} SPARSE_EXTN_SRC_FILES)
 
 set(LBC_INC "${CMAKE_CURRENT_SOURCE_DIR}/lbc/src/includes")
 set(LBC_SRC "${CMAKE_CURRENT_SOURCE_DIR}/lbc/src/")
+set(LBC_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lbc/")
 AUX_SOURCE_DIRECTORY(${LBC_SRC} LBC_SRC_FILES)
 
 
@@ -90,66 +91,11 @@ endif()
 #add_definitions( -DLOAD)
 
 
-### Find Metis if available
-
-#if(EXISTS "$ENV{METISINC}" AND EXISTS "$ENV{METISLIB}")
-#    set(METIS_INC "$ENV{METISINC}")
-#    set(METIS_LIB "$ENV{METISLIB}")
-#    add_definitions(-DMETIS)
-#    set(METIS_LIB_NAME "metis")
-#    set(METIS_SOURCE_FILES "${SPARSE_UTIL_SRC}/metis_interface.cpp")
-#    set(METIS 1)
-#    message(STATUS "METIS found")
-#elseif(EXISTS "$ENV{METISROOT}")
-#    set(METIS_INC "$ENV{METISROOT}/include")
-#    set(METIS_LIB "$ENV{METISROOT}/libmetis")
-#    if(NOT EXISTS ${METIS_LIB})
-#        set(METIS_LIB "$ENV{METISROOT}/lib")
-#    endif()
-#    set(METIS_SOURCE_FILES "${SPARSE_UTIL_SRC}/metis_interface.cpp")
-#    add_definitions(-DMETIS)
-#    set(METIS 1)
-#    set(METIS_LIB_NAME "metis")
-#    message(STATUS "METIS found")
-#else()
-#    message(STATUS "METIS not found, building without metis.")
-#    set(METIS_LIB_NAME "")
-#    set(METIS 0)
-#endif()
-#find_package(METIS OPTIONAL_COMPONENTS)
-
-
-find_package(METIS OPTIONAL_COMPONENTS)
-# set(METIS_LIBRARY "")
- set(METIS_INCLUDE_DIR "")
-#ELSE()
-#    set(ignoreMe "${METIS_ROOT_PATH}")
-#ENDIF()
-
-if(NOT METIS_VERSION_OK)
-    #    find_program(MAKE_EXE NAMES gmake nmake make)
-    #    set(metis_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/metis")
-    #    set(metis_CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${metis_INSTALL_DIR})
-    #set(EXTERNAL_INSTALL_LOCATION ${CMAKE_CURRENT_LIST_DIR}/external)
-    # set(GKLIB_PATH ${SYMPILER_EXTERNAL}/metis/metis-src/GKLIB/ CACHE PATH "d")
-    download_project(PROJ metis
-            GIT_REPOSITORY https://github.com/cheshmi/METIS.git  # https://github.com/KarypisLab/METIS.git
-            # BUILD_IN_SOURCE 1
-            #PREFIX  ${metis_BINARY_DIR}
-            #     URL http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-5.1.0.tar.gz
-            PREFIX  ${SYMPILER_EXTERNAL}/metis/
-            #SOURCE_DIR ${SYMPILER_EXTERNAL}/metis/metis-src/
-            BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/metis/
-            UPDATE_DISCONNECTED 1
-            #CMAKE_ARGS  -DGKLIB_PATH=${metis_SOURCE_DIR}/GKlib/
-            # BUILD_COMMAND ${MAKE_EXE}
-            )
-    add_subdirectory(${metis_SOURCE_DIR})
-    set(METIS_INCLUDE_DIR ${metis_SOURCE_DIR}/include)
-    set(METIS_INCLUDES ${metis_SOURCE_DIR}/include/)
-    set(METIS_LIBRARY ${SYMPILER_ROOT_DIR}/lib/)
-    set(METIS_LIBRARIES ${SYMPILER_ROOT_DIR}/lib/)
-endif()
+    set(METIS_INCLUDE_DIR ${LBC_ROOT_DIR}/external/metis/metis-src/include/)
+    set(METIS_INCLUDES ${LBC_ROOT_DIR}/external/metis/metis-src/include/)
+    set(METIS_LIBRARY ${LBC_ROOT_DIR}/lib/)
+    set(METIS_LIBRARIES ${LBC_ROOT_DIR}/lib/)
+    set(METIS_LIB_NAME "metis")
 
 
 find_package(MKL REQUIRED)
@@ -245,6 +191,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}   -std=c++11 -w -m64")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=x86-64   -mavx2")
 
+Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 
 

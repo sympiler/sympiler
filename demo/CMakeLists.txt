@@ -24,8 +24,11 @@ set(SPTRSVD_SOURCE_FILES
 add_executable(sptrsv_demo ${SPTRSVD_SOURCE_FILES}
         sptrsv_demo.cpp )
 
+target_link_directories(sptrsv_demo PUBLIC
+        ${METIS_LIBRARY})
+
 target_link_libraries(sptrsv_demo
         lbc
         ${ALL_LIBS}
-        ${METIS_LIBRARY} ${METIS_LIBRARIES}
+        ${METIS_LIB_NAME}
         )

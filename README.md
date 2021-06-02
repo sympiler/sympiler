@@ -16,12 +16,7 @@ available from ParSy_bench repository: https://github.com/cheshmi/parsy_bench
 ### Dependencies
 
 #### METIS
-Set the following labels to enable using METIS:
-```bash
-export METISINC /path/to/metis.h
-export METISLIB /path/to/libmetis.so/.a
-```
-If you don't set these variables, the build will continue without using METIS.
+Resolved by cmake.
 
 #### Intel MKL
 Intel MKL should automatically set `MKLROOT` or `MKL_ROOT`, if not, please set:
