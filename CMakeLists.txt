@@ -96,7 +96,7 @@ endif()
     set(METIS_LIBRARY ${LBC_ROOT_DIR}/lib/)
     set(METIS_LIBRARIES ${LBC_ROOT_DIR}/lib/)
     set(METIS_LIB_NAME "metis")
-
+    add_definitions(-DMETIS)
 
 find_package(MKL REQUIRED)
 add_definitions(-DMKL) # add openblas
