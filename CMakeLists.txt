@@ -1,5 +1,8 @@
 cmake_minimum_required( VERSION 2.5)
 
+if(COMMAND cmake_policy)
+    cmake_policy(SET CMP0003 NEW)
+endif(COMMAND cmake_policy)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 include(DownloadProject)
 
@@ -79,7 +82,7 @@ find_package(OpenMP)
 if (OPENMP_FOUND)
     #include_directories("${OPENMP_INCLUDES}")
     #include_directories("/usr/local/include" "/usr/local/opt/llvm/include")
-    link_directories("${OPENMP_LIBRARIES}")
+    #link_directories("${OPENMP_LIBRARIES}")
     #link_directories("/usr/local/lib" "/usr/local/opt/llvm/lib")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
@@ -90,13 +93,22 @@ endif()
 #add_definitions( -DPROFILE)
 #add_definitions( -DLOAD)
 
-
+if(NOT METIS_FOUND)
+    set(METIS_INCLUDE_DIR ${LBC_ROOT_DIR}/external/metis/metis_shared-src/include/)
+    set(METIS_INCLUDES ${LBC_ROOT_DIR}/external/metis/metis_shared-src/include/)
+    set(METIS_LIBRARY ${LBC_ROOT_DIR}/lib/)
+    set(METIS_LIBRARIES ${LBC_ROOT_DIR}/lib/)
+        set(METIS_LIB metis)
+    set(METIS_FOUND TRUE)
+endif()
+add_definitions(-DMETIS)
+#[[
     set(METIS_INCLUDE_DIR ${LBC_ROOT_DIR}/external/metis/metis-src/include/)
     set(METIS_INCLUDES ${LBC_ROOT_DIR}/external/metis/metis-src/include/)
     set(METIS_LIBRARY ${LBC_ROOT_DIR}/lib/)
     set(METIS_LIBRARIES ${LBC_ROOT_DIR}/lib/)
     set(METIS_LIB_NAME "metis")
-    add_definitions(-DMETIS)
+]]
 
 find_package(MKL REQUIRED)
 add_definitions(-DMKL) # add openblas
@@ -174,7 +186,7 @@ set(ALL_LIBS
         ${MKL_LIBRARIES}
         ${PAPI_LIB_NAME}
         ${PAPI_LIB_NAME2}
-        ${METIS_LIB_NAME}
+        ${METIS_LIB}
         )
 
 
@@ -195,14 +207,14 @@ Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 
 
-if(EXISTS "${METIS_INCLUDES}")
+if(METIS_FOUND)
     add_definitions(-DMETIS)
     set(METIS_SOURCE_FILES "${SPARSE_UTIL_SRC}/metis_interface.cpp")
     add_subdirectory(demo)
 endif()
 
-add_subdirectory(sparse_blas)
 add_subdirectory(lbc)
+add_subdirectory(sparse_blas)
 add_subdirectory(Catch_tests)
 add_subdirectory(code_gen)
 add_subdirectory(utils)

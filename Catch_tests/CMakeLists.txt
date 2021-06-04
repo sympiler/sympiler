@@ -9,7 +9,6 @@ include_directories(
 link_directories(
         ${SPARSE_LIB_LIB}
         ${SPARSE_UTIL_LIB}
-        ${METIS_LIB}
         ${MKL_LIB}
         ${MKL_LIB2}
         ${PAPI_LIB}

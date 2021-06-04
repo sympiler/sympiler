@@ -8,10 +8,16 @@ include_directories(includes
         ${SPARSE_UTIL_INC}
         ${MKL_INC}
         )
-
+link_directories(
+        ${METIS_LIBRARY}
+)
 file(GLOB_RECURSE PARSY_SRC parsy/*.cpp)
 
 
+
+if(COMMAND cmake_policy)
+    cmake_policy(SET CMP0003 NEW)
+endif(COMMAND cmake_policy)
 add_library (sym_sparse_blas STATIC
         spmv.cpp
         sptrsv.cpp
@@ -25,7 +31,7 @@ add_library (sym_sparse_blas STATIC
         ${PARSY_SRC}
         )
 
-add_dependencies(sym_sparse_blas metis)
+#add_dependencies(sym_sparse_blas metis)
 target_link_libraries(sym_sparse_blas
         ${ALL_LIBS}
         )

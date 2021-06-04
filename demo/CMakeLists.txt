@@ -13,6 +13,7 @@ include_directories(includes
 
 link_directories(
         ${CMAKE_CURRENT_LIST_DIR}/../lib/
+        ${METIS_LIBRARY}
 )
 
 project(sptrsv_demo)
@@ -24,11 +25,8 @@ set(SPTRSVD_SOURCE_FILES
 add_executable(sptrsv_demo ${SPTRSVD_SOURCE_FILES}
         sptrsv_demo.cpp )
 
-target_link_directories(sptrsv_demo PUBLIC
-        ${METIS_LIBRARY})
 
 target_link_libraries(sptrsv_demo
         lbc
         ${ALL_LIBS}
-        ${METIS_LIB_NAME}
         )
