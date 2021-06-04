@@ -73,6 +73,7 @@ namespace sym_lib {
    size_t ws_int_size;
    size_t ws_dbl_size;
    bool is_factorized, is_solved;
+   size_t *in_perm;
 
    //parallel variables
    int n_level, n_par;

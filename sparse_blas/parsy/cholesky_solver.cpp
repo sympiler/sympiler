@@ -258,7 +258,7 @@ namespace sym_lib {
    thread_thresh = 25;
    simplicial_alloc = 0;
    is_solved = is_factorized = false;
-   x = NULL;
+   x = NULL; in_perm = NULL;
   }
 
   int SolverSettings::build_super_matrix() {
@@ -467,7 +467,7 @@ namespace sym_lib {
                                    n_par_s, par_ptr_s, par_set_s,
                                    cost_param, level_param, final_seq_node,
                                    status, max_sup_wid, max_col, psi->ordering_time,
-                                   simplicial_alloc, extra_cols, NULL, sym_order);
+                                   simplicial_alloc, extra_cols, in_perm, sym_order);
    psi->end = psi->toc();
    psi->analysis_time = psi->elapsed_time(psi->start, psi->end);
    if (L == NULL)
