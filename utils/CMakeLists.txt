@@ -8,15 +8,14 @@ include_directories(includes
 
 file(GLOB_RECURSE EXT_SRC external/*.cpp external/*.c)
 
+message(" ===> ${METIS_SOURCE_FILES}")
 add_library (sympiler_utils STATIC
         BCSCMatrix.cpp
-        etree.cpp
         lfactor_creation.cpp
         sparse_inspector.cpp
         sparse_io.cpp
-        sparse_utilities.cpp
         test_utils.cpp
-        utils.cpp
+        ${METIS_SOURCE_FILES}
         ${EXT_SRC}
 
 #        external/mmio.cpp #TODO: remove this and use SMP
