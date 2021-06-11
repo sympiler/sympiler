@@ -66,6 +66,7 @@ namespace sym_lib {
       /* ---- workspace  */
       int *First,  /* size n workspace for cholmod_postorder */
       int *Level,  /* size n workspace for cholmod_postorder */
+      double &flops,
       /* --------------- */
       // cholmod_common *Common
       int &status

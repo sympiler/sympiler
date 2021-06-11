@@ -203,6 +203,7 @@ namespace sym_lib {
    /* factorization type */
    /* ---------------------------------------------------------------------- */
 
+   double fl; // flops for factorization
    int ordering; /* ordering method used */
 
    int is_ll;  /* TRUE if LL', FALSE if LDL' */

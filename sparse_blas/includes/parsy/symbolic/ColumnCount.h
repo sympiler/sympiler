@@ -93,9 +93,9 @@ namespace sym_lib {
     int *Level,  /* size nrow.  Level [i] is the length of the path from
 			 * i to the root, with Level [root] = 0. */
     /* --------------- */
-    int &fl,
-    int &aatfl,
-    int &lnz,
+    double &fl,
+    double &aatfl,
+    double &lnz,
     //   cholmod_common *Common
     int status
   );

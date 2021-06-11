@@ -74,7 +74,7 @@ namespace sym_lib {
   }
 
   int rowcolcounts(CSC *A, int *fset, size_t fsize, int *Parent, int *Post, int *RowCount, int *ColCount, int *First,
-                   int *Level, int &fl, int &aatfl, int &lnz, int status) {
+                   int *Level, double &fl, double &aatfl, double &lnz, int status) {
    double ff;
    int *Ap, *Ai, *Anz, *PrevNbr, *SetParent, *Head, *PrevLeaf, *Anext, *Ipost,
      *Iwork;

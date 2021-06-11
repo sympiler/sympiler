@@ -106,10 +106,10 @@ namespace sym_lib {
   }
 
   int analyze_ordering(CSC *A, int ordering, int *Perm, int *fset, size_t fsize, int *Parent, int *Post, int *ColCount,
-                       int *First, int *Level, int &status) {
+                       int *First, int *Level, double &fl, int &status) {
    CSC *A1, *A2, *S, *F;
    int n, ok, do_rowcolcounts;
-   int fl, aatfl, lnz;
+   double aatfl, lnz;
 
    /* check inputs */
    //   RETURN_IF_NULL_COMMON (FALSE) ;
@@ -594,7 +594,7 @@ namespace sym_lib {
    if (skip_best) {
     if (!analyze_ordering(A, L->ordering, Lperm, fset, fsize,
                           Lparent, Post, Lcolcount, First,
-                          Level, status)) {
+                          Level,L->fl, status)) {
      /* out of memory, or method failed */
      //FREE_WORKSPACE_AND_RETURN ;
      return FALSE;
