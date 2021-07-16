@@ -23,7 +23,8 @@ Intel MKL should automatically set `MKLROOT` or `MKL_ROOT`, if not, please set:
 ```bash
 export MKLROOT /path/to/mkl
 ```
-If you don't set these variables, the build will continue without using Intel MKL.
+If you don't set these variables, the build will continue without using 
+Intel MKL and the supernodal Cholesky will be excluded.
 
 
 

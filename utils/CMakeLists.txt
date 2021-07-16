@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 2.5)
+cmake_minimum_required( VERSION 3.0)
 project(sympiler_utils)
 
 include_directories(includes
@@ -8,7 +8,7 @@ include_directories(includes
 
 file(GLOB_RECURSE EXT_SRC external/*.cpp external/*.c)
 
-message(" ===> ${METIS_SOURCE_FILES}")
+#message(" ===> ${METIS_SOURCE_FILES}")
 add_library (sympiler_utils STATIC
         BCSCMatrix.cpp
         lfactor_creation.cpp

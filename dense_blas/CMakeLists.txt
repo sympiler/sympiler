@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 2.5)
+cmake_minimum_required( VERSION 3.0)
 project(sym_dense_blas)
 
 include_directories(includes )

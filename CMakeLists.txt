@@ -1,11 +1,10 @@
-cmake_minimum_required( VERSION 2.5)
+cmake_minimum_required( VERSION 3.0)
 
-if(COMMAND cmake_policy)
-    cmake_policy(SET CMP0003 NEW)
-endif(COMMAND cmake_policy)
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 include(DownloadProject)
 
+project(sympiler_project)
 set(SYMPILER_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/)
@@ -111,9 +110,11 @@ add_definitions(-DMETIS)
     set(METIS_LIB_NAME "metis")
 ]]
 
-find_package(MKL REQUIRED)
-add_definitions(-DMKL) # add openblas
-
+find_package(MKL OPTIONAL_COMPONENTS)
+if(MKL_FOUND)
+    add_definitions(-DMKL) # add openblas
+    message(STATUS "Intel MKL not found, skipping supernodal Cholesky lib")
+endif()
 ### Find Intel MKL if available
 #if(EXISTS "$ENV{MKLROOT}" OR EXISTS "$ENV{MKL_ROOT}")
 #    if(EXISTS "$ENV{MKLROOT}")

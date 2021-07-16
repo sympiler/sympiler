@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 2.5)
+cmake_minimum_required( VERSION 3.0)
 project(sym_sparse_blas)
 
 include_directories(includes
@@ -11,8 +11,9 @@ include_directories(includes
 link_directories(
         ${METIS_LIBRARY}
 )
+if(MKL_FOUND)
 file(GLOB_RECURSE PARSY_SRC parsy/*.cpp)
-
+endif()
 
 
 if(COMMAND cmake_policy)
