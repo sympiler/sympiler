@@ -4,7 +4,7 @@
 #include <omp.h>
 
 #include "sparse_blas_lib.h"
-#include "../dense_blas/includes/BLAS.h"
+#include <dense_blas/BLAS.h>
 
 #ifdef MKL
 #include "mkl.h"

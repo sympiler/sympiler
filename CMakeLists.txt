@@ -16,6 +16,9 @@ set(SPARSE_LIB_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(SPARSE_LIB_SRC "${CMAKE_CURRENT_SOURCE_DIR}/sparse_blas")
 AUX_SOURCE_DIRECTORY(${SPARSE_LIB_SRC} SPARSE_LIB_SRC_FILES)
 
+set(SPARSE_UTIL_SRC "${CMAKE_CURRENT_SOURCE_DIR}/lbc/utils")
+set(SPARSE_EXTN_SRC "${SPARSE_UTIL_SRC}/external")
+#[[
 set(SPARSE_UTIL_INC "${CMAKE_CURRENT_SOURCE_DIR}/utils/includes")
 set(SPARSE_UTIL_SRC "${CMAKE_CURRENT_SOURCE_DIR}/utils")
 #AUX_SOURCE_DIRECTORY(${SPARSE_UTIL_SRC} SPARSE_UTIL_SRC_FILES)
@@ -32,20 +35,19 @@ set(SPARSE_UTIL_SRC_FILES
 set(SPARSE_EXTN_INC "${SPARSE_UTIL_SRC}/external/includes")
 set(SPARSE_EXTN_SRC "${SPARSE_UTIL_SRC}/external")
 AUX_SOURCE_DIRECTORY(${SPARSE_EXTN_SRC} SPARSE_EXTN_SRC_FILES)
+]]
 
 
 
-set(LBC_INC "${CMAKE_CURRENT_SOURCE_DIR}/lbc/src/includes")
+set(LBC_INC "${CMAKE_CURRENT_SOURCE_DIR}/lbc/includes")
 set(LBC_SRC "${CMAKE_CURRENT_SOURCE_DIR}/lbc/src/")
 set(LBC_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lbc/lib/")
 set(LBC_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lbc/")
-AUX_SOURCE_DIRECTORY(${LBC_SRC} LBC_SRC_FILES)
+#AUX_SOURCE_DIRECTORY(${LBC_SRC} LBC_SRC_FILES)
 
 
-set(BLAS_INC "${CMAKE_CURRENT_SOURCE_DIR}/dense_blas/includes")
-set(BLAS_SRC "${CMAKE_CURRENT_SOURCE_DIR}/dense_blas")
 #AUX_SOURCE_DIRECTORY(${BLAS_SRC} BLAS_SRC_FILES)
-set(BLAS_SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/dense_blas/BLAS.cpp" )
+#set(BLAS_SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/sparse_blas/dense_blas/BLAS.cpp" )
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/)
@@ -181,6 +183,10 @@ include_directories(
         ${MKL_INCLUDE_DIR}
         ${METIS_INCLUDE_DIR}
         ${METIS_INCLUDES}
+        ${BLAS_INC}
+        ${LBC_INC}
+        includes
+        includes/parsy/
 )
 
 
@@ -189,15 +195,15 @@ set(ALL_LIBS
         ${PAPI_LIB_NAME}
         ${PAPI_LIB_NAME2}
         ${METIS_LIB}
+        lbc
         )
 
-
 set(ALL_SOURCE_FILES
-        ${SPARSE_LIB_SRC_FILES}
-        ${SPARSE_UTIL_SRC_FILES}
-        ${SPARSE_EXTN_SRC_FILES}
+    #    ${SPARSE_LIB_SRC_FILES}
+    #    ${SPARSE_UTIL_SRC_FILES}
+    #    ${SPARSE_EXTN_SRC_FILES}
     #    ${APPS_SRC_FILES} # TODO:some of them are mixed with blas, should be cleaned
-        ${LBC_SRC_FILES}
+    #    ${LBC_SRC_FILES}
         ${BLAS_SRC_FILES}
         ${METIS_SOURCE_FILES})
 
@@ -219,5 +225,5 @@ add_subdirectory(lbc)
 add_subdirectory(sparse_blas)
 add_subdirectory(Catch_tests)
 add_subdirectory(code_gen)
-add_subdirectory(utils)
-add_subdirectory(dense_blas)
+#add_subdirectory(utils)  ## TODO: rmeove the folder
+#add_subdirectory(dense_blas)

@@ -1,4 +1,4 @@
-#include "includes/BLAS.h"
+#include <dense_blas/BLAS.h>
 
 void lsolve_BLAS(int dim, int num_col, double *M, double *b) {
  int k;
