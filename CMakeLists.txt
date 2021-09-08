@@ -95,6 +95,7 @@ endif()
 #add_definitions( -DPROFILE)
 #add_definitions( -DLOAD)
 
+find_package(METIS OPTIONAL_COMPONENTS)
 if(NOT METIS_FOUND)
     set(METIS_INCLUDE_DIR ${LBC_ROOT_DIR}/external/metis/metis_shared-src/include/)
     set(METIS_INCLUDES ${LBC_ROOT_DIR}/external/metis/metis_shared-src/include/)
@@ -102,7 +103,10 @@ if(NOT METIS_FOUND)
     set(METIS_LIBRARIES ${LBC_ROOT_DIR}/lib/)
         set(METIS_LIB metis)
     set(METIS_FOUND TRUE)
+else()
+    set(METIS_LIB ${METIS_LIBRARY})
 endif()
+
 add_definitions(-DMETIS)
 #[[
     set(METIS_INCLUDE_DIR ${LBC_ROOT_DIR}/external/metis/metis-src/include/)
@@ -196,6 +200,7 @@ set(ALL_LIBS
         ${PAPI_LIB_NAME2}
         ${METIS_LIB}
         lbc
+
         )
 
 set(ALL_SOURCE_FILES
