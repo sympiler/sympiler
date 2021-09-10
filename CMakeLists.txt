@@ -104,7 +104,7 @@ if(NOT METIS_FOUND)
         set(METIS_LIB metis)
     set(METIS_FOUND TRUE)
 else()
-    set(METIS_LIB ${METIS_LIBRARY})
+    set(METIS_LIB ${METIS_LIBRARIES})
 endif()
 
 add_definitions(-DMETIS)
