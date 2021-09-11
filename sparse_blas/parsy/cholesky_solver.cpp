@@ -270,14 +270,14 @@ namespace sym_lib {
    size_t SM_size = 0;
    if (C == NULL && B->nrow == 0) {
     SM_size = A->ncol;
-    SMp = new int[SM_size + 1];
+    SMp = new int[SM_size + 1]();
     SMp[0] = 0;
     for (int i = 1; i < A->ncol + 1; ++i) {
      SMp[i] = SMp[i - 1] + (A->p[i] - A->p[i - 1]);
     }
    } else if (C == NULL && B->nrow > 0) {
     SM_size = A->ncol + B->nrow;
-    SMp = new int[SM_size + 1];
+    SMp = new int[SM_size + 1]();
     SMp[0] = 0;
     for (int i = 1; i < A->ncol + 1; ++i) {
      SMp[i] = SMp[i - 1] + (A->p[i] - A->p[i - 1]) +
@@ -285,7 +285,7 @@ namespace sym_lib {
     }
    } else if (C->nrow > 0 && B->nrow == 0) {
     SM_size = A->ncol + C->nrow;
-    SMp = new int[SM_size + 1];
+    SMp = new int[SM_size + 1]();
     SMp[0] = 0;
     for (int i = 1; i < A->ncol + 1; ++i) {
      SMp[i] = SMp[i - 1] + (A->p[i] - A->p[i - 1]) +
@@ -293,7 +293,7 @@ namespace sym_lib {
     }
    } else {// both are not null
     SM_size = A->ncol + B->nrow + C->nrow;
-    SMp = new int[SM_size + 1];
+    SMp = new int[SM_size + 1]();
     SMp[0] = 0;
     for (int i = 1; i < A->ncol + 1; ++i) {
      SMp[i] = SMp[i - 1] + (A->p[i] - A->p[i - 1]) +
@@ -306,7 +306,7 @@ namespace sym_lib {
     SMp[k] = SMp[k - 1] + 1;
    }
    SM_nz = SMp[SM_size];
-   SMi = new int[SM_nz];
+   SMi = new int[SM_nz]();
    SMx = new double[SM_nz]();
 
    int base1 = A->ncol;
@@ -483,7 +483,7 @@ namespace sym_lib {
    //ws = new double[2*AorSM->ncol]();
    //ws_int = new int[3*AorSM->ncol]();
    //pinv = new int[AorSM->ncol];
-   perm_piv = new int[AorSM->ncol];
+   perm_piv = new int[AorSM->ncol]();
    marked = new bool[AorSM->ncol]();
    if (simplicial_alloc) {
     L->x_s = new double[L->xsize_s]();
@@ -495,7 +495,7 @@ namespace sym_lib {
    if (solver_mode == 0) {
     atree = L->sParent;
     if (simplicial_alloc) {
-     etree_mod = new int[AorSM->ncol];
+     etree_mod = new int[AorSM->ncol]();
      for (int k = 0; k < AorSM->ncol; ++k) {
       etree_mod[k] = L->Parent[k];
      }
@@ -512,8 +512,8 @@ namespace sym_lib {
     l_pe = NULL; //new int[AorSM->ncol];
     l_i = L->i; //new int[L->xsize]();
     l_x = L->x_s; //new double[L->xsize]();
-    atree = new int[L->nsuper];
-    visible_sn = new bool[L->nsuper];
+    atree = new int[L->nsuper]();
+    visible_sn = new bool[L->nsuper]();
     for (int i = 0; i < L->nsuper; ++i) {
      atree[i] = L->sParent[i];
     }
@@ -626,7 +626,8 @@ namespace sym_lib {
    A_ord = ptranspose(AT_ord, 2, NULL, NULL, 0, status);
    etree = L->Parent;
    atree = L->sParent;
-   numerical_factorization();
+   auto ret = numerical_factorization();
+   return ret;
   }
 
   int SolverSettings::numerical_factorization() {
@@ -792,7 +793,7 @@ namespace sym_lib {
    delete []x;
    x = new double[n_rhs*A_ord->ncol]();
    psi->start = psi->toc();
-   double *x_ord = new double[n_rhs*A_ord->ncol];
+   double *x_ord = new double[n_rhs*A_ord->ncol]();
    double *rhs_ord = ws + A_ord->ncol;
 #pragma omp parallel for
    for (int i = 0; i < A_ord->ncol; ++i) {
@@ -869,7 +870,7 @@ namespace sym_lib {
    int norm_type = 0;
    CSC *TMP = ptranspose(A_ord, 2, L->IPerm, NULL, 0, status);
    CSC *TMP2 = ptranspose(TMP, 2, NULL, NULL, 0, status);
-   double *res = new double[TMP2->ncol];
+   double *res = new double[TMP2->ncol]();
    x_l1 = norm_dense(1, TMP2->ncol, x, norm_type);
    rhs_l1 = norm_dense(1, TMP2->ncol, rhs, norm_type);
    spmv_csc_sym_one_int(TMP2->ncol, TMP2->p, TMP2->i, TMP2->x, -1, alp, bet,
@@ -939,9 +940,9 @@ namespace sym_lib {
   int SolverSettings::check_ldlt_factor() { // TODO move it to unit test later
 
    size_t *ia = new size_t[A_ord->ncol + 1]();
-   int *ja = new int[L->xsize];
-   double *a = new double[L->xsize];
-   size_t *A2p = new size_t[A_ord->ncol + 1];
+   int *ja = new int[L->xsize]();
+   double *a = new double[L->xsize]();
+   size_t *A2p = new size_t[A_ord->ncol + 1]();
    for (int m = 0; m <= A_ord->ncol; ++m) {
     A2p[m] = static_cast<size_t >(A_ord->p[m]);
    }
