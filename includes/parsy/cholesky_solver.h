@@ -54,81 +54,81 @@ namespace sym_lib {
 
   struct SolverSettings {
    int solver_mode; //0 is normal solve, 1 is row/col addition
-   BCSC *L;
-   double *valL, *d_val, *x, *rhs;
+   BCSC *L{};
+   double *valL{}, *d_val{}, *x, *rhs;
    CSC *A, *SM; // SuperMatrix
-   CSC *AorSM; // Pointer to A or SM
+   CSC *AorSM{}; // Pointer to A or SM
    CSC *A_ord, *AT_ord; //reordered matrix, either SM or A
-   CSC *B, *BT;
-   CSC *C, *CT; // These are for QP mode.
-   size_t dim1;
-   size_t base; //base is zero for mode 0 and SM->ncol - B->nrow for mode 1
-   int *perm_piv, *pinv;
+   CSC *B, *BT{};
+   CSC *C, *CT{}; // These are for QP mode.
+   size_t dim1{};
+   size_t base{}; //base is zero for mode 0 and SM->ncol - B->nrow for mode 1
+   int *perm_piv{}, *pinv{};
    int a_consistent; // Is A ordered according to L?
-   int ldl_variant, ldl_update_variant;
-   double *sm_rhs, *sm_solution;
-   int *l_pb, *l_pe, *l_i;//simplicial format
-   double *l_x;
-   int is_super, simplicial_alloc;
-   size_t ws_int_size;
-   size_t ws_dbl_size;
-   bool is_factorized, is_solved;
-   size_t *in_perm;
+   int ldl_variant{}, ldl_update_variant{};
+   double *sm_rhs{}, *sm_solution{};
+   int *l_pb{}, *l_pe{}, *l_i{};//simplicial format
+   double *l_x{};
+   int is_super{}, simplicial_alloc{};
+   size_t ws_int_size{};
+   size_t ws_dbl_size{};
+   bool is_factorized{}, is_solved{};
+   size_t *in_perm{};
 
    //parallel variables
-   int n_level, n_par;
-   int *level_ptr, *level_set, *par_ptr, *par_set;
-   int n_level_s, n_par_s;
-   int *level_ptr_s, *par_ptr_s, *par_set_s;
-   int *s_level_ptr, *s_level_set;
-   int s_level_no;
-   int *prune_ptr, *prune_set;
-   int *extra_cols;
+   int n_level{}, n_par{};
+   int *level_ptr, *level_set{}, *par_ptr, *par_set;
+   int n_level_s{}, n_par_s{};
+   int *level_ptr_s{}, *par_ptr_s{}, *par_set_s{};
+   int *s_level_ptr{}, *s_level_set{};
+   int s_level_no{};
+   int *prune_ptr{}, *prune_set{};
+   int *extra_cols{};
    //sparsity related
-   int n_relax[3];
-   double z_relax[3];
-   int max_sup_wid, max_col, status = 0;
-   int ordering_type; //TODO to be used later.
+   int n_relax[3]{};
+   double z_relax[3]{};
+   int max_sup_wid{}, max_col{}, status = 0;
+   int ordering_type{}; //TODO to be used later.
    //etree info
-   int *atree, *etree, *etree_mod;
-   int *visible_cnt; //number of invisible col of a supernode
-   int *child_ptr, *child_no, *num_child;
-   int *child_sn_ptr, *child_sn_no, *num_sn_child;
+   int *atree{}, *etree{}, *etree_mod{};
+   int *visible_cnt{}; //number of invisible col of a supernode
+   int *child_ptr{}, *child_no{}, *num_child{};
+   int *child_sn_ptr{}, *child_sn_no{}, *num_sn_child{};
    std::vector<std::vector<int>> children_vec;
    std::vector<int> detached_nodes;
    SYM_ORDER sym_order;
-   int col_del, to_del;
+   int col_del{}, to_del;
    //Numeric related
-   double reg_diag;
-   int num_pivot;
+   double reg_diag{};
+   int num_pivot{};
    // For iterative refinement
-   int max_iter, max_inner_iter;
-   int num_ref_iter; //output
-   int req_ref_iter;
-   double tol_abs, tol_rel;
+   int max_iter{}, max_inner_iter{};
+   int num_ref_iter{}; //output
+   int req_ref_iter{};
+   double tol_abs{}, tol_rel{};
    std::vector<perturbed_value> perturbed_diags;
-   int regularization;
+   int regularization{};
 
    //architecture info
-   int cost_param, level_param, final_seq_node;
-   int chunk, num_thread, thread_thresh;
+   int cost_param{}, level_param{}, final_seq_node{};
+   int chunk{}, num_thread{}, thread_thresh{};
 
    //Profiling info FIXME: define profiling class
    profiling_solver_info *psi;
 
    //Update/Downdate
    std::vector<int> modified_sns;
-   bool *marked, *visible_sn;
-   double *ws; // workspace for double computations
+   bool *marked{}, *visible_sn;
+   double *ws{}; // workspace for double computations
    //double *ws_zeroed; //after each process, this is zero
    //int *ws_int; // workspace for integer computations
-   double *extra_rhs;
+   double *extra_rhs{};
    //Internal vars
    int remove_trans;
 
    //Norms
-   double A_l1, x_l1, rhs_l1, res_l1;
-   double bwd_err;
+   double A_l1{}, x_l1{}, rhs_l1{}, res_l1{};
+   double bwd_err{};
 
    SolverSettings(CSC *Amat);
 
