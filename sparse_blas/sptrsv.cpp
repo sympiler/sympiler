@@ -22,7 +22,7 @@ namespace sym_lib {
   }
  }
 
-
+/// for unit diagonal L-factor from ILU0
  void sptrsv_csr_ilu(int n, const int *Lp, const int *Li, const double *Lx,
    const int*diags, double *x) {
   int i, j;
@@ -31,7 +31,7 @@ namespace sym_lib {
    for (j = Lp[i]; j < dia; j++) {
     x[i] -= Lx[j] * x[Li[j]];
    }
-   x[i] /= Lx[dia];
+   //x[i] /= Lx[dia];
   }
  }
 
