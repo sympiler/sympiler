@@ -11,6 +11,7 @@ namespace sym_lib {
                const double *x, double *y) {
   int i, j;
   for (i = 0; i < n; i++) {
+   y[i]=0;
    for (j = Ap[i]; j < Ap[i + 1]; j++) {
     y[i] += Ax[j] * x[Ai[j]];
    }
@@ -40,6 +41,7 @@ namespace sym_lib {
 #endif
 #pragma omp for schedule(static) nowait
   for (int i = 0; i < n; i++) {
+   y[i]=0;
    for (int j = Ap[i]; j < Ap[i + 1]; j++) {
     y[i] += Ax[j] * x[Ai[j]];
    }
