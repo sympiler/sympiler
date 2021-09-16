@@ -97,7 +97,7 @@ endif()
 
 find_package(METIS OPTIONAL_COMPONENTS)
 if(NOT METIS_FOUND)
-    set(METIS_INCLUDE_DIR ${LBC_ROOT_DIR}/external/metis/metis_shared-src/include/)
+    set(METIS_INCLUDE_DIRS ${LBC_ROOT_DIR}/external/metis/metis_shared-src/include/)
     set(METIS_INCLUDES ${LBC_ROOT_DIR}/external/metis/metis_shared-src/include/)
     set(METIS_LIBRARY ${LBC_ROOT_DIR}/lib/)
     set(METIS_LIBRARIES ${LBC_ROOT_DIR}/lib/)
@@ -185,7 +185,7 @@ endif()
 
 include_directories(
         ${MKL_INCLUDE_DIR}
-        ${METIS_INCLUDE_DIR}
+        ${METIS_INCLUDE_DIRS}
         ${METIS_INCLUDES}
         ${BLAS_INC}
         ${LBC_INC}
