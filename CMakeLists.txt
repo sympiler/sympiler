@@ -191,6 +191,7 @@ include_directories(
         ${LBC_INC}
         includes
         includes/parsy/
+        includes/linear_solver/
 )
 
 
@@ -200,7 +201,6 @@ set(ALL_LIBS
         ${PAPI_LIB_NAME2}
         ${METIS_LIB}
         lbc
-
         )
 
 set(ALL_SOURCE_FILES
