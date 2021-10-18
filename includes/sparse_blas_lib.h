@@ -351,6 +351,29 @@ namespace sym_lib {
  void mat_postmult_diag_parallel(CSR *A, const double *d);
  void mat_postmult_diag_parallel(CSC *A, const double *d);
 
+ ////////////////////////////// CHOLESKY
+
+ /// Left looking simplicial cholesky with reach function coupled
+ /// Performs a Cholesky decomposition on a given matrix (c, r, values), i.e.
+ /// stored in compressed column format, and produces L, which are
+ /// stored in column compressed format. The column sparsity pattern of L
+ /// is provided in lC
+ /// The row sparsity pattern of L is provided in lR
+ /// \param n
+ /// \param c
+ /// \param r
+ /// \param values
+ /// \param cT
+ /// \param rT
+ /// \param lC
+ /// \param lR
+ /// \param lValues
+ /// \param eTree
+ /// \return
+ bool cholesky_left_serial(const int n, const int* c, const int* r, const
+ double* values, const int* cT, const int* rT, const int* lC, const int*
+ lR, double* &lValues, const int *eTree);
+
 }
 
 

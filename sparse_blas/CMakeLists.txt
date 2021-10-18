@@ -17,6 +17,8 @@ if(MKL_FOUND)
 file(GLOB_RECURSE PARSY_SRC parsy/*.cpp)
 endif()
 
+file(GLOB_RECURSE LINSOLVE_SRC linear_solver/*.cpp)
+
 set(BLAS_SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/dense_blas/BLAS.cpp" )
 
 if(COMMAND cmake_policy)
@@ -30,11 +32,12 @@ add_library (sym_sparse_blas STATIC
         spilu0.cpp
         sptrsv_lt.cpp
         spldl.cpp
+        spcholesky.cpp
         other_operations.cpp
         diagonal_solver.cpp
         ${BLAS_SRC_FILES}
         ${PARSY_SRC}
-
+        ${LINSOLVE_SRC}
         )
 
 #add_dependencies(sym_sparse_blas metis)
