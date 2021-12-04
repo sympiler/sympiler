@@ -58,22 +58,23 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/)
 
 
 # Find OpenMP
-
 find_package(OpenMP)
 if (OPENMP_FOUND)
-    if(APPLE) #TODO: there might be a better support
+    if(APPLE) #TODO: set path for brew install libomp
         set(OpenMP_CXX_INCLUDE_DIRS  "/usr/local/include/")
-        set(OpenMP_CXX_INCLUDE_DIRS  "/usr/local/include/")
+        set(OpenMP_omp_LIBRARY "/usr/local/lib/libomp.dylib")
+        include_directories(
+                ${OpenMP_CXX_INCLUDE_DIRS}
+        )
+        link_libraries(
+            $OpenMP_omp_LIBRARY$
+        )
     endif()
-    include_directories(
-            ${OpenMP_CXX_INCLUDE_DIRS}
-    )
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     add_definitions(-DOPENMP)
 endif()
 
-#find_package(OPENMP)
 
 #add_definitions( -DPROFILE)
 #add_definitions( -DLOAD)
@@ -86,43 +87,6 @@ if(MKL_FOUND)
     add_definitions(-DMKL) # add openblas
     message(STATUS "Intel MKL not found, skipping supernodal Cholesky lib")
 endif()
-### Find Intel MKL if available
-#if(EXISTS "$ENV{MKLROOT}" OR EXISTS "$ENV{MKL_ROOT}")
-#    if(EXISTS "$ENV{MKLROOT}")
-#        set(MKLPATH "$ENV{MKLROOT}")
-#    else()
-#        set(MKLPATH "$ENV{MKL_ROOT}")
-#    endif()
-#
-#    if(APPLE)
-#        #find_package(OpenMP REQUIRED)
-#        set(MKL_INC "${MKLPATH}/include")
-#        set(MKL_LIB "${MKLPATH}/lib")
-#        set(MKL_LIB2 "${MKLPATH}/../compiler/lib")
-#    endif()
-#    if(UNIX AND NOT APPLE)
-#        set(MKL_INC "${MKLPATH}/include")
-#        set(MKL_LIB "${MKLPATH}/lib/intel64")
-#        # for iomp lib
-#        set(MKL_LIB2 "${MKLPATH}/../compiler/lib/intel64")
-#    endif()
-#    add_definitions(-DMKL)
-#    set(MKL 1)
-#    set(MKL_LIB_NAME "mkl_intel_lp64"
-#            "pthread"
-#            "mkl_intel_thread"
-#            "iomp5"
-#            "mkl_sequential"
-#            "mkl_core"
-#            #"mkl_sequential"
-#                     )
-##                     "mkl_intel_ilp64")
-#    message(STATUS "Intel MKL found")
-#else()
-#    message(STATUS "Intel MKL not found, building without MKL.")
-#    set(MKL_LIB_NAME "")
-#    set(MKL 0)
-#endif()
 
 ### Find PAPI for Profiling
 ### Can be cloned directly from https://bitbucket.org/icl/papi.git
@@ -176,7 +140,7 @@ set(ALL_SOURCE_FILES
         ${METIS_SOURCE_FILES})
 
 set(CMAKE_CXX_STANDARD 11)
-if(UNIX AND NOT APPLE)
+if(UNIX)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}   -std=c++11 -w -m64")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=x86-64   -mavx2")
 endif()
