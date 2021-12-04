@@ -62,12 +62,11 @@ find_package(OpenMP)
 if (OPENMP_FOUND)
     if(APPLE) #TODO: set path for brew install libomp
         set(OpenMP_CXX_INCLUDE_DIRS  "/usr/local/include/")
-        set(OpenMP_omp_LIBRARY "/usr/local/lib/libomp.dylib")
         include_directories(
                 ${OpenMP_CXX_INCLUDE_DIRS}
         )
         link_libraries(
-            $OpenMP_omp_LIBRARY$
+                OpenMP::OpenMP_CXX
         )
     endif()
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
