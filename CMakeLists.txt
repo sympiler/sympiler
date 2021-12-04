@@ -79,8 +79,7 @@ if(APPLE)
         set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
         set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
     endif()
-
-else()
+endif()
 
     find_package(OpenMP)
 
@@ -94,7 +93,6 @@ else()
         # set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
         add_definitions(-DOPENMP)
     endif()
-endif()
 
 #find_package(OPENMP)
 
