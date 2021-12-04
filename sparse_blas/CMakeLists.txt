@@ -40,3 +40,6 @@ add_library (sym_sparse_blas STATIC
 target_link_libraries(sym_sparse_blas PRIVATE
         ${ALL_LIBS}
         )
+if(OpenMP_FOUND)
+    target_link_libraries(sym_sparse_blas PRIVATE OpenMP::OpenMP_CXX)
+endif()

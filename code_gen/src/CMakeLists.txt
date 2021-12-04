@@ -21,6 +21,6 @@ add_executable(sympile sympiler.cpp Func.cpp Func.h Var.cpp Var.h Module.cpp Mod
         VILoopFuse.cpp VILoopFuse.h PeelIters.cpp PeelIters.h)
 
 
-target_link_libraries(sympile
-
-        )
+if(OpenMP_FOUND)
+    target_link_libraries(sympile PRIVATE OpenMP::OpenMP_CXX)
+endif()

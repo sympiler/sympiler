@@ -22,3 +22,6 @@ add_library (sympiler_utils STATIC
 
         )
 #target_link_libraries(sympiler_utils)
+if(OpenMP_FOUND)
+    target_link_libraries(sympiler_utils PRIVATE OpenMP::OpenMP_CXX)
+endif()
