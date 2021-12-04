@@ -23,10 +23,16 @@ add_executable(sptrsv_demo
         sptrsv_demo.cpp )
 
 
-target_link_libraries(sptrsv_demo
-        ${ALL_LIBS}
-        sym_sparse_blas
-        )
 if(OpenMP_FOUND)
-    target_link_libraries(sptrsv_demo PRIVATE OpenMP::OpenMP_CXX)
+    target_link_libraries(sptrsv_demo PRIVATE
+            ${ALL_LIBS}
+            sym_sparse_blas
+            OpenMP::OpenMP_CXX
+            )
+else()
+    target_link_libraries(sptrsv_demo PRIVATE
+            ${ALL_LIBS}
+            sym_sparse_blas
+            )
+
 endif()
