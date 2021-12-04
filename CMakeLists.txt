@@ -58,46 +58,19 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/)
 
 
 # Find OpenMP
-if(APPLE)
-    #    SET(CMAKE_C_COMPILER "/usr/local/opt/llvm/bin/clang")
-    #    SET(CMAKE_CXX_COMPILER "/usr/local/opt/llvm/bin/clang++")
-    #    SET(OPENMP_LIBRARIES "/usr/local/opt/llvm/lib")
-    #    SET(OPENMP_INCLUDES "/usr/local/opt/llvm/include")
-    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-        set(OpenMP_C "${CMAKE_C_COMPILER}")
-        set(OpenMP_C_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
-        set(OpenMP_C_LIB_NAMES "libomp" "libgomp" "libiomp5")
-        set(OpenMP_libomp_LIBRARY ${OpenMP_C_LIB_NAMES})
-        set(OpenMP_libgomp_LIBRARY ${OpenMP_C_LIB_NAMES})
-        set(OpenMP_libiomp5_LIBRARY ${OpenMP_C_LIB_NAMES})
+
+find_package(OpenMP)
+if (OPENMP_FOUND)
+    if(APPLE) #TODO: there might be a better support
+        set(OpenMP_CXX_INCLUDE_DIRS  "/usr/local/include/")
     endif()
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
-        set(OpenMP_CXX_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
-        set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5")
-        set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
-        set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
-        set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
-    endif()
+    include_directories(
+            ${OpenMP_CXX_INCLUDE_DIRS}
+    )
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    add_definitions(-DOPENMP)
 endif()
-
-    find_package(OpenMP)
-
-    if (OPENMP_FOUND)
-        #include_directories("${OPENMP_INCLUDES}")
-        #include_directories("/usr/local/include" "/usr/local/opt/llvm/include")
-        #link_directories("${OPENMP_LIBRARIES}")
-        #link_directories("/usr/local/lib" "/usr/local/opt/llvm/lib")
-        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-
-        message(STATUS "OpenMP found in: ${OpenMP_CXX_INCLUDE_DIRS}" )
-        include_directories(
-                ${OpenMP_CXX_INCLUDE_DIRS}
-        )
-        # set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-        add_definitions(-DOPENMP)
-    endif()
 
 #find_package(OPENMP)
 
