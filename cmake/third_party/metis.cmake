@@ -49,7 +49,7 @@ else()
     )
     list(REMOVE_ITEM SRC_FILES "${metis_SOURCE_DIR}/GKlib/gkregex.c")
 
-    add_library(metis STATIC ${INC_FILES} ${SRC_FILES})
+    add_library(metis SHARED ${INC_FILES} ${SRC_FILES})
     add_library(metis::metis ALIAS metis)
 
     if(MSVC)
