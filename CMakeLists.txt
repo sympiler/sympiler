@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.0)
+cmake_minimum_required( VERSION 3.15)
 
 
 list(APPEND CMAKE_MODULE_PATH
@@ -90,6 +90,11 @@ endif()
         #link_directories("/usr/local/lib" "/usr/local/opt/llvm/lib")
         set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+
+        message(STATUS "OpenMP found in: ${OpenMP_CXX_INCLUDE_DIRS}" )
+        include_directories(
+                ${OpenMP_CXX_INCLUDE_DIRS}
+        )
         # set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
         add_definitions(-DOPENMP)
     endif()
