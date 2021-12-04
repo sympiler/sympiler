@@ -63,6 +63,7 @@ find_package(OpenMP)
 if (OPENMP_FOUND)
     if(APPLE) #TODO: there might be a better support
         set(OpenMP_CXX_INCLUDE_DIRS  "/usr/local/include/")
+        set(OpenMP_CXX_INCLUDE_DIRS  "/usr/local/include/")
     endif()
     include_directories(
             ${OpenMP_CXX_INCLUDE_DIRS}
@@ -175,7 +176,7 @@ set(ALL_SOURCE_FILES
         ${METIS_SOURCE_FILES})
 
 set(CMAKE_CXX_STANDARD 11)
-if(UNIX)
+if(UNIX AND NOT APPLE)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}   -std=c++11 -w -m64")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=x86-64   -mavx2")
 endif()
