@@ -1,10 +1,8 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.15)
 
 
 
 include_directories(includes
-        #${SPARSE_UTIL_INC}
-        #${SPARSE_EXTN_INC}
         ${SPARSE_LIB_INC}
         ${LBC_INC}
         )
@@ -29,3 +27,6 @@ target_link_libraries(sptrsv_demo
         ${ALL_LIBS}
         sym_sparse_blas
         )
+if(OpenMP_FOUND)
+    target_link_libraries(sptrsv_demo PRIVATE OpenMP::OpenMP_CXX)
+endif()
