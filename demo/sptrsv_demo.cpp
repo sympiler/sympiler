@@ -37,7 +37,6 @@ int sptrsv_csc_demo02(int argc, char *argv[]){
  int *perm;
  std::string matrix_name;
  std::vector<timing_measurement> time_array;
- std::cout<<"starting ...\n";
  if (argc < 2) {
   PRINT_LOG("Not enough input args, switching to random mode.\n");
   n = 16;
@@ -61,13 +60,11 @@ int sptrsv_csc_demo02(int argc, char *argv[]){
  if(argc >= 4)
   p3 = atoi(argv[3]);
  /// Re-ordering L matrix
- std::cout<<"before metis ...\n";
 #ifdef METIS
  //We only reorder L since dependency matters more in l-solve.
  //perm = new int[n]();
  CSC *L1_csc_full = make_full(L1_csc);
  delete L1_csc;
- std::cout<<"starting metis ...\n";
  metis_perm_general(L1_csc_full, perm);
  L1_csc = make_half(L1_csc_full->n, L1_csc_full->p, L1_csc_full->i,
                     L1_csc_full->x);
@@ -80,7 +77,6 @@ int sptrsv_csc_demo02(int argc, char *argv[]){
  delete[]perm;
 #endif
 
- std::cout<<"done metis ...\n";
  L2_csr = csc_to_csr(L1_csc);
 
  double *y_serial, *y_correct = new double[n];
@@ -94,11 +90,9 @@ int sptrsv_csc_demo02(int argc, char *argv[]){
  copy_vector(0,n,y_serial,y_correct);
  //print_vec("x:\n", 0, n, y_correct);
 
- std::cout<<"serial done ...\n";
  auto *sls = new SptrsvLevelSet(L2_csr, L1_csc, y_correct, "levelset csc");
  t_levelset = sls->evaluate();
 
- std::cout<<"ls done ...\n";
  auto *sl = new SptrsvLBC(L2_csr, L1_csc, y_serial, "lbc",num_threads, p2, p3);
  t_par = sl->evaluate();
 
