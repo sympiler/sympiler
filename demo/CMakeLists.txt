@@ -7,13 +7,10 @@ include_directories(includes
         #${SPARSE_EXTN_INC}
         ${SPARSE_LIB_INC}
         ${LBC_INC}
-        ${METIS_INCLUDE_DIR}
-        ${METIS_INCLUDES}
         )
 
 link_directories(
         ${CMAKE_CURRENT_LIST_DIR}/../lib/
-        ${METIS_LIBRARY}
 )
 
 project(sptrsv_demo)

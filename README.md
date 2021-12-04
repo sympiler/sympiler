@@ -1,4 +1,6 @@
 ![APM](https://badgen.net/github/license/micromatch/micromatch)
+![example workflow](https://github.com/sympiler/sympiler/actions/workflows/cmakeUbuntu.yml/badge.svg)
+![example workflow](https://github.com/sympiler/sympiler/actions/workflows/cmakeMac.yml/badge.svg)
 
 # Sympiler
 Sympiler is a code generator for transforming sparse matrix methods.

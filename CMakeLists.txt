@@ -1,7 +1,10 @@
 cmake_minimum_required( VERSION 3.0)
 
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH
+        ${CMAKE_CURRENT_LIST_DIR}/cmake
+        "${CMAKE_CURRENT_LIST_DIR}/cmake/third_party"
+        )
 include(DownloadProject)
 
 project(sympiler_project)
@@ -39,7 +42,7 @@ AUX_SOURCE_DIRECTORY(${SPARSE_EXTN_SRC} SPARSE_EXTN_SRC_FILES)
 
 
 
-set(LBC_INC "${CMAKE_CURRENT_SOURCE_DIR}/lbc/includes")
+set(LBC_INC "${CMAKE_CURRENT_SOURCE_DIR}/lbc/include")
 set(LBC_SRC "${CMAKE_CURRENT_SOURCE_DIR}/lbc/src/")
 set(LBC_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lbc/lib/")
 set(LBC_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lbc/")
@@ -95,26 +98,8 @@ endif()
 #add_definitions( -DPROFILE)
 #add_definitions( -DLOAD)
 
-find_package(METIS OPTIONAL_COMPONENTS)
-if(NOT METIS_FOUND)
-    set(METIS_INCLUDE_DIRS ${LBC_ROOT_DIR}/external/metis/metis_shared-src/include/)
-    set(METIS_INCLUDES ${LBC_ROOT_DIR}/external/metis/metis_shared-src/include/)
-    set(METIS_LIBRARY ${LBC_ROOT_DIR}/lib/)
-    set(METIS_LIBRARIES ${LBC_ROOT_DIR}/lib/)
-        set(METIS_LIB metis)
-    set(METIS_FOUND TRUE)
-else()
-    set(METIS_LIB ${METIS_LIBRARIES})
-endif()
+include(metis)
 
-add_definitions(-DMETIS)
-#[[
-    set(METIS_INCLUDE_DIR ${LBC_ROOT_DIR}/external/metis/metis-src/include/)
-    set(METIS_INCLUDES ${LBC_ROOT_DIR}/external/metis/metis-src/include/)
-    set(METIS_LIBRARY ${LBC_ROOT_DIR}/lib/)
-    set(METIS_LIBRARIES ${LBC_ROOT_DIR}/lib/)
-    set(METIS_LIB_NAME "metis")
-]]
 
 find_package(MKL OPTIONAL_COMPONENTS)
 if(MKL_FOUND)
@@ -185,8 +170,6 @@ endif()
 
 include_directories(
         ${MKL_INCLUDE_DIR}
-        ${METIS_INCLUDE_DIRS}
-        ${METIS_INCLUDES}
         ${BLAS_INC}
         ${LBC_INC}
         includes
@@ -199,7 +182,7 @@ set(ALL_LIBS
         ${MKL_LIBRARIES}
         ${PAPI_LIB_NAME}
         ${PAPI_LIB_NAME2}
-        ${METIS_LIB}
+        metis::metis
         lbc
         )
 
@@ -222,7 +205,6 @@ Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 if(METIS_FOUND)
     add_definitions(-DMETIS)
-    set(METIS_SOURCE_FILES "${SPARSE_UTIL_SRC}/metis_interface.cpp")
     add_subdirectory(demo)
 endif()
 

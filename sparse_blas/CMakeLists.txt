@@ -7,11 +7,7 @@ include_directories(
         ${BLAS_INC}
        # ${SPARSE_EXTN_INC}
        # ${SPARSE_UTIL_INC}
-        ${MKL_INC}
         )
-link_directories(
-        ${METIS_LIBRARY}
-)
 
 if(MKL_FOUND)
 file(GLOB_RECURSE PARSY_SRC parsy/*.cpp)
@@ -41,6 +37,6 @@ add_library (sym_sparse_blas STATIC
         )
 
 #add_dependencies(sym_sparse_blas metis)
-target_link_libraries(sym_sparse_blas
+target_link_libraries(sym_sparse_blas PRIVATE
         ${ALL_LIBS}
         )
