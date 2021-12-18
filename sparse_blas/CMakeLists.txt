@@ -2,8 +2,8 @@ cmake_minimum_required( VERSION 3.0)
 project(sym_sparse_blas)
 
 include_directories(
-        #includes
-        #includes/parsy
+        #include
+        #include/parsy
         ${BLAS_INC}
        # ${SPARSE_EXTN_INC}
        # ${SPARSE_UTIL_INC}

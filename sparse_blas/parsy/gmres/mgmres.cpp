@@ -132,7 +132,7 @@ namespace sym_lib {
 
     The array UA can be used to locate the diagonal elements of the matrix.
 
-    It is assumed that every row of the matrix includes a diagonal element,
+    It is assumed that every row of the matrix include a diagonal element,
     and that the elements of each row have been ascending sorted.
 
   Licensing:

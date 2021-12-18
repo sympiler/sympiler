@@ -22,7 +22,7 @@ AUX_SOURCE_DIRECTORY(${SPARSE_LIB_SRC} SPARSE_LIB_SRC_FILES)
 set(SPARSE_UTIL_SRC "${CMAKE_CURRENT_SOURCE_DIR}/lbc/utils")
 set(SPARSE_EXTN_SRC "${SPARSE_UTIL_SRC}/external")
 #[[
-set(SPARSE_UTIL_INC "${CMAKE_CURRENT_SOURCE_DIR}/utils/includes")
+set(SPARSE_UTIL_INC "${CMAKE_CURRENT_SOURCE_DIR}/utils/include")
 set(SPARSE_UTIL_SRC "${CMAKE_CURRENT_SOURCE_DIR}/utils")
 #AUX_SOURCE_DIRECTORY(${SPARSE_UTIL_SRC} SPARSE_UTIL_SRC_FILES)
 set(SPARSE_UTIL_SRC_FILES
@@ -35,7 +35,7 @@ set(SPARSE_UTIL_SRC_FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/utils/lfactor_creation.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/utils/utils.cpp")
 
-set(SPARSE_EXTN_INC "${SPARSE_UTIL_SRC}/external/includes")
+set(SPARSE_EXTN_INC "${SPARSE_UTIL_SRC}/external/include")
 set(SPARSE_EXTN_SRC "${SPARSE_UTIL_SRC}/external")
 AUX_SOURCE_DIRECTORY(${SPARSE_EXTN_SRC} SPARSE_EXTN_SRC_FILES)
 ]]
@@ -86,6 +86,7 @@ include(metis)
 find_package(MKL OPTIONAL_COMPONENTS)
 if(MKL_FOUND)
     add_definitions(-DMKL) # add openblas
+else()
     message(STATUS "Intel MKL not found, skipping supernodal Cholesky lib")
 endif()
 
@@ -117,9 +118,9 @@ include_directories(
         ${MKL_INCLUDE_DIR}
         ${BLAS_INC}
         ${LBC_INC}
-        includes
-        includes/parsy/
-        includes/linear_solver/
+        include
+        include/parsy/
+        include/linear_solver/
 )
 
 
@@ -132,11 +133,6 @@ set(ALL_LIBS
         )
 
 set(ALL_SOURCE_FILES
-    #    ${SPARSE_LIB_SRC_FILES}
-    #    ${SPARSE_UTIL_SRC_FILES}
-    #    ${SPARSE_EXTN_SRC_FILES}
-    #    ${APPS_SRC_FILES} # TODO:some of them are mixed with blas, should be cleaned
-    #    ${LBC_SRC_FILES}
         ${BLAS_SRC_FILES}
         ${METIS_SOURCE_FILES})
 

@@ -51,13 +51,13 @@
 # The following variables control the behaviour of this module:
 #
 # SUITESPARSE_INCLUDE_DIR_HINTS: List of additional directories in which to
-#                                search for SuiteSparse includes,
+#                                search for SuiteSparse include,
 #                                e.g: /timbuktu/include.
 # SUITESPARSE_LIBRARY_DIR_HINTS: List of additional directories in which to
 #                                search for SuiteSparse libraries,
 #                                e.g: /timbuktu/lib.
 #
-# The following variables define the presence / includes & libraries for the
+# The following variables define the presence / include & libraries for the
 # SuiteSparse components searched for, the SUITESPARSE_XX variables are the
 # union of the variables for all components.
 #
@@ -465,7 +465,7 @@ if (SUITESPARSE_FOUND)
     list(APPEND SUITESPARSE_INCLUDE_DIRS
       ${UFCONFIG_INCLUDE_DIR})
   endif (UFCONFIG_FOUND)
-  # As SuiteSparse includes are often all in the same directory, remove any
+  # As SuiteSparse include are often all in the same directory, remove any
   # repetitions.
   list(REMOVE_DUPLICATES SUITESPARSE_INCLUDE_DIRS)
 
