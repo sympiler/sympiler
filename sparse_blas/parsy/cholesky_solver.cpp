@@ -236,8 +236,8 @@ namespace sym_lib {
 #endif
    chunk = 1;
    cost_param = num_thread;
-   level_param = -3;
-   final_seq_node = 50;// should be greater than 1
+   level_param = -1;
+   final_seq_node = 4000;// should be greater than 1
    n_relax[0] = 4;
    n_relax[1] = 16;
    n_relax[2] = 48;
