@@ -313,4 +313,48 @@ namespace sym_lib {
   }
  }
 
+
+/// triangular solve a diagonal matrix with a vector
+/// \param L input two dim array with size of rowNoxdNum
+/// \param v input two dim array with size ofrowNo x 1
+/// \param dNum input number of diagonals
+/// \param rowNo input number of rows
+/// \param result output two dim array with size of rowNo x 1
+/// \return
+    int BandedMatrixTriangularSolve(const double **L, const double **v, const int dNum,
+                                    const int rowNo, double **&result)
+    {
+        int k;
+        double s = 0;
+        int l=0;
+        int n = dNum/2 + 1;
+        double **rowIdx;
+        for(int i=0; i<rowNo; i++){
+            result[i][0] = v[i][0];
+        }
+        for(int i=0; i<n; i++){
+            k=i;
+            for(int j=0; j< rowNo-l; j++){
+                rowIdx[i][j] = k;
+                k++;
+            }
+            l++;
+        }
+        result[0][0] = v[0][0] / L[0][0];
+        for(int i=1; i<rowNo; i++){
+            l=1;
+            for(int j=1; j< n; j++){
+                for(int k=0; k<rowNo-l; k++){
+                    if (rowIdx[j][k] == i){
+                        s += L[j][k] * result[k][0];
+                    }
+                }
+                l++;
+            }
+            result[i][0] = (v[i][0] - s) / L[0][i];
+            s = 0;
+        }
+        return 1;
+    }
+
 }

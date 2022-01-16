@@ -182,4 +182,35 @@ namespace sym_lib {
    }
   }
  }
+
+    /// multiplies a diagonal matrix with a vector
+/// \param d input two dim array with size of rowxdNum
+/// \param v input two dim array with size of row x 1
+/// \param dNum input number of diagonals
+/// \param row input number of rows
+/// \param result output two dim array with size of row x 1
+/// \return
+    int BandedMatrixVectorMult(const double **d, const double **v,
+                               const int dNum,const int row,
+                               double **&result){
+
+        int d1 = dNum/2;
+
+        for(int i=0; i<row; i++){
+            if(i<=d1){
+                for(int j=0; j<=i ; j++){
+                    result[i][0] += d[i][j]*v[j][0];
+                }
+            }
+            if(i>d1){
+                for (int j = i; j >= j-d1; j--){
+                    result[i][0] += d[i][d1]*v[j][0];
+                    d1--;
+                }
+                d1=dNum/2;
+            }
+        }
+        return 1;
+    }
+
 }
