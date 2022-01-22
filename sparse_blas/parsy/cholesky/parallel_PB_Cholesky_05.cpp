@@ -25,6 +25,8 @@
 #include "blas/cblas.h"
 #endif
 
+#include <tbb/parallel_for.h>
+
 namespace sym_lib {
  namespace parsy {
 
@@ -68,26 +70,31 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
  start = std::chrono::system_clock::now();
 #endif
  for (int i1 = 0; i1 < nLevels - 1; ++i1) {
+
+#ifdef OPENMP
 #pragma omp parallel //shared(lValues)//private(map, contribs)
   {
 #pragma omp  for schedule(static) private(map, contribs, xi, startin, endin, duration2)
    for (int j1 = levelPtr[i1]; j1 < levelPtr[i1 + 1]; ++j1) {
-#ifdef BLASTIMING
-    int threadID = omp_get_thread_num();
-    std::chrono::time_point<std::chrono::system_clock> startBlas, endBlas;
+#else
+    tbb::parallel_for(levelPtr[i1], levelPtr[i1+1], 1,[&](int j1) {
 #endif
-    map = new int[n]();
-    contribs = new double[super_max * col_max]();
-    xi = new int[2 * supNo]();
-    //int pls = levelSet[j1];
+#ifdef BLASTIMING
+     int threadID = omp_get_thread_num();
+     std::chrono::time_point<std::chrono::system_clock> startBlas, endBlas;
+#endif
+     map = new int[n]();
+     contribs = new double[super_max * col_max]();
+     xi = new int[2 * supNo]();
+     //int pls = levelSet[j1];
 #ifdef TIMING1
-    startin = std::chrono::system_clock::now();
+     startin = std::chrono::system_clock::now();
 #endif
 //#pragma omp parallel for schedule(static,chunk)private(thth)
-    for (int k1 = parPtr[j1]; k1 < parPtr[j1 + 1]; ++k1) {
-     int s = partition[k1] + 1;
+     for (int k1 = parPtr[j1]; k1 < parPtr[j1 + 1]; ++k1) {
+      int s = partition[k1] + 1;
 
-     //for (int lev = 0; lev < nLevels; ++lev) {
+      //for (int lev = 0; lev < nLevels; ++lev) {
 //#pragma omp parallel private(map, contribs)
 //  {
 //   map = new int[n]();
@@ -96,163 +103,168 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
 //            schedule(dynamic,chunk)
 //   for (int lIter = levelPtr[lev]; lIter < levelPtr[lev+1]; ++lIter) {
 //    int s = levelSet[lIter]+1;
-     //printf("Thread %d has completed iteration %d.\n", omp_get_thread_num( ), s);
-     int curCol = s != 0 ? blockSet[s - 1] : 0;
-     int nxtCol = blockSet[s];
-     MKL_INT supWdt = nxtCol - curCol;
-     MKL_INT nSupR = Li_ptr[nxtCol] - Li_ptr[curCol];//row size of supernode
-     for (size_t i = Li_ptr[curCol], cnt = 0; i < Li_ptr[nxtCol]; ++i) {
-      map[lR[i]] = cnt++;//mapping L rows position to actual row idx
-     }
-     //copy the columns from A to L
-     for (int i = curCol; i < nxtCol; ++i) {//Copy A to L
-      int pad = i - curCol;
-      for (int j = c[i]; j < c[i + 1]; ++j) {
-       // if(r[j]>=i)//does not need to save upper part.
-       lValues[lC[i] + map[r[j]]] = values[j];
-       //   else
-       //      printf("dddd\n");
+      //printf("Thread %d has completed iteration %d.\n", omp_get_thread_num( ), s);
+      int curCol = s != 0 ? blockSet[s - 1] : 0;
+      int nxtCol = blockSet[s];
+      MKL_INT supWdt = nxtCol - curCol;
+      MKL_INT nSupR = Li_ptr[nxtCol] - Li_ptr[curCol];//row size of supernode
+      for (size_t i = Li_ptr[curCol], cnt = 0; i < Li_ptr[nxtCol]; ++i) {
+       map[lR[i]] = cnt++;//mapping L rows position to actual row idx
       }
-     }
-     double *src, *cur = &lValues[lC[curCol]];//pointing to first element of the current supernode
+      //copy the columns from A to L
+      for (int i = curCol; i < nxtCol; ++i) {//Copy A to L
+       int pad = i - curCol;
+       for (int j = c[i]; j < c[i + 1]; ++j) {
+        // if(r[j]>=i)//does not need to save upper part.
+        lValues[lC[i] + map[r[j]]] = values[j];
+        //   else
+        //      printf("dddd\n");
+       }
+      }
+      double *src, *cur = &lValues[lC[curCol]];//pointing to first element of the current supernode
 #ifndef PRUNE
-     top = ereach_sn(supNo, cT, rT, curCol, nxtCol, col2Sup, aTree, xi, xi + supNo);
-     assert(top >= 0);
-     for (int i = top; i < supNo; ++i) {
-      int lSN = xi[i];
+      top = ereach_sn(supNo, cT, rT, curCol, nxtCol, col2Sup, aTree, xi, xi + supNo);
+      assert(top >= 0);
+      for (int i = top; i < supNo; ++i) {
+       int lSN = xi[i];
 
 #else
-      for (int i = prunePtr[s - 1]; i < prunePtr[s]; ++i) {
-       int lSN = pruneSet[i];
+       for (int i = prunePtr[s - 1]; i < prunePtr[s]; ++i) {
+        int lSN = pruneSet[i];
 #endif
 #if DEBUG
-      if(xi[top++] != lSN)
-                         printf("fail");
+       if(xi[top++] != lSN)
+                          printf("fail");
 #endif
-      MKL_INT nSupRs = 0;
-      int cSN = blockSet[lSN];//first col of current SN
-      int cNSN = blockSet[lSN + 1];//first col of Next SN
-      size_t Li_ptr_cNSN = Li_ptr[cNSN];
-      size_t Li_ptr_cSN = Li_ptr[cSN];
-      MKL_INT nSNRCur = Li_ptr_cNSN - Li_ptr_cSN;
-      MKL_INT supWdts = cNSN - cSN;//The width of current src SN
-      int lb = 0, ub = 0;
-      bool sw = true;
-      for (size_t j = Li_ptr_cSN; j < Li_ptr_cNSN; ++j) {
-       //finding the overlap between curCol and curCol+supWdt in the src col
-       if (lR[j] >= curCol && sw) {
-        //src*transpose(row lR[j])
-        lb = j - Li_ptr_cSN;
-        sw = false;
+       MKL_INT nSupRs = 0;
+       int cSN = blockSet[lSN];//first col of current SN
+       int cNSN = blockSet[lSN + 1];//first col of Next SN
+       size_t Li_ptr_cNSN = Li_ptr[cNSN];
+       size_t Li_ptr_cSN = Li_ptr[cSN];
+       MKL_INT nSNRCur = Li_ptr_cNSN - Li_ptr_cSN;
+       MKL_INT supWdts = cNSN - cSN;//The width of current src SN
+       int lb = 0, ub = 0;
+       bool sw = true;
+       for (size_t j = Li_ptr_cSN; j < Li_ptr_cNSN; ++j) {
+        //finding the overlap between curCol and curCol+supWdt in the src col
+        if (lR[j] >= curCol && sw) {
+         //src*transpose(row lR[j])
+         lb = j - Li_ptr_cSN;
+         sw = false;
+        }
+        if (lR[j] < curCol + supWdt && !sw) {
+         ub = j - Li_ptr_cSN;
+        }
+        if (lR[j] >= curCol + supWdt)
+         break;
        }
-       if (lR[j] < curCol + supWdt && !sw) {
-        ub = j - Li_ptr_cSN;
-       }
-       if (lR[j] >= curCol + supWdt)
-        break;
-      }
-      nSupRs = Li_ptr_cNSN - Li_ptr_cSN - lb;
-      MKL_INT ndrow1 = ub - lb + 1;
-      MKL_INT ndrow3 = nSupRs - ndrow1;
-      src = &lValues[lC[cSN] +
-                     lb];//first element of src supernode starting from row lb
-      double *srcL = &lValues[lC[cSN] + ub + 1];
+       nSupRs = Li_ptr_cNSN - Li_ptr_cSN - lb;
+       MKL_INT ndrow1 = ub - lb + 1;
+       MKL_INT ndrow3 = nSupRs - ndrow1;
+       src = &lValues[lC[cSN] +
+                      lb];//first element of src supernode starting from row lb
+       double *srcL = &lValues[lC[cSN] + ub + 1];
 #ifdef BLASTIMING
-      startBlas = std::chrono::system_clock::now();
+       startBlas = std::chrono::system_clock::now();
 #endif
 #ifdef MKL
-      dsyrk("L", "N", &ndrow1, &supWdts, one, src, &nSNRCur, zero,
-            contribs, &nSupRs);
+       dsyrk("L", "N", &ndrow1, &supWdts, one, src, &nSNRCur, zero,
+             contribs, &nSupRs);
 #endif
 #ifdef OPENBLAS
-      dsyrk_("L","N",&ndrow1,&supWdts,one,src,&nSNRCur,zero,
-                             contribs,&nSupRs);
-#endif
-#ifdef MYBLAS
-      //TODO
-#endif
-      // MKL_Domain_Set_Num_Threads(5,MKL_DOMAIN_BLAS);
-      if (ndrow3 > 0) {
-#ifdef MKL
-       dgemm("N", "C", &ndrow3, &ndrow1, &supWdts, one, srcL, &nSNRCur,
-             src, &nSNRCur, zero, &contribs[ndrow1], &nSupRs);
-#endif
-#ifdef OPENBLAS
-       dgemm_("N","C",&ndrow3,&ndrow1,&supWdts,one,srcL,&nSNRCur,
-                                src,&nSNRCur,zero,contribs+ndrow1,&nSupRs );
+       dsyrk_("L","N",&ndrow1,&supWdts,one,src,&nSNRCur,zero,
+                              contribs,&nSupRs);
 #endif
 #ifdef MYBLAS
        //TODO
 #endif
-#ifdef BLASTIMING
-       endBlas = std::chrono::system_clock::now();
-       elapsed_seconds = (endBlas-startBlas);
-       blasTimePerThread[threadID]+=elapsed_seconds.count();
+       // MKL_Domain_Set_Num_Threads(5,MKL_DOMAIN_BLAS);
+       if (ndrow3 > 0) {
+#ifdef MKL
+        dgemm("N", "C", &ndrow3, &ndrow1, &supWdts, one, srcL, &nSNRCur,
+              src, &nSNRCur, zero, &contribs[ndrow1], &nSupRs);
 #endif
-      }
-      //copying contrib to L
-      for (int i = 0; i < ndrow1; ++i) {//Copy contribs to L
-       int col = map[lR[Li_ptr_cSN + i + lb]];//col in the SN
-       for (int j = i; j < nSupRs; ++j) {
-        int cRow = lR[Li_ptr_cSN + j + lb];//corresponding row in SN
-        //lValues[lC[curCol+col]+ map[cRow]] -= contribs[i*nSupRs+j];
-        cur[col * nSupR + map[cRow]] -= contribs[i * nSupRs + j];
+#ifdef OPENBLAS
+        dgemm_("N","C",&ndrow3,&ndrow1,&supWdts,one,srcL,&nSNRCur,
+                                 src,&nSNRCur,zero,contribs+ndrow1,&nSupRs );
+#endif
+#ifdef MYBLAS
+        //TODO
+#endif
+#ifdef BLASTIMING
+        endBlas = std::chrono::system_clock::now();
+        elapsed_seconds = (endBlas-startBlas);
+        blasTimePerThread[threadID]+=elapsed_seconds.count();
+#endif
+       }
+       //copying contrib to L
+       for (int i = 0; i < ndrow1; ++i) {//Copy contribs to L
+        int col = map[lR[Li_ptr_cSN + i + lb]];//col in the SN
+        for (int j = i; j < nSupRs; ++j) {
+         int cRow = lR[Li_ptr_cSN + j + lb];//corresponding row in SN
+         //lValues[lC[curCol+col]+ map[cRow]] -= contribs[i*nSupRs+j];
+         cur[col * nSupR + map[cRow]] -= contribs[i * nSupRs + j];
+        }
        }
       }
+      //MKL_Domain_Set_Num_Threads(1,MKL_DOMAIN_BLAS);
+#ifdef BLASTIMING
+      startBlas = std::chrono::system_clock::now();
+#endif
+#ifdef MKL
+      dpotrf("L", &supWdt, cur, &nSupR, &info);
+#endif
+      if (info != 0)
+       break;
+#ifdef OPENBLAS
+       dpotrf_("L",&supWdt,cur,&nSupR,&info);
+#endif
+#ifdef MYBLAS
+       Cholesky_col(nSupR,supWdt,cur);
+#endif
+
+      MKL_INT rowNo = nSupR - supWdt;
+#ifdef MKL
+      //MKL_Domain_Set_Num_Threads(4,MKL_DOMAIN_BLAS);
+      dtrsm("R", "L", "C", "N", &rowNo, &supWdt, one,
+            cur, &nSupR, &cur[supWdt], &nSupR);
+#endif
+#ifdef OPENBLAS
+      dtrsm_("R", "L", "C", "N", &rowNo, &supWdt,one,
+                         cur,&nSupR,&cur[supWdt],&nSupR);
+#endif
+#ifdef MYBLAS
+      for (int i = supWdt; i < nSupR; ++i) {
+                      lSolve_dense_col(nSupR,supWdt,cur,&cur[i]);
+                  }//TODO
+#endif
+#ifdef BLASTIMING
+      endBlas = std::chrono::system_clock::now();
+      elapsed_seconds = (endBlas-startBlas);
+      blasTimePerThread[threadID]+=elapsed_seconds.count();
+#endif
+
+      //        }
+      /*int thth3=omp_get_thread_num();
+      std::cout<<"-"<<thth3<<"-";*/
      }
-     //MKL_Domain_Set_Num_Threads(1,MKL_DOMAIN_BLAS);
-#ifdef BLASTIMING
-     startBlas = std::chrono::system_clock::now();
-#endif
-#ifdef MKL
-     dpotrf("L", &supWdt, cur, &nSupR, &info);
-#endif
-     if (info != 0)
-      break;
-#ifdef OPENBLAS
-     dpotrf_("L",&supWdt,cur,&nSupR,&info);
-#endif
-#ifdef MYBLAS
-     Cholesky_col(nSupR,supWdt,cur);
-#endif
-
-     MKL_INT rowNo = nSupR - supWdt;
-#ifdef MKL
-     //MKL_Domain_Set_Num_Threads(4,MKL_DOMAIN_BLAS);
-     dtrsm("R", "L", "C", "N", &rowNo, &supWdt, one,
-           cur, &nSupR, &cur[supWdt], &nSupR);
-#endif
-#ifdef OPENBLAS
-     dtrsm_("R", "L", "C", "N", &rowNo, &supWdt,one,
-                        cur,&nSupR,&cur[supWdt],&nSupR);
-#endif
-#ifdef MYBLAS
-     for (int i = supWdt; i < nSupR; ++i) {
-                     lSolve_dense_col(nSupR,supWdt,cur,&cur[i]);
-                 }//TODO
-#endif
-#ifdef BLASTIMING
-     endBlas = std::chrono::system_clock::now();
-     elapsed_seconds = (endBlas-startBlas);
-     blasTimePerThread[threadID]+=elapsed_seconds.count();
-#endif
-
-     //        }
-     /*int thth3=omp_get_thread_num();
-     std::cout<<"-"<<thth3<<"-";*/
-    }
 #ifdef TIMING1
-    endin = std::chrono::system_clock::now();
-    elapsed_seconds = endin-startin;
-    duration1=elapsed_seconds.count();
-    int thth2=omp_get_thread_num();
-    std::cout<<"**"<<thth2<<" : "<<j1<<" "<<duration1<<"\n";
+     endin = std::chrono::system_clock::now();
+     elapsed_seconds = endin-startin;
+     duration1=elapsed_seconds.count();
+     int thth2=omp_get_thread_num();
+     std::cout<<"**"<<thth2<<" : "<<j1<<" "<<duration1<<"\n";
 #endif
-    delete[]xi;
-    delete[]contribs;
-    delete[]map;
-   }
-  }
+     delete[]xi;
+     delete[]contribs;
+     delete[]map;
+#ifdef OPENMP
+     }
+    }
+#else
+    }
+    );
+#endif
   if (info != 0)
    return false;
  }

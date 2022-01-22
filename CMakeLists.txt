@@ -68,9 +68,8 @@ if (OPENMP_FOUND)
         link_libraries(
                 OpenMP::OpenMP_CXX
         )
-
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mmacosx-version-min=10.6")
-endif()
+    endif()
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     add_definitions(-DOPENMP)
@@ -81,7 +80,7 @@ endif()
 #add_definitions( -DLOAD)
 
 include(metis)
-
+include(tbb)
 
 find_package(MKL OPTIONAL_COMPONENTS)
 if(MKL_FOUND)
@@ -129,6 +128,7 @@ set(ALL_LIBS
         ${PAPI_LIB_NAME}
         ${PAPI_LIB_NAME2}
         metis::metis
+        tbb_static
         lbc
         )
 
