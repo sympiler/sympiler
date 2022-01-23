@@ -24,7 +24,7 @@ endif()
     set(TBB_BUILD_TBBMALLOC_PROXY OFF CACHE BOOL " " FORCE)
     set(TBB_BUILD_TESTS OFF CACHE BOOL " " FORCE)
 #message("=== ${tbb_SOURCE_DIR}")
-    add_subdirectory(${tbb_SOURCE_DIR})
+    add_subdirectory(${tbb_SOURCE_DIR} build EXCLUDE_FROM_ALL)
 #    add_library(tbb::tbb ALIAS tbb)
 
 include_directories(

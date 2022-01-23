@@ -28,7 +28,8 @@ export MKLROOT /path/to/mkl
 If you don't set these variables, the build will continue without using 
 Intel MKL and the supernodal Cholesky will be excluded.
 
-
+### OpenMP
+You can use `-DSYMPILER_USE_TBB=ON` if you do not have OpenMP. CMake handles TBB dependency.
 
 ### Build
 

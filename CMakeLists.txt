@@ -8,10 +8,13 @@ list(APPEND CMAKE_MODULE_PATH
 include(DownloadProject)
 
 project(sympiler_project)
+
 set(SYMPILER_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/)
 set(SYMPILER_EXTERNAL ${CMAKE_CURRENT_LIST_DIR}/external)
+
+option(SYMPILER_USE_TBB "Use TBB for threading" OFF)
 
 # Defining paths
 set(SPARSE_LIB_INC "${CMAKE_CURRENT_SOURCE_DIR}/sparse_blas/includes")
@@ -73,9 +76,13 @@ set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mmacosx-version-min=10.6")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     add_definitions(-DOPENMP)
+
+
 endif()
 
-
+if(SYMPILER_USE_TBB)
+    add_definitions(-DUSE_TBB)
+endif()
 #add_definitions( -DPROFILE)
 #add_definitions( -DLOAD)
 

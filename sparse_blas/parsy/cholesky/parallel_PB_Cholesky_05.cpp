@@ -25,7 +25,10 @@
 #include "blas/cblas.h"
 #endif
 
+#ifdef USE_TBB
 #include <tbb/parallel_for.h>
+#endif
+#include <iostream>
 
 namespace sym_lib {
  namespace parsy {
@@ -47,10 +50,6 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
   * For timing using BLAS
   */
  int top = 0;
- // int *xi = new int[2*supNo]();
- //int col_max = n;
- int *map, *xi;
- double *contribs;
  double *blasTimePerThread = timing + 4;
  MKL_INT info;
  int thth = 0;
@@ -66,26 +65,38 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
  //omp_set_num_threads(6);
  //   std::cout<<"MAx threads are: " <<omp_get_max_threads()<<"\n";
  //omp_set_nested(1);
+ int **map_list = new int*[threads]();
+ double **contribs_list = new double*[threads]();
+ int **xi_list = new int*[threads]();
+ for (int i = 0; i < threads; ++i) {
+  map_list[i] = new int[n]();
+  contribs_list[i] = new double[super_max * col_max]();
+  xi_list[i] = new int[2 * supNo]();
+ }
 #ifdef TIMING
  start = std::chrono::system_clock::now();
 #endif
  for (int i1 = 0; i1 < nLevels - 1; ++i1) {
 
-#ifdef OPENMP
+#ifndef USE_TBB
 #pragma omp parallel //shared(lValues)//private(map, contribs)
   {
-#pragma omp  for schedule(static) private(map, contribs, xi, startin, endin, duration2)
+#pragma omp  for schedule(static) private(startin, endin, duration2)
    for (int j1 = levelPtr[i1]; j1 < levelPtr[i1 + 1]; ++j1) {
+    int worker_index = omp_get_thread_num();
 #else
     tbb::parallel_for(levelPtr[i1], levelPtr[i1+1], 1,[&](int j1) {
+      int worker_index = tbb::task_arena::current_thread_index();
 #endif
 #ifdef BLASTIMING
      int threadID = omp_get_thread_num();
      std::chrono::time_point<std::chrono::system_clock> startBlas, endBlas;
 #endif
-     map = new int[n]();
-     contribs = new double[super_max * col_max]();
-     xi = new int[2 * supNo]();
+
+     //std::cout<<worker_index<<"\n";
+     int *map = map_list[worker_index]; //new int[n]();
+     double *contribs = contribs_list[worker_index]; //new double[super_max * col_max]();
+     int *xi = xi_list[worker_index]; //new int[2 * supNo]();
      //int pls = levelSet[j1];
 #ifdef TIMING1
      startin = std::chrono::system_clock::now();
@@ -94,16 +105,6 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
      for (int k1 = parPtr[j1]; k1 < parPtr[j1 + 1]; ++k1) {
       int s = partition[k1] + 1;
 
-      //for (int lev = 0; lev < nLevels; ++lev) {
-//#pragma omp parallel private(map, contribs)
-//  {
-//   map = new int[n]();
-//   contribs = new double[super_max*col_max]();
-//#pragma omp for \
-//            schedule(dynamic,chunk)
-//   for (int lIter = levelPtr[lev]; lIter < levelPtr[lev+1]; ++lIter) {
-//    int s = levelSet[lIter]+1;
-      //printf("Thread %d has completed iteration %d.\n", omp_get_thread_num( ), s);
       int curCol = s != 0 ? blockSet[s - 1] : 0;
       int nxtCol = blockSet[s];
       MKL_INT supWdt = nxtCol - curCol;
@@ -255,10 +256,10 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
      int thth2=omp_get_thread_num();
      std::cout<<"**"<<thth2<<" : "<<j1<<" "<<duration1<<"\n";
 #endif
-     delete[]xi;
-     delete[]contribs;
-     delete[]map;
-#ifdef OPENMP
+//     delete[]xi;
+//     delete[]contribs;
+//     delete[]map;
+#ifndef USE_TBB
      }
     }
 #else
@@ -268,6 +269,7 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
   if (info != 0)
    return false;
  }
+
 
 #ifdef BLASTIMING
  int threadID = omp_get_thread_num();
@@ -288,9 +290,9 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
 #ifdef TIMING
  start = std::chrono::system_clock::now();
 #endif
- map = new int[n]();
- contribs = new double[super_max * col_max]();
- xi = new int[2 * supNo]();
+ int *map = map_list[0];// new int[n]();
+ double *contribs = contribs_list[0];// new double[super_max * col_max]();
+ int *xi = xi_list[0];// new int[2 * supNo]();
  for (int j1 = levelPtr[nLevels - 1]; j1 < levelPtr[nLevels]; ++j1) {
   for (int k1 = parPtr[j1]; k1 < parPtr[j1 + 1]; ++k1) {
    int s = partition[k1] + 1;
@@ -433,10 +435,20 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
  //std::cout<<duration2<<"; ";
  timing[1] = duration2;
 #endif
- delete[]xi;
- delete[]contribs;
- delete[]map;
+// delete[]xi;
+// delete[]contribs;
+// delete[]map;
 #endif
+
+ for (int i = 0; i < threads; ++i) {
+  delete []map_list[i];
+  delete []contribs_list[i];
+  delete []xi_list[i];
+ }
+ delete []map_list;
+ delete []contribs_list;
+ delete []xi_list;
+
  return true;
 }
 
