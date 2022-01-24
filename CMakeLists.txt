@@ -82,6 +82,7 @@ endif()
 
 if(SYMPILER_USE_TBB)
     add_definitions(-DUSE_TBB)
+    message(STATUS "TBB threading is enabled.")
 endif()
 #add_definitions( -DPROFILE)
 #add_definitions( -DLOAD)
