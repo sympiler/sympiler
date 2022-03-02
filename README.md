@@ -3,13 +3,12 @@
 ![example workflow](https://github.com/sympiler/sympiler/actions/workflows/cmakeMac.yml/badge.svg)
 
 # Sympiler
+
 Sympiler is a code generator for transforming sparse matrix methods.
 To access the list of publication and resources please visit: http://www.sympiler.com/
 
-
 **ParSy** is parallel version of Sympiler. The evaluation benchmark for ParSy is
 available from ParSy_bench repository: https://github.com/cheshmi/parsy_bench
-
 
 **NASOQ and LBL** solvers use Sympiler and ParSy code internally. For more information visit [NASOQ Webpage](https://nasoq.github.io/).
 
@@ -18,17 +17,22 @@ available from ParSy_bench repository: https://github.com/cheshmi/parsy_bench
 ### Dependencies
 
 #### METIS
+
 Resolved by cmake.
 
 #### Intel MKL
+
 Intel MKL should automatically set `MKLROOT` or `MKL_ROOT`, if not, please set:
+
 ```bash
 export MKLROOT /path/to/mkl
 ```
-If you don't set these variables, the build will continue without using 
+
+If you don't set these variables, the build will continue without using
 Intel MKL and the supernodal Cholesky will be excluded.
 
 ### OpenMP
+
 You can use `-DSYMPILER_USE_TBB=ON` if you do not have OpenMP. CMake handles TBB dependency.
 
 ### Build
@@ -41,5 +45,3 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make 
 ```
-
-

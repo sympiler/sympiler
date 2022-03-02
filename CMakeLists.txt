@@ -22,7 +22,7 @@ set(SPARSE_LIB_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(SPARSE_LIB_SRC "${CMAKE_CURRENT_SOURCE_DIR}/sparse_blas")
 AUX_SOURCE_DIRECTORY(${SPARSE_LIB_SRC} SPARSE_LIB_SRC_FILES)
 
-set(SPARSE_UTIL_SRC "${CMAKE_CURRENT_SOURCE_DIR}/lbc/utils")
+set(SPARSE_UTIL_SRC "${CMAKE_CURRENT_SOURCE_DIR}/aggregation/utils")
 set(SPARSE_EXTN_SRC "${SPARSE_UTIL_SRC}/external")
 #[[
 set(SPARSE_UTIL_INC "${CMAKE_CURRENT_SOURCE_DIR}/utils/include")
@@ -45,10 +45,10 @@ AUX_SOURCE_DIRECTORY(${SPARSE_EXTN_SRC} SPARSE_EXTN_SRC_FILES)
 
 
 
-set(LBC_INC "${CMAKE_CURRENT_SOURCE_DIR}/lbc/include")
-set(LBC_SRC "${CMAKE_CURRENT_SOURCE_DIR}/lbc/src/")
-set(LBC_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lbc/lib/")
-set(LBC_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lbc/")
+set(LBC_INC "${CMAKE_CURRENT_SOURCE_DIR}/aggregation/include")
+set(LBC_SRC "${CMAKE_CURRENT_SOURCE_DIR}/aggregation/src/")
+set(LBC_LIB "${CMAKE_CURRENT_SOURCE_DIR}/aggregation/lib/")
+set(LBC_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/aggregation/")
 #AUX_SOURCE_DIRECTORY(${LBC_SRC} LBC_SRC_FILES)
 
 
@@ -159,7 +159,7 @@ if(METIS_FOUND)
     add_subdirectory(demo)
 endif()
 
-add_subdirectory(lbc)
+add_subdirectory(aggregation)
 add_subdirectory(sparse_blas)
 add_subdirectory(Catch_tests)
 add_subdirectory(code_gen)
