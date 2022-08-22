@@ -43,3 +43,12 @@ target_link_libraries(sym_sparse_blas PRIVATE
 if(OpenMP_FOUND)
     target_link_libraries(sym_sparse_blas PRIVATE OpenMP::OpenMP_CXX)
 endif()
+
+#[[if(SYMPILER_USE_BLAS_MKL)
+    target_link_libraries(sym_sparse_blas PRIVATE mkl::mkl)
+    target_compile_definitions(sym_sparse_blas PRIVATE "MKL_BLAS")
+else]]
+if(SYMPILER_USE_BLAS_OpenBLAS)
+    target_link_libraries(sym_sparse_blas PRIVATE OpenBLAS::OpenBLAS)
+    target_compile_definitions(sym_sparse_blas PRIVATE "OPENBLAS")
+endif()

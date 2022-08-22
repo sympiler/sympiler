@@ -16,7 +16,9 @@
 
 #endif
 #ifdef OPENBLAS
-#include "blas/cblas.h"
+#include "openblas/cblas.h"
+#include "openblas/lapack.h"
+#define MKL_INT int
 #endif
 
 namespace sym_lib {
@@ -118,8 +120,8 @@ namespace sym_lib {
            contribs, &nSupRs);
 #endif
 #ifdef OPENBLAS
-     dsyrk_("L","N",&ndrow1,&supWdts,one,src,&nSNRCur,zero,
-                      contribs,&nSupRs);
+     cblas_dsyrk(CblasColMajor, CblasLower, CblasNoTrans,ndrow1,supWdts,one[0],src,
+                 nSNRCur,zero[0],contribs, nSupRs);
 #endif
 #ifdef MYBLAS
      //TODO
@@ -130,8 +132,9 @@ namespace sym_lib {
             src, &nSNRCur, zero, &contribs[ndrow1], &nSupRs);
 #endif
 #ifdef OPENBLAS
-      dgemm_("N","C",&ndrow3,&ndrow1,&supWdts,one,srcL,&nSNRCur,
-                         src,&nSNRCur,zero,contribs+ndrow1,&nSupRs );
+      cblas_dgemm(CblasColMajor,CblasNoTrans,CblasConjTrans,ndrow3,
+                  ndrow1,supWdts,one[0],srcL,nSNRCur,
+                         src,nSNRCur,zero[0],contribs+ndrow1,nSupRs );
 #endif
 #ifdef MYBLAS
       //TODO
@@ -153,7 +156,7 @@ namespace sym_lib {
     dpotrf("L", &supWdt, cur, &nSupR, &info);
 #endif
 #ifdef OPENBLAS
-    dpotrf_("L",&supWdt,cur,&nSupR,&info);
+     dpotrf_("L",&supWdt,cur,&nSupR,&info);
 #endif
 #ifdef MYBLAS
     Cholesky_col(nSupR,supWdt,cur);
@@ -165,8 +168,9 @@ namespace sym_lib {
           cur, &nSupR, &cur[supWdt], &nSupR);
 #endif
 #ifdef OPENBLAS
-    dtrsm_("R", "L", "C", "N", &rowNo, &supWdt,one,
-                 cur,&nSupR,&cur[supWdt],&nSupR);
+    cblas_dtrsm(CblasColMajor, CblasRight, CblasLower, CblasConjTrans, CblasNonUnit,
+                rowNo, supWdt,one[0],
+                 cur,nSupR,&cur[supWdt],nSupR);
 #endif
 #ifdef MYBLAS
     for (int i = supWdt; i < nSupR; ++i) {
