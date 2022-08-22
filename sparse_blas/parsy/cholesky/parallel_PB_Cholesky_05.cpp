@@ -21,8 +21,11 @@
 #include <common/Reach.h>
 
 #endif
+
 #ifdef OPENBLAS
-#include "blas/cblas.h"
+#include "openblas/cblas.h"
+#include "openblas/lapack.h"
+#define MKL_INT int
 #endif
 
 #ifdef USE_TBB
@@ -173,8 +176,8 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
              contribs, &nSupRs);
 #endif
 #ifdef OPENBLAS
-       dsyrk_("L","N",&ndrow1,&supWdts,one,src,&nSNRCur,zero,
-                              contribs,&nSupRs);
+       cblas_dsyrk(CblasColMajor, CblasLower, CblasNoTrans,ndrow1,supWdts,one[0],src,
+                   nSNRCur,zero[0],contribs, nSupRs);
 #endif
 #ifdef MYBLAS
        //TODO
@@ -186,8 +189,9 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
               src, &nSNRCur, zero, &contribs[ndrow1], &nSupRs);
 #endif
 #ifdef OPENBLAS
-        dgemm_("N","C",&ndrow3,&ndrow1,&supWdts,one,srcL,&nSNRCur,
-                                 src,&nSNRCur,zero,contribs+ndrow1,&nSupRs );
+        cblas_dgemm(CblasColMajor,CblasNoTrans,CblasConjTrans,ndrow3,
+                    ndrow1,supWdts,one[0],srcL,nSNRCur,
+                    src,nSNRCur,zero[0],contribs+ndrow1,nSupRs );
 #endif
 #ifdef MYBLAS
         //TODO
@@ -231,8 +235,9 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
             cur, &nSupR, &cur[supWdt], &nSupR);
 #endif
 #ifdef OPENBLAS
-      dtrsm_("R", "L", "C", "N", &rowNo, &supWdt,one,
-                         cur,&nSupR,&cur[supWdt],&nSupR);
+      cblas_dtrsm(CblasColMajor, CblasRight, CblasLower, CblasConjTrans, CblasNonUnit,
+                  rowNo, supWdt,one[0],
+                  cur,nSupR,&cur[supWdt],nSupR);
 #endif
 #ifdef MYBLAS
       for (int i = supWdt; i < nSupR; ++i) {
@@ -286,7 +291,9 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
 
 #if 1
 //  std::cout << omp_get_thread_num() << "-----";
+#ifdef MKL
  MKL_Domain_Set_Num_Threads(threads, MKL_DOMAIN_BLAS);
+#endif
 #ifdef TIMING
  start = std::chrono::system_clock::now();
 #endif
@@ -357,8 +364,8 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
           contribs, &nSupRs);
 #endif
 #ifdef OPENBLAS
-    dsyrk_("L","N",&ndrow1,&supWdts,one,src,&nSNRCur,zero,
-                    contribs,&nSupRs);
+    cblas_dsyrk(CblasColMajor, CblasLower, CblasNoTrans,ndrow1,supWdts,one[0],src,
+                nSNRCur,zero[0],contribs, nSupRs);
 #endif
 #ifdef MYBLAS
     //TODO
@@ -369,8 +376,9 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
            src, &nSNRCur, zero, &contribs[ndrow1], &nSupRs);
 #endif
 #ifdef OPENBLAS
-     dgemm_("N","C",&ndrow3,&ndrow1,&supWdts,one,srcL,&nSNRCur,
-                       src,&nSNRCur,zero,contribs+ndrow1,&nSupRs );
+     cblas_dgemm(CblasColMajor,CblasNoTrans,CblasConjTrans,ndrow3,
+                 ndrow1,supWdts,one[0],srcL,nSNRCur,
+                 src,nSNRCur,zero[0],contribs+ndrow1,nSupRs );
 #endif
 #ifdef MYBLAS
      //TODO
@@ -411,8 +419,9 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
          cur, &nSupR, &cur[supWdt], &nSupR);
 #endif
 #ifdef OPENBLAS
-   dtrsm_("R", "L", "C", "N", &rowNo, &supWdt,one,
-               cur,&nSupR,&cur[supWdt],&nSupR);
+   cblas_dtrsm(CblasColMajor, CblasRight, CblasLower, CblasConjTrans, CblasNonUnit,
+               rowNo, supWdt,one[0],
+               cur,nSupR,&cur[supWdt],nSupR);
 #endif
 #ifdef MYBLAS
    for (int i = supWdt; i < nSupR; ++i) {

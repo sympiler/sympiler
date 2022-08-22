@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.15)
+cmake_minimum_required( VERSION 3.16)
 
 
 list(APPEND CMAKE_MODULE_PATH
@@ -8,6 +8,45 @@ list(APPEND CMAKE_MODULE_PATH
 include(DownloadProject)
 
 project(sympiler_project)
+
+#----------------------------[ global configuration ]--------------------------#
+
+set(CMAKE_CXX_STANDARD 11)
+
+get_directory_property(HAS_PARENT PARENT_DIRECTORY)
+if(HAS_PARENT)
+    set(SYMPILER_IS_TOPLEVEL OFF)
+else()
+    set(SYMPILER_IS_TOPLEVEL ON)
+endif()
+
+if(UNIX )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
+endif()
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+
+#----------------------------------[ options ]---------------------------------#
+
+option(SYMPILER_BUILD_EXAMPLES "Build SYMPILER Examples" ${SYMPILER_IS_TOPLEVEL})
+option(SYMPILER_BUILD_DOCS "Build SYMPILER Documentation" ${SYMPILER_IS_TOPLEVEL})
+
+
+set(SYMPILER_BLAS_BACKEND "OpenBLAS" CACHE STRING "BLAS implementation for SYMPILER to use")
+set_property(CACHE SYMPILER_BLAS_BACKEND PROPERTY STRINGS MKL OpenBLAS)
+
+if(${SYMPILER_BLAS_BACKEND} STREQUAL "MKL")
+    set(SYMPILER_USE_BLAS_MKL      ON)
+    set(SYMPILER_USE_BLAS_OpenBLAS OFF)
+elseif(${SYMPILER_BLAS_BACKEND} STREQUAL "OpenBLAS")
+    set(SYMPILER_USE_BLAS_MKL      OFF)
+    set(SYMPILER_USE_BLAS_OpenBLAS ON)
+else()
+    message(FATAL_ERROR "unrecognized value for `SYMPILER_BLAS_BACKEND` option: '${SYMPILER_BLAS_BACKEND}'")
+endif()
+
+
 
 set(SYMPILER_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/)
@@ -24,24 +63,6 @@ AUX_SOURCE_DIRECTORY(${SPARSE_LIB_SRC} SPARSE_LIB_SRC_FILES)
 
 set(SPARSE_UTIL_SRC "${CMAKE_CURRENT_SOURCE_DIR}/aggregation/utils")
 set(SPARSE_EXTN_SRC "${SPARSE_UTIL_SRC}/external")
-#[[
-set(SPARSE_UTIL_INC "${CMAKE_CURRENT_SOURCE_DIR}/utils/include")
-set(SPARSE_UTIL_SRC "${CMAKE_CURRENT_SOURCE_DIR}/utils")
-#AUX_SOURCE_DIRECTORY(${SPARSE_UTIL_SRC} SPARSE_UTIL_SRC_FILES)
-set(SPARSE_UTIL_SRC_FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/utils/BCSCMatrix.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/utils/etree.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/utils/sparse_inspector.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/utils/sparse_io.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/utils/sparse_utilities.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/utils/test_utils.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/utils/lfactor_creation.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/utils/utils.cpp")
-
-set(SPARSE_EXTN_INC "${SPARSE_UTIL_SRC}/external/include")
-set(SPARSE_EXTN_SRC "${SPARSE_UTIL_SRC}/external")
-AUX_SOURCE_DIRECTORY(${SPARSE_EXTN_SRC} SPARSE_EXTN_SRC_FILES)
-]]
 
 
 
@@ -49,15 +70,22 @@ set(LBC_INC "${CMAKE_CURRENT_SOURCE_DIR}/aggregation/include")
 set(LBC_SRC "${CMAKE_CURRENT_SOURCE_DIR}/aggregation/src/")
 set(LBC_LIB "${CMAKE_CURRENT_SOURCE_DIR}/aggregation/lib/")
 set(LBC_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/aggregation/")
-#AUX_SOURCE_DIRECTORY(${LBC_SRC} LBC_SRC_FILES)
 
 
-#AUX_SOURCE_DIRECTORY(${BLAS_SRC} BLAS_SRC_FILES)
-#set(BLAS_SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/sparse_blas/dense_blas/BLAS.cpp" )
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/)
-
+#--------------------------------[ third party ]-------------------------------#
+if(SYMPILER_USE_BLAS_MKL)
+    find_package(MKL)
+    if(MKL_FOUND)
+        add_definitions(-DMKL) # add openblas
+    else()
+        message(STATUS "Intel MKL not found, please use OpenBLAS")
+    endif()
+elseif(SYMPILER_USE_BLAS_OpenBLAS)
+    #set(openblas_WITHOUT_LAPACK ON) # for win support
+    include(openblas)
+    add_definitions(-DOPENBLAS)
+endif()
 
 
 # Find OpenMP
@@ -76,28 +104,22 @@ set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mmacosx-version-min=10.6")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     add_definitions(-DOPENMP)
-
-
 endif()
 
 if(SYMPILER_USE_TBB)
     add_definitions(-DUSE_TBB)
     message(STATUS "TBB threading is enabled.")
 endif()
-#add_definitions( -DPROFILE)
-#add_definitions( -DLOAD)
+
 
 include(metis)
 include(tbb)
 
-find_package(MKL OPTIONAL_COMPONENTS)
-if(MKL_FOUND)
-    add_definitions(-DMKL) # add openblas
-else()
-    message(STATUS "Intel MKL not found, skipping supernodal Cholesky lib")
-endif()
+
 
 ### Find PAPI for Profiling
+#add_definitions( -DPROFILE)
+#add_definitions( -DLOAD)
 ### Can be cloned directly from https://bitbucket.org/icl/papi.git
 #if(EXISTS "$ENV{PAPIROOT}")
 #    if(EXISTS "$ENV{PAPIROOT}/src")
@@ -140,6 +162,8 @@ set(ALL_LIBS
         lbc
         )
 
+
+
 set(ALL_SOURCE_FILES
         ${BLAS_SRC_FILES}
         ${METIS_SOURCE_FILES})
@@ -163,5 +187,4 @@ add_subdirectory(aggregation)
 add_subdirectory(sparse_blas)
 add_subdirectory(Catch_tests)
 add_subdirectory(code_gen)
-#add_subdirectory(utils)  ## TODO: rmeove the folder
-#add_subdirectory(dense_blas)
+

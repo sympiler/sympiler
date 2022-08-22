@@ -22,7 +22,7 @@ namespace sym_lib {
    S_AMD,S_METIS,S_SCOTCH,S_GIVEN,S_NATURAL
   };
 
-#define MKL 1
+//#define MKL 1
 #define METIS 1
 
 
