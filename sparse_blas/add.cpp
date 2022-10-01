@@ -2,9 +2,9 @@
 // Created by kazem on 2/9/20.
 //
 
-#include <def.h>
-#include <sparse_utilities.h>
-#include "sparse_blas_lib.h"
+#include <aggregation/def.h>
+#include <aggregation/sparse_utilities.h>
+#include "sympiler/sparse_blas_lib.h"
 
 namespace sym_lib {
 

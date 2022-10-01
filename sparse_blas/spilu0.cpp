@@ -2,7 +2,7 @@
 // Created by kazem on 2020-05-20.
 //
 #include <omp.h>
-#include "def.h"
+#include "aggregation/def.h"
 
 namespace sym_lib{
 

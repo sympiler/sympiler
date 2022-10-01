@@ -5,7 +5,7 @@
 #ifndef FUSION_SPARSEBLASLIB_H
 #define FUSION_SPARSEBLASLIB_H
 
-#include "def.h"
+#include "aggregation/def.h"
 namespace sym_lib {
 
  ///////////////////////// SPTRSV

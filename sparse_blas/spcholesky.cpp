@@ -2,7 +2,7 @@
 // Created by kazem on 10/17/21.
 //
 
-#include <sparse_inspector.h>
+#include <aggregation/sparse_inspector.h>
 #include <valarray>
 
 namespace sym_lib {

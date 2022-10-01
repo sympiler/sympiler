@@ -2,8 +2,8 @@
 // Created by kazem on 10/17/21.
 //
 
-#include <sparse_blas_lib.h>
-#include "Cholesky.h"
+#include <sympiler/sparse_blas_lib.h>
+#include "sympiler/linear_solver/Cholesky.h"
 
 namespace sym_lib{
 

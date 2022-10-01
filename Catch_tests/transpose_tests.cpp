@@ -2,10 +2,10 @@
 // Created by Kazem on 10/12/19.
 //
 
-#include <def.h>
-#include <test_utils.h>
-#include <sparse_utilities.h>
-#include <sparse_blas_lib.h>
+#include <aggregation/def.h>
+#include <aggregation/test_utils.h>
+#include <aggregation/sparse_utilities.h>
+#include <sympiler/sparse_blas_lib.h>
 #include "catch.hpp"
 
 using namespace sym_lib;

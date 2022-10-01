@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include <cassert>
-#include <sparse_inspector.h>
+#include <aggregation/sparse_inspector.h>
 #include <omp.h>
 
 namespace sym_lib{

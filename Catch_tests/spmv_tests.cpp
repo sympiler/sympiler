@@ -7,11 +7,11 @@
 #define CATCH_CONFIG_MAIN
 
 #include <omp.h>
-#include <test_utils.h>
+#include <aggregation/test_utils.h>
 #include <utility>
 #include "catch.hpp"
-#include "sparse_blas_lib.h"
-#include "sparse_utilities.h"
+#include "sympiler/sparse_blas_lib.h"
+#include "aggregation/sparse_utilities.h"
 
 using namespace sym_lib;
 using namespace std;

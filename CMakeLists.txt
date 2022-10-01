@@ -148,8 +148,8 @@ include_directories(
         ${BLAS_INC}
         ${LBC_INC}
         include
-        include/parsy/
-        include/linear_solver/
+        include/sympiler/parsy/
+        include/sympiler/linear_solver/
 )
 
 
@@ -159,7 +159,7 @@ set(ALL_LIBS
         ${PAPI_LIB_NAME2}
         metis::metis
         tbb_static
-        lbc
+        aggregation
         )
 
 

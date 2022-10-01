@@ -5,8 +5,8 @@
 #ifndef SYMPILER_PROJECT_LINEARSOLVER_H
 #define SYMPILER_PROJECT_LINEARSOLVER_H
 
-#include <def.h>
-#include <lfactor_creation.h>
+#include <aggregation/def.h>
+#include <aggregation/lfactor_creation.h>
 
 namespace sym_lib {
 

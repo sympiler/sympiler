@@ -3,13 +3,13 @@
 //
 #define DBG_LOG
 #define CSV_LOG
-#include <def.h>
-#include <test_utils.h>
-#include <utils.h>
+#include <aggregation/def.h>
+#include <aggregation/test_utils.h>
+#include <aggregation/utils.h>
 #include "FusionDemo.h"
-#include <sparse_utilities.h>
+#include <aggregation/sparse_utilities.h>
 #ifdef METIS
-#include <metis_interface.h>
+#include <aggregation/metis_interface.h>
 #endif
 
 namespace sym_lib{

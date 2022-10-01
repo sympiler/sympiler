@@ -5,8 +5,8 @@
 #ifndef FUSION_SPTRSV_DEMO_UTILS_H
 #define FUSION_SPTRSV_DEMO_UTILS_H
 
-#include <sparse_inspector.h>
-#include <lbc.h>
+#include <aggregation/sparse_inspector.h>
+#include <aggregation/lbc.h>
 
 #include "FusionDemo.h"
 #include "sparse_blas_lib.h"

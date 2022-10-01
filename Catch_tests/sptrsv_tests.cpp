@@ -2,13 +2,13 @@
 // Created by george on 2019-10-09.
 //
 
-#include <test_utils.h>
+#include <aggregation/test_utils.h>
 #include <omp.h>
-#include <sparse_io.h>
-#include <sparse_inspector.h>
+#include <aggregation/sparse_io.h>
+#include <aggregation/sparse_inspector.h>
 #include "catch.hpp"
-#include "sparse_blas_lib.h"
-#include "sparse_utilities.h"
+#include "sympiler/sparse_blas_lib.h"
+#include "aggregation/sparse_utilities.h"
 
 
 using namespace sym_lib;
