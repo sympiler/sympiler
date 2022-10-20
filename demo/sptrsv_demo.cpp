@@ -8,9 +8,11 @@
 #include <iostream>
 #include <aggregation/sparse_io.h>
 #include <aggregation/test_utils.h>
-#include <omp.h>
 #include <aggregation/metis_interface.h>
 
+#ifdef OPENMP
+#include <omp.h>
+#endif
 #include "sptrsv_demo_utils.h"
 
 using namespace sym_lib;
@@ -56,7 +58,9 @@ int sptrsv_csc_demo02(int argc, char *argv[]){
  }
  if(argc >= 3)
   p2 = atoi(argv[2]);
+#ifdef OPENMP
  omp_set_num_threads(num_threads);
+#endif
  if(argc >= 4)
   p3 = atoi(argv[3]);
  /// Re-ordering L matrix

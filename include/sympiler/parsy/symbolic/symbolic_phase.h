@@ -12,7 +12,7 @@
 #ifdef SCOTCH
 #include "scotch.h"
 #endif
-#include <amd.h>
+#include <aggregation/amd.h>
 
 #ifdef METIS
 #include "metis.h"

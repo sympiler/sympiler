@@ -74,8 +74,10 @@ set(LBC_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/aggregation/")
 
 
 #--------------------------------[ third party ]-------------------------------#
-if(SYMPILER_USE_BLAS_MKL)
-    find_package(MKL)
+if(SYMPILER_USE_BLAS_MKL AND NOT TARGET MKL::MKL)
+    set(MKL_INTERFACE "lp64")
+    find_package(MKL CONFIG)
+
     if(MKL_FOUND)
         add_definitions(-DMKL) # add openblas
     else()
@@ -108,12 +110,15 @@ endif()
 
 if(SYMPILER_USE_TBB)
     add_definitions(-DUSE_TBB)
+    include(tbb)
+    set(ALL_LIBS
+            tbb_static)
     message(STATUS "TBB threading is enabled.")
 endif()
 
 
 include(metis)
-include(tbb)
+
 
 
 
@@ -144,9 +149,10 @@ include(tbb)
 #endif()
 
 include_directories(
-        ${MKL_INCLUDE_DIR}
+        #${MKL_INCLUDE_DIR}
         ${BLAS_INC}
         ${LBC_INC}
+#        $<TARGET_PROPERTY:MKL::MKL,INTERFACE_INCLUDE_DIRECTORIES>
         include
         include/sympiler/parsy/
         include/sympiler/linear_solver/
@@ -154,11 +160,12 @@ include_directories(
 
 
 set(ALL_LIBS
-        ${MKL_LIBRARIES}
+        ${ALL_LIBS}
+       # ${MKL_LIBRARIES}
         ${PAPI_LIB_NAME}
         ${PAPI_LIB_NAME2}
         metis::metis
-        tbb_static
+
         aggregation
         )
 

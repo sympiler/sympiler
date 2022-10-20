@@ -44,10 +44,16 @@ if(OpenMP_FOUND)
     target_link_libraries(sym_sparse_blas PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
-#[[if(SYMPILER_USE_BLAS_MKL)
-    target_link_libraries(sym_sparse_blas PRIVATE mkl::mkl)
-    target_compile_definitions(sym_sparse_blas PRIVATE "MKL_BLAS")
-else]]
+if(SYMPILER_USE_BLAS_MKL AND TARGET MKL::MKL)
+    target_include_directories(sym_sparse_blas PRIVATE
+            $<TARGET_PROPERTY:MKL::MKL,INTERFACE_INCLUDE_DIRECTORIES>
+    )
+    target_link_libraries(sym_sparse_blas PRIVATE
+            $<LINK_ONLY:MKL::MKL>)
+    target_compile_definitions(sym_sparse_blas PRIVATE
+            "MKL_BLAS")
+endif()
+
 if(SYMPILER_USE_BLAS_OpenBLAS)
     target_link_libraries(sym_sparse_blas PRIVATE OpenBLAS::OpenBLAS)
     target_compile_definitions(sym_sparse_blas PRIVATE "OPENBLAS")
