@@ -87,7 +87,9 @@ namespace sym_lib{
                                       int *parPtr, int *partition) {
 //omp_set_num_threads(1);
 
+#ifdef ENABLE_OPENMP
   omp_set_nested(1);
+#endif
   for (int i1 = 0; i1 < nLevels; ++i1) {
 #pragma omp parallel
    {

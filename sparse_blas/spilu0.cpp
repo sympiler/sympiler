@@ -61,7 +61,11 @@ namespace sym_lib{
   for (int i1 = 0; i1 < level_no; ++i1) {
 #pragma omp parallel
    {
+#ifdef ENABLE_OPENMP
     int id = omp_get_thread_num();
+#else
+    int id =1;
+#endif
     int *iw = tempvecs+(id*n);
 #pragma omp  for schedule(auto)
     for (int j1 = level_ptr[i1]; j1 < level_ptr[i1 + 1]; ++j1) {

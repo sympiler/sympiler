@@ -83,8 +83,11 @@ namespace sym_lib {
    {
 #pragma omp for schedule(auto)
     for (int j1 = level_ptr[i1]; j1 < level_ptr[i1 + 1]; ++j1) {
-
+#ifdef ENABLE_OPENMP
      int tid = omp_get_thread_num();
+#else
+     int tid=0;
+#endif
      double *tt = tmp + tid*n;
      std::fill_n(tt,n,0); //TODO not sure if needed
      for (int k1 = par_ptr[j1]; k1 < par_ptr[j1 + 1]; ++k1) {
@@ -242,7 +245,11 @@ namespace sym_lib {
   for (i = 0; i < n_lev; i++) {
 #pragma omp parallel default(shared) private(j, k, p)
    {
+#ifdef ENABLE_OPENMP
     int id = omp_get_thread_num();
+#else
+    int id = 0;
+#endif
     double *tempvec = tempvecs[id];
 
 #pragma omp for schedule(auto)
@@ -278,7 +285,12 @@ namespace sym_lib {
   for (i = 0; i < n_lev; i++) {
 #pragma omp parallel default(shared) private(j, k, p, base)
    {
-    double *tempvec = tempvecs[omp_get_thread_num()];
+#ifdef ENABLE_OPENMP
+    int id = omp_get_thread_num();
+#else
+    int id = 0;
+#endif
+    double *tempvec = tempvecs[id];
 #pragma omp for schedule(auto)
     for (j = levelPtr[i]; j < levelPtr[i + 1]; j++) {
      int super = levels[j];

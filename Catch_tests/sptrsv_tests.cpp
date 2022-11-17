@@ -2,16 +2,14 @@
 // Created by george on 2019-10-09.
 //
 
-#include <aggregation/test_utils.h>
-#include <omp.h>
-#include <aggregation/sparse_io.h>
-#include <aggregation/sparse_inspector.h>
 #include "catch.hpp"
+#include <aggregation/test_utils.h>
+#include <aggregation/sparse_inspector.h>
 #include "sympiler/sparse_blas_lib.h"
 #include "aggregation/sparse_utilities.h"
 
 
-using namespace sym_lib;
+//using namespace sym_lib;
 using namespace std;
 
 TEST_CASE("Check small lower triangular cases", "[sptrsvCorrectnessChecks]") {
@@ -27,7 +25,7 @@ TEST_CASE("Check small lower triangular cases", "[sptrsvCorrectnessChecks]") {
    i = 1.0;
   double b0[10] = {1, 1, 2, 1, 2, 5, 2, 3, 5, 4};
   double b1[10] = {1, 1, 2, 1, 2, 5, 2, 3, 5, 4};
-  sptrsv_csc(n, Lp, Li, Lx, b0);
+  sym_lib::sptrsv_csc(n, Lp, Li, Lx, b0);
   for (int i = 0; i < n; ++i) {
    CHECK(b0[i] == 1.0);
   }
@@ -35,8 +33,8 @@ TEST_CASE("Check small lower triangular cases", "[sptrsvCorrectnessChecks]") {
   // CSR version
   int *nLp, *nLi;
   double *nLx;
-  csc_to_csr(n, n, Lp, Li, Lx, nLp, nLi, nLx);
-  sptrsv_csr(n, nLp, nLi, nLx, b1);
+  sym_lib::csc_to_csr(n, n, Lp, Li, Lx, nLp, nLi, nLx);
+  sym_lib::sptrsv_csr(n, nLp, nLi, nLx, b1);
   for (int i = 0; i < n; ++i) {
    CHECK(b1[i] == 1.0);
   }
@@ -56,21 +54,21 @@ TEST_CASE("Check small lower triangular cases", "[sptrsvCorrectnessChecks]") {
    size_t n = i.first;
    double density = i.second;
    int *level_set, *level_ptr, level_no;
-   CSC *A = random_square_sparse(n,density);
-   CSC *L = make_half(A->n,A->p,A->i,A->x);
-   level_no = build_levelSet_CSC(L->n, L->p, L->i, level_ptr, level_set);
-   CSR *L_csr = csc_to_csr(L);
+   sym_lib::CSC *A = sym_lib::random_square_sparse(n,density);
+   sym_lib::CSC *L = sym_lib::make_half(A->n,A->p,A->i,A->x);
+   level_no = sym_lib::build_levelSet_CSC(L->n, L->p, L->i, level_ptr, level_set);
+   sym_lib::CSR *L_csr = csc_to_csr(L);
 
    auto *y_serial = new double[A->n]();
    auto *y_parallel = new double[A->n]();
    std::fill_n(y_serial,A->n,1.0);
-   sptrsv_csr(L_csr->n,L_csr->p,L_csr->i,L_csr->x,y_serial);
+   sym_lib::sptrsv_csr(L_csr->n,L_csr->p,L_csr->i,L_csr->x,y_serial);
 
    std::fill_n(y_parallel,A->n,1.0);
-   sptrsv_csr_levelset(L_csr->n,L_csr->p,L_csr->i,L_csr->x,y_parallel,
+   sym_lib::sptrsv_csr_levelset(L_csr->n,L_csr->p,L_csr->i,L_csr->x,y_parallel,
      level_no,level_ptr,level_set);
 
-   CHECK(is_equal(0,A->n,y_serial,y_parallel));
+   CHECK(sym_lib::is_equal(0,A->n,y_serial,y_parallel));
 
    delete []y_serial;
    delete []y_parallel;

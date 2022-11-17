@@ -6,7 +6,6 @@
 #define CHOLOPENMP_PB_CHOLESKY_H
 
 #include <chrono>
-#include <omp.h>
 #include <common/Sym_BLAS.h>
 #include <cassert>
 

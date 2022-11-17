@@ -86,7 +86,11 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
   {
 #pragma omp  for schedule(static) private(startin, endin, duration2)
    for (int j1 = levelPtr[i1]; j1 < levelPtr[i1 + 1]; ++j1) {
+#ifdef ENABLE_OPENMP
     int worker_index = omp_get_thread_num();
+#else
+    int worker_index = 1;
+#endif
 #else
     tbb::parallel_for(levelPtr[i1], levelPtr[i1+1], 1,[&](int j1) {
       int worker_index = tbb::task_arena::current_thread_index();
