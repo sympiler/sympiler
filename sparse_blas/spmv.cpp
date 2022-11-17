@@ -2,7 +2,9 @@
 // Created by kazem on 10/9/19.
 //
 
-#include <omp.h>
+#include <#ifdef ENABLE_OPENMP
+ #include <omp.h>
+#endif>
 #include "sympiler/sparse_blas_lib.h"
 
 namespace sym_lib {

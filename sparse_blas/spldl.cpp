@@ -5,7 +5,9 @@
 #include <algorithm>
 #include <cassert>
 #include <aggregation/sparse_inspector.h>
-#include <omp.h>
+#include <#ifdef ENABLE_OPENMP
+ #include <omp.h>
+#endif>
 
 namespace sym_lib{
 
