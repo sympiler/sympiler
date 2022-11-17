@@ -5,9 +5,9 @@
 #ifndef CHOLOPENMP_PARALLEL_PB_CHOLESKY_05_H
 #define CHOLOPENMP_PARALLEL_PB_CHOLESKY_05_H
 #include <chrono>
-#include <#ifdef ENABLE_OPENMP
+#ifdef ENABLE_OPENMP
  #include <omp.h>
-#endif>
+#endif
 #include <common/Sym_BLAS.h>
 #include <cassert>
 

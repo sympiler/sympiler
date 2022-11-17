@@ -1,9 +1,9 @@
 //
 // Created by kazem on 2020-05-20.
 //
-#include <#ifdef ENABLE_OPENMP
+#ifdef ENABLE_OPENMP
  #include <omp.h>
-#endif>
+#endif
 #include "aggregation/def.h"
 
 namespace sym_lib{

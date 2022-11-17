@@ -1,9 +1,9 @@
 //
 // Created by george on 2019-10-09.
 //
-#include <#ifdef ENABLE_OPENMP
+#ifdef ENABLE_OPENMP
  #include <omp.h>
-#endif>
+#endif
 
 #include "sympiler/sparse_blas_lib.h"
 #include <sympiler/dense_blas/BLAS.h>
