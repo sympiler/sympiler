@@ -1,0 +1,6 @@
+List of todo items in the code:
+* Creating a framewrok independent function call for finding thread id and number of thread using a combination of
+TBB, MKL, OMP, and thread in C++17
+* Finishing the reset symbolic factor
+* Completing SCOTCH integration
+* rebasing the code for factorization with the linear solver part

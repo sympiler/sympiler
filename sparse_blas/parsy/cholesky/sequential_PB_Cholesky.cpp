@@ -20,6 +20,12 @@
 #define MKL_INT int
 #endif
 
+#ifdef APPLEBLAS
+#include "cblas.h"
+#include "clapack.h"
+
+#endif
+
 namespace sym_lib {
  namespace parsy {
 
@@ -89,7 +95,7 @@ namespace sym_lib {
      if(xi[top++] != lSN)
                   printf("fail");
 #endif
-     MKL_INT nSupRs = 0;
+     int nSupRs = 0;
      int cSN = blockSet[lSN];//first col of current SN
      int cNSN = blockSet[lSN + 1];//first col of Next SN
      int Li_ptr_cNSN = Li_ptr[cNSN];
@@ -114,11 +120,11 @@ namespace sym_lib {
      int ndrow3 = nSupRs - ndrow1;
      src = &lValues[lC[cSN] + lb];//first element of src supernode starting from row lb
      double *srcL = &lValues[lC[cSN] + ub + 1];
-#ifdef MKL
-     dsyrk("L", "N", &ndrow1, &supWdts, one, src, &nSNRCur, zero,
-           contribs, &nSupRs);
-#endif
-#ifdef OPENBLAS
+//#ifdef MKL
+//     dsyrk("L", "N", &ndrow1, &supWdts, one, src, &nSNRCur, zero,
+//           contribs, &nSupRs);
+//#endif
+#ifdef CBLAS
      cblas_dsyrk(CblasColMajor, CblasLower, CblasNoTrans,ndrow1,supWdts,one[0],src,
                  nSNRCur,zero[0],contribs, nSupRs);
 #endif
@@ -126,11 +132,11 @@ namespace sym_lib {
      //TODO
 #endif
      if (ndrow3 > 0) {
-#ifdef MKL
-      dgemm("N", "C", &ndrow3, &ndrow1, &supWdts, one, srcL, &nSNRCur,
-            src, &nSNRCur, zero, &contribs[ndrow1], &nSupRs);
-#endif
-#ifdef OPENBLAS
+//#ifdef MKL
+//      dgemm("N", "C", &ndrow3, &ndrow1, &supWdts, one, srcL, &nSNRCur,
+//            src, &nSNRCur, zero, &contribs[ndrow1], &nSupRs);
+//#endif
+#ifdef CBLAS
       cblas_dgemm(CblasColMajor,CblasNoTrans,CblasConjTrans,ndrow3,
                   ndrow1,supWdts,one[0],srcL,nSNRCur,
                          src,nSNRCur,zero[0],contribs+ndrow1,nSupRs );
@@ -154,7 +160,7 @@ namespace sym_lib {
 #ifdef MKL
     dpotrf("L", &supWdt, cur, &nSupR, &info);
 #endif
-#ifdef OPENBLAS
+#if defined(OPENBLAS) || defined(APPLEBLAS)
      dpotrf_("L",&supWdt,cur,&nSupR,&info);
 #endif
 #ifdef MYBLAS
@@ -162,11 +168,11 @@ namespace sym_lib {
 #endif
 
     int rowNo = nSupR - supWdt;
-#ifdef MKL
-    dtrsm("R", "L", "C", "N", &rowNo, &supWdt, one,
-          cur, &nSupR, &cur[supWdt], &nSupR);
-#endif
-#ifdef OPENBLAS
+//#ifdef MKL
+//    dtrsm("R", "L", "C", "N", &rowNo, &supWdt, one,
+//          cur, &nSupR, &cur[supWdt], &nSupR);
+//#endif
+#ifdef CBLAS
     cblas_dtrsm(CblasColMajor, CblasRight, CblasLower, CblasConjTrans, CblasNonUnit,
                 rowNo, supWdt,one[0],
                  cur,nSupR,&cur[supWdt],nSupR);

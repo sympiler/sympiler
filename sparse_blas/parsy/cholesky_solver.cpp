@@ -21,7 +21,9 @@
 #include "linear_solver/solve_phase.h"
 #include "symbolic/symbolic_phase.h"
 
-
+#ifdef APPLEBLAS
+#include <thread> // only used in apple for now
+#endif
 
 namespace sym_lib {
  namespace parsy {
@@ -230,10 +232,15 @@ namespace sym_lib {
 #ifdef OPENBLAS
    num_thread = openblas_get_num_procs();
    openblas_set_num_threads(1);
-#else
+#endif
+#ifdef MKL
    num_thread = mkl_get_max_threads();
    MKL_Domain_Set_Num_Threads(1, MKL_DOMAIN_BLAS);
 #endif
+#ifdef APPLEBLAS
+   num_thread = (int) std::thread::hardware_concurrency() / 2;
+#endif
+   num_thread = std::max(num_thread, 1);
    chunk = 1;
    cost_param = num_thread;
    level_param = -1;

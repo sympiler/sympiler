@@ -78,18 +78,34 @@ namespace sym_lib {
     int nSupR = Li_ptr[nxtCol] - Li_ptr[curCol];//row size of supernode
     double *Ltrng = &Lx[Lp[curCol]];//first nnz of current supernode
 
+/*    SYM_DTRSM("L", "L", "N", "N", &supWdt,&n_rhs,one,Ltrng,
+          &nSupR,&x[curCol],&n);*/
 
-
-    SYM_DTRSM("L", "L", "N", "N", &supWdt,&n_rhs,one,Ltrng,
-          &nSupR,&x[curCol],&n);
-
+#ifdef CBLAS
+    cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasConjTrans, CblasNonUnit, supWdt, n_rhs, 1.0,
+                Ltrng, nSupR, &x[curCol], n);
+#else
+    SYM_DTRSM("L", "L", "T", "N", &supWdt, &ione, one, Ltrng,
+              &nSupR, &x[curCol], &n);
+#endif
     Ltrng = &Lx[Lp[curCol] + supWdt];//first nnz of below diagonal
     int tmpRow = nSupR - supWdt;
+
+
+
+#ifdef CBLAS
+    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, tmpRow, n_rhs, supWdt, one[0], Ltrng,
+              nSupR,
+              &x[curCol], n,
+              one[0], tempvec, off_set);
+
+#else
     SYM_DGEMM("N", "N", &tmpRow, &n_rhs, &supWdt, one, Ltrng,
           &nSupR,
           &x[curCol], &n,
           one, tempvec, &off_set);
 
+#endif
 
     for (int l = Li_ptr[curCol] + supWdt, k = 0; l < Li_ptr[nxtCol]; l++, k++) {
      int idx = Li[l];
@@ -133,7 +149,7 @@ namespace sym_lib {
 #else
 
     int tmpRow = nSupR - supWdt;
-#ifdef OPENBLAS
+#ifdef CBLAS
     cblas_dgemv(CblasColMajor,CblasTrans,tmpRow, supWdt, minus_one, Ltrng,
       nSupR, tempVec, ione, 1.0, &x[curCol], ione);
 #else
@@ -146,7 +162,7 @@ namespace sym_lib {
 #ifdef SYM_BLAS
     dlsolve_blas_nonUnit(nSupR,supWdt,Ltrng,&x[curCol]);//FIXME make it for transpose
 #else
-#ifdef OPENBLAS
+#ifdef CBLAS
     cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasConjTrans, CblasNonUnit, supWdt, ione, 1.0,
                 Ltrng, nSupR, &x[curCol], n);
 #else
@@ -200,9 +216,9 @@ namespace sym_lib {
 #else
 
     int tmpRow = nSupR - supWdt;
-#ifdef OPENBLAS
-    cblas_dgemv(CblasColMajor,CblasTrans,tmpRow, supWdt, minus_one, Ltrng,
-      nSupR, tempVec, ione, 1.0, &x[curCol], ione);
+#ifdef CBLAS
+    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, supWdt, m_rhs, tmpRow, minus_one, Ltrng, nSupR, tempVec, off_set,
+              one[0], &x[curCol], n);
 #else
     SYM_DGEMM("T", "N", &supWdt, &m_rhs, &tmpRow, &minus_one, Ltrng, &nSupR, tempVec, &off_set,
               one, &x[curCol], &n);
@@ -213,7 +229,7 @@ namespace sym_lib {
 #ifdef SYM_BLAS
     dlsolve_blas_nonUnit(nSupR,supWdt,Ltrng,&x[curCol]);//FIXME make it for transpose
 #else
-#ifdef OPENBLAS
+#ifdef CBLAS
     cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasConjTrans, CblasNonUnit, supWdt, ione, 1.0,
                 Ltrng, nSupR, &x[curCol], n);
 #else
@@ -282,7 +298,7 @@ namespace sym_lib {
       dmatvec_blas(nSupR,nSupR-supWdt,supWdt,Ltrng,&x[curCol],tempVec);
 #else
       int tmpRow = nSupR - supWdt;
-#ifdef OPENBLAS
+#ifdef CBLAS
       cblas_dgemv(CblasColMajor,CblasTrans,tmpRow, supWdt, minus_one, Ltrng,
                   nSupR, tempVec, ione, 1.0, &x[curCol], ione);
 #else
@@ -296,7 +312,7 @@ namespace sym_lib {
 #ifdef SYM_BLAS
       dlsolve_blas_nonUnit(nSupR,supWdt,Ltrng,&x[curCol]);//FIXME make it for transpose
 #else
-#ifdef OPENBLAS
+#ifdef CBLAS
       cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasConjTrans, CblasNonUnit, supWdt, ione, 1.0,
                  Ltrng, nSupR, &x[curCol], n);
 #else
@@ -343,7 +359,7 @@ namespace sym_lib {
 #ifdef SYM_BLAS
     dlsolve_blas_nonUnit(nSupR,supWdt,Ltrng,&x[curCol]);
 #else
-#ifdef OPENBLAS
+#ifdef CBLAS
     cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasNoTrans, CblasNonUnit, supWdt, ione, 1.0,
                Ltrng, nSupR, &x[curCol], n);
 #else
@@ -358,7 +374,7 @@ namespace sym_lib {
     dmatvec_blas(nSupR,nSupR-supWdt,supWdt,Ltrng,&x[curCol],tempVec);
 #else
     int tmpRow = nSupR - supWdt;
-#ifdef OPENBLAS
+#ifdef CBLAS
     cblas_dgemv(CblasColMajor,CblasNoTrans,tmpRow, supWdt, one[0], Ltrng,
                 nSupR, &x[curCol], ione, zero[0], tempVec, ione);
 #else
@@ -522,11 +538,10 @@ namespace sym_lib {
        int supWdt = nxtCol - curCol;
        int nSupR = Li_ptr[nxtCol] - Li_ptr[curCol];//row size of supernode
        double *Ltrng = &Lx[Lp[curCol]];//first nnz of current supernode
-       //lSolve_dense(nSupR,supWdt,Ltrng,&x[curCol]);
 #ifdef SYM_BLAS
        dlsolve_blas_nonUnit(nSupR, supWdt, Ltrng, &x[curCol]);
 #else
-#ifdef OPENBLAS
+#ifdef CBLAS
        cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasNoTrans, CblasNonUnit, supWdt, ione, 1.0,
                    Ltrng, nSupR, &x[curCol], n);
 #else
@@ -541,7 +556,7 @@ namespace sym_lib {
                     tempVec);
 #else
        int tmpRow = nSupR - supWdt;
-#ifdef OPENBLAS
+#ifdef CBLAS
        cblas_dgemv(CblasColMajor,CblasNoTrans,tmpRow, supWdt, one[0], Ltrng,
                        nSupR, &x[curCol], ione, zero[0], tempVec, ione);
 #else
@@ -596,16 +611,30 @@ namespace sym_lib {
        int supWdt = nxtCol - curCol;
        int nSupR = Li_ptr[nxtCol] - Li_ptr[curCol];//row size of supernode
        double *Ltrng = &Lx[Lp[curCol]];//first nnz of current supernode
-       SYM_DTRSM("L", "L", "N", "N", &supWdt,&n_rhs,one,Ltrng,
-                 &nSupR,&x[curCol],&n);
 
+#ifdef CBLAS
+       cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasConjTrans, CblasNonUnit, supWdt, n_rhs, 1.0,
+                   Ltrng, nSupR, &x[curCol], n);
+#else
+       SYM_DTRSM("L", "L", "T", "N", &supWdt, &ione, one, Ltrng,
+              &nSupR, &x[curCol], &n);
+#endif
        Ltrng = &Lx[Lp[curCol] + supWdt];//first nnz of below diagonal
        int tmpRow = nSupR - supWdt;
-       SYM_DGEMM("N", "N", &tmpRow, &n_rhs, &supWdt, one, Ltrng,
-                 &nSupR,
-                 &x[curCol], &n,
-                 one, tempvec, &off_set);
 
+#ifdef CBLAS
+       cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, tmpRow, n_rhs, supWdt, one[0], Ltrng,
+                   nSupR,
+                   &x[curCol], n,
+                   one[0], tempvec, off_set);
+
+#else
+       SYM_DGEMM("N", "N", &tmpRow, &n_rhs, &supWdt, one, Ltrng,
+          &nSupR,
+          &x[curCol], &n,
+          one, tempvec, &off_set);
+
+#endif
 
        for (int l = Li_ptr[curCol] + supWdt, k = 0; l < Li_ptr[nxtCol]; l++, k++) {
         int idx = Li[l];
@@ -668,7 +697,7 @@ namespace sym_lib {
 #ifdef SYM_BLAS
        dlsolve_blas_nonUnit(nSupR, supWdt, Ltrng, &x[curCol]);
 #else
-#ifdef OPENBLAS
+#ifdef CBLAS
        cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasNoTrans, CblasNonUnit, supWdt, ione, 1.0,
                        Ltrng, nSupR, &x[curCol], n);
 #else
@@ -683,7 +712,7 @@ namespace sym_lib {
                     tempVec);
 #else
        int tmpRow = nSupR - supWdt;
-#ifdef OPENBLAS
+#ifdef CBLAS
        cblas_dgemv(CblasColMajor,CblasNoTrans,tmpRow, supWdt, one[0], Ltrng,
                    nSupR, &x[curCol], ione, zero[0], tempVec, ione);
 #else
@@ -747,7 +776,7 @@ namespace sym_lib {
        dmatvec_blas(nSupR,nSupR-supWdt,supWdt,Ltrng,&x[curCol],tempVec);
 #else
        int tmpRow = nSupR - supWdt;
-#ifdef OPENBLAS
+#ifdef CBLAS
        cblas_dgemv(CblasColMajor,CblasTrans,tmpRow, supWdt, minus_one, Ltrng,
                    nSupR, tempVec, ione, one[0], &x[curCol], ione);
 #else
@@ -759,7 +788,7 @@ namespace sym_lib {
 #ifdef SYM_BLAS
        dlsolve_blas_nonUnit(nSupR,supWdt,Ltrng,&x[curCol]);//FIXME make it for transpose
 #else
-#ifdef OPENBLAS
+#ifdef CBLAS
        cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasTrans, CblasNonUnit, supWdt, ione, 1.0,
                        Ltrng, nSupR, &x[curCol], n);
 #else
@@ -825,7 +854,7 @@ namespace sym_lib {
 #else
        //std::cout<<" : "<<nSupR <<" \n";
        int tmpRow = nSupR - supWdt;
-#ifdef OPENBLAS
+#ifdef CBLAS
        cblas_dgemv(CblasColMajor,CblasTrans,tmpRow, supWdt, minus_one, Ltrng,
       nSupR, tempVec, ione, 1.0, &x[curCol], ione);
 #else
@@ -838,7 +867,7 @@ namespace sym_lib {
 #ifdef SYM_BLAS
        dlsolve_blas_nonUnit(nSupR,supWdt,Ltrng,&x[curCol]);//FIXME make it for transpose
 #else
-#ifdef OPENBLAS
+#ifdef CBLAS
        cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasConjTrans, CblasNonUnit, supWdt, ione, 1.0,
                 Ltrng, nSupR, &x[curCol], n);
 #else
@@ -907,7 +936,7 @@ namespace sym_lib {
        dmatvec_blas(nSupR,nSupR-supWdt,supWdt,Ltrng,&x[curCol],tempVec);
 #else
        int tmpRow = nSupR - supWdt;
-#ifdef OPENBLAS
+#ifdef CBLAS
        cblas_dgemv(CblasColMajor,CblasTrans,tmpRow, supWdt, minus_one, Ltrng,
                    nSupR, tempVec, ione, one[0], &x[curCol], ione);
 #else
@@ -919,7 +948,7 @@ namespace sym_lib {
 #ifdef SYM_BLAS
        dlsolve_blas_nonUnit(nSupR,supWdt,Ltrng,&x[curCol]);//FIXME make it for transpose
 #else
-#ifdef OPENBLAS
+#ifdef CBLAS
        cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasTrans, CblasNonUnit, supWdt, ione, 1.0,
                       Ltrng, nSupR, &x[curCol], n);
 #else
@@ -978,7 +1007,7 @@ namespace sym_lib {
 #ifdef SYM_BLAS
        dlsolve_blas_nonUnit(nSupR, supWdt, Ltrng, &x[curCol]);
 #else
-#ifdef OPENBLAS
+#ifdef CBLAS
        cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasNoTrans, CblasNonUnit, supWdt, ione, 1.0,
                    Ltrng, nSupR, &x[curCol], n);
 #else
@@ -994,7 +1023,7 @@ namespace sym_lib {
                     tempVec);
 #else
        int tmpRow=nSupR - supWdt;
-#ifdef OPENBLAS
+#ifdef CBLAS
            cblas_dgemv(CblasColMajor,CblasNoTrans,tmpRow, supWdt, one[0], Ltrng,
                        nSupR, &x[curCol], ione, zero[0], tempVec, ione);
 #else
@@ -1045,7 +1074,7 @@ namespace sym_lib {
 #ifdef SYM_BLAS
      dlsolve_blas_nonUnit(nSupR, supWdt, Ltrng, &x[curCol]);
 #else
-#ifdef OPENBLAS
+#ifdef CBLAS
      cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasNoTrans, CblasNonUnit, supWdt, ione, 1.0,
                  Ltrng, nSupR, &x[curCol], n);
 #else
@@ -1061,7 +1090,7 @@ namespace sym_lib {
                   tempVec);
 #else
      int tmpRow = nSupR - supWdt;
-#ifdef OPENBLAS
+#ifdef CBLAS
      cblas_dgemv(CblasColMajor,CblasNoTrans,tmpRow, supWdt, one[0], Ltrng,
                  nSupR, &x[curCol], ione, zero[0], tempVec, ione);
 #else

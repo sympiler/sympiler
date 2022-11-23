@@ -357,10 +357,6 @@ namespace sym_lib {
     //std::cout<<"parts: "<<outinnerParts<<"\n";
 //  std::cout<<outinnerParts<<",";
    }
-   //A HACK for printing the clustering info in the output
-   for (int i = lClusterCnt; i < 7; ++i) {
-    // std::cout<<"0,";
-   }
 
    finaLevelNo = lClusterCnt;
    if (false) {//Verification of the set.
