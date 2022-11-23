@@ -14,6 +14,10 @@
 #include "symbolic/ColumnCount.h"
 #include "symbolic/supernode_detection.h"
 
+#ifdef SCOTCH
+#include "scotch.h"
+#endif
+
 namespace sym_lib {
  namespace parsy {
 
@@ -211,81 +215,14 @@ namespace sym_lib {
 
    lnz_best = (double) EMPTY;
    skip_best = FALSE;
-   //  nmethods = MIN (Common->nmethods, CHOLMOD_MAXMETHODS) ;
-   // nmethods = MAX (0, nmethods) ;
 
-
-
-/*    default_strategy = (nmethods == 0) ;
-    if (default_strategy)
-    {
-        *//* default strategy: try UserPerm, if given.  Try AMD for A, or AMD
-         * to order A*A'.  Try METIS for the symmetric case only if AMD reports
-             * a high degree of fill-in and flop count.  METIS is not tried if the
-             * Partition Module isn't installed.   If Common->default_nesdis is
-             * TRUE, then NESDIS is used as the 3rd ordering instead. *//*
-        Common->method [0].ordering = CHOLMOD_GIVEN ;*//* skip if UserPerm NULL *//*
-        Common->method [1].ordering = CHOLMOD_AMD ;
-        Common->method [2].ordering =
-                (Common->default_nesdis ? CHOLMOD_NESDIS : CHOLMOD_METIS) ;
-        amd_backup = FALSE ;
-#ifndef NPARTITION
-        nmethods = 3 ;
-#else
-        nmethods = 2 ;
-#endif
-    }
-    else
-    {
-        *//* If only METIS and NESDIS are selected, or if 2 or more methods are
-         * being tried, then enable AMD backup *//*
-        amd_backup = (nmethods > 1) || (nmethods == 1 &&
-                                        (Common->method [0].ordering == CHOLMOD_METIS ||
-                                         Common->method [0].ordering == CHOLMOD_NESDIS)) ;
-    }*/
 
 #ifdef NSUPERNODAL
    /* CHOLMOD Supernodal module not installed, just do simplicial analysis */
       Common->supernodal = CHOLMOD_SIMPLICIAL ;
 #endif
 
-   /* ---------------------------------------------------------------------- */
-   /* allocate workspace */
-   /* ---------------------------------------------------------------------- */
 
-   /* Note: enough space needs to be allocated here so that routines called by
-    * cholmod_analyze do not reallocate the space.
-    */
-
-   /* s = 6*n + uncol */
-   /* s = CHOLMOD(mult_size_t) (n, 6, &ok) ;
-    s = CHOLMOD(add_size_t) (s, uncol, &ok) ;
-    if (!ok)
-    {
-  //        ERROR (CHOLMOD_TOO_LARGE, "problem too large") ;
-        return (NULL) ;
-    }
-
-    CHOLMOD(allocate_work) (n, s, 0, Common) ;
-    if (Common->status < CHOLMOD_OK)
-    {
-        return (NULL) ;	    *//* out of memory *//*
-    }*/
-   //   ASSERT (CHOLMOD(dump_work) (TRUE, TRUE, 0, Common)) ;
-
-   /* ensure that subsequent routines, called by cholmod_analyze, do not
-    * reallocate any workspace.  This is set back to FALSE in the
-    * FREE_WORKSPACE_AND_RETURN macro, which is the only way this function
-    * returns to its caller. */
-   // Common->no_workspace_reallocate = TRUE ;
-
-   /* Use the last 4*n int's in Iwork for Parent, First, Level, and Post, since
-    * other CHOLMOD routines will use the first 2n+uncol space.  The ordering
-    * routines (cholmod_amd, cholmod_colamd, cholmod_ccolamd, cholmod_metis)
-    * are an exception.  They can use all 6n + ncol space, since the contents
-    * of Parent, First, Level, and Post are not needed across calls to those
-    * routines. */
-   //s = 6*n + uncol;
    s = 4 * n;
    Work4n = new int[s]();
    // Work4n += 2*((size_t) n) + uncol ;

@@ -9,9 +9,7 @@ include_directories(
        # ${SPARSE_UTIL_INC}
         )
 
-if(MKL_FOUND)
 file(GLOB_RECURSE PARSY_SRC parsy/*.cpp)
-endif()
 
 file(GLOB_RECURSE LINSOLVE_SRC linear_solver/*.cpp)
 
@@ -57,4 +55,10 @@ endif()
 if(SYMPILER_USE_BLAS_OpenBLAS)
     target_link_libraries(sym_sparse_blas PRIVATE OpenBLAS::OpenBLAS)
     target_compile_definitions(sym_sparse_blas PRIVATE "OPENBLAS")
+endif()
+
+if(SYMPILER_USE_BLAS_Apple)
+    target_include_directories(sym_sparse_blas PRIVATE ${BLAS_LIBRARIES}/Frameworks/vecLib.framework/Headers/)
+    target_compile_definitions(sym_sparse_blas PRIVATE "APPLEBLAS" )
+    target_link_libraries(sym_sparse_blas PRIVATE BLAS::BLAS ${BLAS_LINKER_FLAGS})
 endif()

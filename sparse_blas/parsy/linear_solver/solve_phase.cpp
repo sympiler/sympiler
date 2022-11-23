@@ -3,6 +3,7 @@
 //
 
 
+#include <iostream>
 #include "linear_solver/solve_phase.h"
 
 #include "common/Sym_BLAS.h"
@@ -64,7 +65,7 @@ namespace sym_lib {
                           parts, parPtr, partition, chunk);
 #if 0
    for (int i = 0; i < n; ++i) {
-   std::cout<<i<<"->"<<x[i]<<"/"<<d_val[i]<<"= "<<x[i]/d_val[i]<<"\n";
+   std::cout<<i<<"->"<<x[i]<<"/"<<"\n";
   }
 #endif
    //*************** Parallel Blocked BWD solve

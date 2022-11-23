@@ -10,6 +10,7 @@
 #endif
 #include <common/Sym_BLAS.h>
 #include <cassert>
+#include <common/Reach.h>
 
 #define TIMING
 //#undef TIMING
@@ -20,14 +21,18 @@
 #undef PRUNE
 #ifdef MKL
 #include "mkl.h"
-#include <common/Reach.h>
-
 #endif
 
 #ifdef OPENBLAS
 #include "openblas/cblas.h"
 #include "openblas/lapack.h"
 #define MKL_INT int
+#endif
+
+#ifdef APPLEBLAS
+#include "cblas.h"
+#include "clapack.h"
+
 #endif
 
 #ifdef USE_TBB
@@ -56,7 +61,7 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
   */
  int top = 0;
  double *blasTimePerThread = timing + 4;
- MKL_INT info;
+ int info=0;
  int thth = 0;
  double one[2], zero[2];
  one[0] = 1.0;    /* ALPHA for *syrk, *herk, *gemm, and *trsm */
@@ -84,9 +89,9 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
  for (int i1 = 0; i1 < nLevels - 1; ++i1) {
 
 #ifndef USE_TBB
-#pragma omp parallel //shared(lValues)//private(map, contribs)
+#pragma omp parallel //default(none) //shared(lValues)//private(map, contribs)
   {
-#pragma omp  for schedule(static) private(startin, endin, duration2)
+#pragma omp  for schedule(static) private(i1, startin, endin, duration2)
    for (int j1 = levelPtr[i1]; j1 < levelPtr[i1 + 1]; ++j1) {
 #ifdef ENABLE_OPENMP
     int worker_index = omp_get_thread_num();
@@ -116,8 +121,8 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
 
       int curCol = s != 0 ? blockSet[s - 1] : 0;
       int nxtCol = blockSet[s];
-      MKL_INT supWdt = nxtCol - curCol;
-      MKL_INT nSupR = Li_ptr[nxtCol] - Li_ptr[curCol];//row size of supernode
+      int supWdt = nxtCol - curCol;
+      int nSupR = Li_ptr[nxtCol] - Li_ptr[curCol];//row size of supernode
       for (size_t i = Li_ptr[curCol], cnt = 0; i < Li_ptr[nxtCol]; ++i) {
        map[lR[i]] = cnt++;//mapping L rows position to actual row idx
       }
@@ -146,13 +151,13 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
        if(xi[top++] != lSN)
                           printf("fail");
 #endif
-       MKL_INT nSupRs = 0;
+       int nSupRs = 0;
        int cSN = blockSet[lSN];//first col of current SN
        int cNSN = blockSet[lSN + 1];//first col of Next SN
        size_t Li_ptr_cNSN = Li_ptr[cNSN];
        size_t Li_ptr_cSN = Li_ptr[cSN];
-       MKL_INT nSNRCur = Li_ptr_cNSN - Li_ptr_cSN;
-       MKL_INT supWdts = cNSN - cSN;//The width of current src SN
+       int nSNRCur = Li_ptr_cNSN - Li_ptr_cSN;
+       int supWdts = cNSN - cSN;//The width of current src SN
        int lb = 0, ub = 0;
        bool sw = true;
        for (size_t j = Li_ptr_cSN; j < Li_ptr_cNSN; ++j) {
@@ -169,19 +174,19 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
          break;
        }
        nSupRs = Li_ptr_cNSN - Li_ptr_cSN - lb;
-       MKL_INT ndrow1 = ub - lb + 1;
-       MKL_INT ndrow3 = nSupRs - ndrow1;
+       int ndrow1 = ub - lb + 1;
+       int ndrow3 = nSupRs - ndrow1;
        src = &lValues[lC[cSN] +
                       lb];//first element of src supernode starting from row lb
        double *srcL = &lValues[lC[cSN] + ub + 1];
 #ifdef BLASTIMING
        startBlas = std::chrono::system_clock::now();
 #endif
-#ifdef MKL
-       dsyrk("L", "N", &ndrow1, &supWdts, one, src, &nSNRCur, zero,
-             contribs, &nSupRs);
-#endif
-#ifdef OPENBLAS
+//#ifdef MKL
+//       dsyrk("L", "N", &ndrow1, &supWdts, one, src, &nSNRCur, zero,
+//             contribs, &nSupRs);
+//#endif
+#ifdef CBLAS
        cblas_dsyrk(CblasColMajor, CblasLower, CblasNoTrans,ndrow1,supWdts,one[0],src,
                    nSNRCur,zero[0],contribs, nSupRs);
 #endif
@@ -190,11 +195,11 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
 #endif
        // MKL_Domain_Set_Num_Threads(5,MKL_DOMAIN_BLAS);
        if (ndrow3 > 0) {
-#ifdef MKL
-        dgemm("N", "C", &ndrow3, &ndrow1, &supWdts, one, srcL, &nSNRCur,
-              src, &nSNRCur, zero, &contribs[ndrow1], &nSupRs);
-#endif
-#ifdef OPENBLAS
+//#ifdef MKL
+//        dgemm("N", "C", &ndrow3, &ndrow1, &supWdts, one, srcL, &nSNRCur,
+//              src, &nSNRCur, zero, &contribs[ndrow1], &nSupRs);
+//#endif
+#ifdef CBLAS
         cblas_dgemm(CblasColMajor,CblasNoTrans,CblasConjTrans,ndrow3,
                     ndrow1,supWdts,one[0],srcL,nSNRCur,
                     src,nSNRCur,zero[0],contribs+ndrow1,nSupRs );
@@ -227,20 +232,20 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
 #endif
       if (info != 0)
        break;
-#ifdef OPENBLAS
-       dpotrf_("L",&supWdt,cur,&nSupR,&info);
+#if defined(OPENBLAS) || defined(APPLEBLAS)
+      dpotrf_("L",&supWdt,cur,&nSupR,&info);
 #endif
 #ifdef MYBLAS
        Cholesky_col(nSupR,supWdt,cur);
 #endif
 
-      MKL_INT rowNo = nSupR - supWdt;
-#ifdef MKL
-      //MKL_Domain_Set_Num_Threads(4,MKL_DOMAIN_BLAS);
-      dtrsm("R", "L", "C", "N", &rowNo, &supWdt, one,
-            cur, &nSupR, &cur[supWdt], &nSupR);
-#endif
-#ifdef OPENBLAS
+      int rowNo = nSupR - supWdt;
+//#ifdef MKL
+//      //MKL_Domain_Set_Num_Threads(4,MKL_DOMAIN_BLAS);
+//      dtrsm("R", "L", "C", "N", &rowNo, &supWdt, one,
+//            cur, &nSupR, &cur[supWdt], &nSupR);
+//#endif
+#ifdef CBLAS
       cblas_dtrsm(CblasColMajor, CblasRight, CblasLower, CblasConjTrans, CblasNonUnit,
                   rowNo, supWdt,one[0],
                   cur,nSupR,&cur[supWdt],nSupR);
@@ -277,8 +282,10 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
     }
     );
 #endif
-  if (info != 0)
+  if (info != 0){
+   assert(false);// matrix is not SPD
    return false;
+  }
  }
 
 
@@ -311,8 +318,8 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
    int s = partition[k1] + 1;
    int curCol = s != 0 ? blockSet[s - 1] : 0;
    int nxtCol = blockSet[s];
-   MKL_INT supWdt = nxtCol - curCol;
-   MKL_INT nSupR = Li_ptr[nxtCol] - Li_ptr[curCol];//row size of supernode
+   int supWdt = nxtCol - curCol;
+   int nSupR = Li_ptr[nxtCol] - Li_ptr[curCol];//row size of supernode
    for (int i = Li_ptr[curCol], cnt = 0; i < Li_ptr[nxtCol]; ++i) {
     map[lR[i]] = cnt++;//mapping L rows position to actual row idx
    }
@@ -337,13 +344,13 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
     for (int i = prunePtr[s - 1]; i < prunePtr[s]; ++i) {
       int lSN = pruneSet[i];
 #endif
-    MKL_INT nSupRs = 0;
+    int nSupRs = 0;
     int cSN = blockSet[lSN];//first col of current SN
     int cNSN = blockSet[lSN + 1];//first col of Next SN
-    MKL_INT Li_ptr_cNSN = Li_ptr[cNSN];
-    MKL_INT Li_ptr_cSN = Li_ptr[cSN];
-    MKL_INT nSNRCur = Li_ptr_cNSN - Li_ptr_cSN;
-    MKL_INT supWdts = cNSN - cSN;//The width of current src SN
+    int Li_ptr_cNSN = Li_ptr[cNSN];
+    int Li_ptr_cSN = Li_ptr[cSN];
+    int nSNRCur = Li_ptr_cNSN - Li_ptr_cSN;
+    int supWdts = cNSN - cSN;//The width of current src SN
     int lb = 0, ub = 0;
     bool sw = true;
     for (int j = Li_ptr_cSN; j < Li_ptr_cNSN; ++j) {
@@ -358,18 +365,18 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
      }
     }
     nSupRs = Li_ptr_cNSN - Li_ptr_cSN - lb;
-    MKL_INT ndrow1 = ub - lb + 1;
-    MKL_INT ndrow3 = nSupRs - ndrow1;
+    int ndrow1 = ub - lb + 1;
+    int ndrow3 = nSupRs - ndrow1;
     src = &lValues[lC[cSN] + lb];//first element of src supernode starting from row lb
     double *srcL = &lValues[lC[cSN] + ub + 1];
 #ifdef BLASTIMING
     startBlas = std::chrono::system_clock::now();
 #endif
-#ifdef MKL
+/*#ifdef MKL // fortran interface
     dsyrk("L", "N", &ndrow1, &supWdts, one, src, &nSNRCur, zero,
           contribs, &nSupRs);
-#endif
-#ifdef OPENBLAS
+#endif*/
+#ifdef CBLAS
     cblas_dsyrk(CblasColMajor, CblasLower, CblasNoTrans,ndrow1,supWdts,one[0],src,
                 nSNRCur,zero[0],contribs, nSupRs);
 #endif
@@ -377,11 +384,11 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
     //TODO
 #endif
     if (ndrow3 > 0) {
-#ifdef MKL
+/*#ifdef MKL
      dgemm("N", "C", &ndrow3, &ndrow1, &supWdts, one, srcL, &nSNRCur,
            src, &nSNRCur, zero, &contribs[ndrow1], &nSupRs);
-#endif
-#ifdef OPENBLAS
+#endif*/
+#ifdef CBLAS
      cblas_dgemm(CblasColMajor,CblasNoTrans,CblasConjTrans,ndrow3,
                  ndrow1,supWdts,one[0],srcL,nSNRCur,
                  src,nSNRCur,zero[0],contribs+ndrow1,nSupRs );
@@ -412,19 +419,19 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
 #ifdef MKL
    dpotrf("L", &supWdt, cur, &nSupR, &info);
 #endif
-#ifdef OPENBLAS
+#if defined(OPENBLAS) || defined(APPLEBLAS)
    dpotrf_("L",&supWdt,cur,&nSupR,&info);
 #endif
 #ifdef MYBLAS
    Cholesky_col(nSupR,supWdt,cur);
 #endif
 
-   MKL_INT rowNo = nSupR - supWdt;
-#ifdef MKL
+   int rowNo = nSupR - supWdt;
+/*#ifdef MKL
    dtrsm("R", "L", "C", "N", &rowNo, &supWdt, one,
          cur, &nSupR, &cur[supWdt], &nSupR);
-#endif
-#ifdef OPENBLAS
+#endif*/
+#ifdef CBLAS
    cblas_dtrsm(CblasColMajor, CblasRight, CblasLower, CblasConjTrans, CblasNonUnit,
                rowNo, supWdt,one[0],
                cur,nSupR,&cur[supWdt],nSupR);

@@ -34,14 +34,20 @@ option(SYMPILER_BUILD_DOCS "Build SYMPILER Documentation" ${SYMPILER_IS_TOPLEVEL
 
 
 set(SYMPILER_BLAS_BACKEND "OpenBLAS" CACHE STRING "BLAS implementation for SYMPILER to use")
-set_property(CACHE SYMPILER_BLAS_BACKEND PROPERTY STRINGS MKL OpenBLAS)
+set_property(CACHE SYMPILER_BLAS_BACKEND PROPERTY STRINGS MKL OpenBLAS Apple)
 
 if(${SYMPILER_BLAS_BACKEND} STREQUAL "MKL")
     set(SYMPILER_USE_BLAS_MKL      ON)
     set(SYMPILER_USE_BLAS_OpenBLAS OFF)
+    set(SYMPILER_USE_BLAS_Apple OFF)
 elseif(${SYMPILER_BLAS_BACKEND} STREQUAL "OpenBLAS")
     set(SYMPILER_USE_BLAS_MKL      OFF)
     set(SYMPILER_USE_BLAS_OpenBLAS ON)
+    set(SYMPILER_USE_BLAS_Apple OFF)
+elseif(${SYMPILER_BLAS_BACKEND} STREQUAL "Apple")
+    set(SYMPILER_USE_BLAS_MKL      OFF)
+    set(SYMPILER_USE_BLAS_OpenBLAS OFF)
+    set(SYMPILER_USE_BLAS_Apple ON)
 else()
     message(FATAL_ERROR "unrecognized value for `SYMPILER_BLAS_BACKEND` option: '${SYMPILER_BLAS_BACKEND}'")
 endif()
@@ -54,6 +60,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib/)
 set(SYMPILER_EXTERNAL ${CMAKE_CURRENT_LIST_DIR}/external)
 
 option(SYMPILER_USE_TBB "Use TBB for threading" OFF)
+option(Sympiler_USE_SCOTCH  "Use SCOTCH" OFF)
+
 
 # Defining paths
 set(SPARSE_LIB_INC "${CMAKE_CURRENT_SOURCE_DIR}/sparse_blas/includes")
@@ -79,14 +87,21 @@ if(SYMPILER_USE_BLAS_MKL AND NOT TARGET MKL::MKL)
     find_package(MKL CONFIG)
 
     if(MKL_FOUND)
-        add_definitions(-DMKL) # add openblas
+        add_definitions(-DMKL)
+        add_definitions(-DCBLAS)
     else()
         message(STATUS "Intel MKL not found, please use OpenBLAS")
     endif()
+elseif(SYMPILER_USE_BLAS_Apple)
+    set(BLA_VENDOR Apple)
+    find_package(BLAS)
+    add_definitions(-DAPPLEBLAS)
+    add_definitions(-DCBLAS)
 elseif(SYMPILER_USE_BLAS_OpenBLAS)
     #set(openblas_WITHOUT_LAPACK ON) # for win support
     include(openblas)
     add_definitions(-DOPENBLAS)
+    add_definitions(-DCBLAS)
 endif()
 
 
@@ -121,6 +136,24 @@ endif()
 include(metis)
 
 
+if(Sympiler_USE_SCOTCH)
+    #include(scotch)  # TODO: fixed this cmake part
+
+    add_definitions(-DSCOTCH)
+    link_directories(
+            ${SCOTCH_ROOT}/build/lib/
+    )
+    set(ALL_LIBS
+            ${ALL_LIBS}
+            ${SCOTCH_ROOT}/build/lib/libscotch.a
+            ${SCOTCH_ROOT}/build/lib/libscotcherr.a
+            )
+    include_directories(
+            ${SCOTCH_ROOT}/build/src/include/
+    )
+    message(STATUS "SCOTCH is enabled from ${SCOTCH_ROOT}")
+endif()
+
 
 
 ### Find PAPI for Profiling
@@ -151,7 +184,7 @@ include(metis)
 
 include_directories(
         #${MKL_INCLUDE_DIR}
-        ${BLAS_INC}
+        #${BLAS_INC}
         ${LBC_INC}
 #        $<TARGET_PROPERTY:MKL::MKL,INTERFACE_INCLUDE_DIRECTORIES>
         include
