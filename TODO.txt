@@ -4,3 +4,6 @@ TBB, MKL, OMP, and thread in C++17
 * Finishing the reset symbolic factor
 * Completing SCOTCH integration
 * rebasing the code for factorization with the linear solver part
+* Merging the eigen interface into this repo
+* removing smp repo and merge it into nasoq-bench and sympiler repo
+* writing inspectors to take only one storage format. 
