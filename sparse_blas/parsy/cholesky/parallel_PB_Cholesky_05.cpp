@@ -37,6 +37,7 @@
 
 #ifdef USE_TBB
 #include <tbb/parallel_for.h>
+#include "tbb/task_scheduler_init.h"
 #endif
 #include <iostream>
 
@@ -99,6 +100,7 @@ bool cholesky_left_par_05(int n, int* c, int* r, double* values,
     int worker_index = 1;
 #endif
 #else
+     tbb::task_scheduler_init TBBinit(threads);
     tbb::parallel_for(levelPtr[i1], levelPtr[i1+1], 1,[&](int j1) {
       int worker_index = tbb::task_arena::current_thread_index();
 #endif

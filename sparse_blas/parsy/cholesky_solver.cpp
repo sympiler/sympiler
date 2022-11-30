@@ -708,7 +708,7 @@ namespace sym_lib {
      break;
     case 4://Parallel SBK
      psi->start = psi->tic();
-#ifdef OPENMP
+#if defined(OPENMP) or defined(USE_TBB)
     ret_val = cholesky_left_par_05(A_ord->ncol, A_ord->p, A_ord->i, A_ord->x,
                                       L->p, L->s, L->i_ptr, valL,
                                       L->super, L->nsuper, psi->timing_chol,
