@@ -878,8 +878,8 @@ namespace sym_lib {
    CSC *TMP = ptranspose(A_ord, 2, L->IPerm, NULL, 0, status);
    CSC *TMP2 = ptranspose(TMP, 2, NULL, NULL, 0, status);
    double *res = new double[TMP2->ncol]();
-   x_l1 = norm_dense(1, TMP2->ncol, x, norm_type);
-   rhs_l1 = norm_dense(1, TMP2->ncol, rhs, norm_type);
+   x_l1 = norm_dense(TMP2->ncol, 1, x, norm_type);
+   rhs_l1 = norm_dense(TMP2->ncol, 1, rhs, norm_type);
    spmv_csc_sym_one_int(TMP2->ncol, TMP2->p, TMP2->i, TMP2->x, -1, alp, bet,
                         1, x, res);
    //print_vec("res mult: ",0,TMP2->ncol,res);
@@ -887,7 +887,7 @@ namespace sym_lib {
     res[i] = rhs[i] - res[i];
    }
    //print_vec("res: ",0,TMP2->ncol,res);
-   res_l1 = norm_dense(1, TMP2->ncol, res, norm_type);
+   res_l1 = norm_dense( TMP2->ncol, 1, res, norm_type);
    A_l1 = norm_sparse_int(TMP2->ncol, TMP2->p, TMP2->i, TMP2->x, -1, norm_type);
    delete[]res;
    allocateAC(TMP, 0, 0, 0, FALSE);
@@ -909,6 +909,9 @@ namespace sym_lib {
 
   void SolverSettings::convert_supernode_to_simplicial() {
    size_t actualNNZ = 0;
+   l_pb = new int[A->ncol]();l_pe = new int[A->ncol]();
+   l_i = new int[L->p[A->ncol]]();
+   std::cout<<"\n";
    for (int i = 0; i < L->nsuper; ++i) {
     int curCol = L->super[i];
     int nxtCol = L->super[i + 1];
@@ -920,7 +923,8 @@ namespace sym_lib {
      for (int k = l_pb[j],
             kk = L->i_ptr[curCol] + (j - curCol);
           k < l_pe[j]; ++k, ++kk) { // copy row indices
-      l_i[k] = L->i[kk];
+      l_i[k] = L->s[kk];
+      std::cout<<  std::setprecision(20)<<L->s[kk]+1<<" "<<j+1<<" "<<valL[k]<<"\n";
      }
     }
    }

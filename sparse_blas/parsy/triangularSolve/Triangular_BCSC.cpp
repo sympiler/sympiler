@@ -82,7 +82,7 @@ namespace sym_lib {
           &nSupR,&x[curCol],&n);*/
 
 #ifdef CBLAS
-    cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasConjTrans, CblasNonUnit, supWdt, n_rhs, 1.0,
+    cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasTrans, CblasNonUnit, supWdt, n_rhs, 1.0,
                 Ltrng, nSupR, &x[curCol], n);
 #else
     SYM_DTRSM("L", "L", "T", "N", &supWdt, &ione, one, Ltrng,
@@ -163,7 +163,7 @@ namespace sym_lib {
     dlsolve_blas_nonUnit(nSupR,supWdt,Ltrng,&x[curCol]);//FIXME make it for transpose
 #else
 #ifdef CBLAS
-    cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasConjTrans, CblasNonUnit, supWdt, ione, 1.0,
+    cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasTrans, CblasNonUnit, supWdt, ione, 1.0,
                 Ltrng, nSupR, &x[curCol], n);
 #else
     SYM_DTRSM("L", "L", "T", "N", &supWdt, &ione, one, Ltrng,
