@@ -6,7 +6,9 @@
 // you use this file to create a new test case
 #define CATCH_CONFIG_MAIN
 
+#ifdef OPENMP
 #include <omp.h>
+#endif
 #include <aggregation/test_utils.h>
 #include <utility>
 #include "catch.hpp"
