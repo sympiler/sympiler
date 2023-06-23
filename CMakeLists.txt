@@ -83,6 +83,7 @@ set(LBC_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/aggregation/")
 
 #--------------------------------[ third party ]-------------------------------#
 if(SYMPILER_USE_BLAS_MKL AND NOT TARGET MKL::MKL)
+    message(FATAL_ERROR "should not go there")
     set(MKL_INTERFACE "lp64")
     find_package(MKL CONFIG)
 
@@ -107,7 +108,8 @@ endif()
 
 # Find OpenMP
 find_package(OpenMP)
-if (OPENMP_FOUND)
+if (0 AND OPENMP_FOUND)
+    message(FATAL_ERROR "don't use openmp")
     if(APPLE) #TODO: set path for brew install libomp
         set(OpenMP_CXX_INCLUDE_DIRS  "/usr/local/include/")
         include_directories(
