@@ -109,7 +109,7 @@ endif()
 # Find OpenMP
 find_package(OpenMP)
 if (OPENMP_FOUND)
-    message(FATAL_ERROR "don't use openmp")
+    #message(FATAL_ERROR "don't use openmp")
     if(APPLE) #TODO: set path for brew install libomp
         set(OpenMP_CXX_INCLUDE_DIRS  "/usr/local/include/")
         include_directories(
