@@ -83,7 +83,7 @@ set(LBC_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/aggregation/")
 
 #--------------------------------[ third party ]-------------------------------#
 if(SYMPILER_USE_BLAS_MKL AND NOT TARGET MKL::MKL)
-    message(FATAL_ERROR "should not go there")
+    #message(FATAL_ERROR "should not go there")
     set(MKL_INTERFACE "lp64")
     find_package(MKL CONFIG)
 
@@ -91,7 +91,7 @@ if(SYMPILER_USE_BLAS_MKL AND NOT TARGET MKL::MKL)
         add_definitions(-DMKL)
         add_definitions(-DCBLAS)
     else()
-        message(STATUS "Intel MKL not found, please use OpenBLAS")
+        message(FATAL_ERROR "Intel MKL not found, please use OpenBLAS")
     endif()
 elseif(SYMPILER_USE_BLAS_Apple)
     set(BLA_VENDOR Apple)
