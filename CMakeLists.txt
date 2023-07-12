@@ -224,7 +224,7 @@ Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 
 
-if(METIS_FOUND)
+if(TARGET metis::metis )
     add_definitions(-DMETIS)
     add_subdirectory(demo)
 endif()
